@@ -1,0 +1,46 @@
+ERROR:root:Client error fetching URL status for http://postmates.com/la/anar-indian-restaurant-los-angeles: 400, message='Got more than 8190 bytes (10343) when reading Header value is too long.', url=URL('https://postmates.com/la/anar-indian-restaurant-los-angeles')
+ERROR:root:Client error fetching URL status for http://postmates.com/la/anar-indian-restaurant-los-angeles: 400, message='Got more than 8190 bytes (10343) when reading Header value is too long.', url=URL('https://postmates.com/la/anar-indian-restaurant-los-angeles')
+ERROR:root:Client error fetching URL status for http://www.romansalonla.com/: Server disconnected
+ERROR:root:Client error fetching URL status for http://www.romansalonla.com/: Server disconnected
+ERROR:root:Client error fetching URL status for nan: nan
+ERROR:root:Client error fetching URL status for nan: nan
+ERROR:root:Error fetching WHOIS information for nan: 'NoneType' object is not iterable
+ERROR:root:Client error fetching URL status for http://bigfootwest.com/: Cannot connect to host bigfootwest.com:80 ssl:default [No address associated with hostname]
+ERROR:root:Client error fetching URL status for http://bigfootwest.com/: Cannot connect to host bigfootwest.com:80 ssl:default [No address associated with hostname]
+ERROR:root:Timeout error fetching URL status for https://www.dolbytheatre.com/
+ERROR:root:Timeout error fetching URL status for https://www.dolbytheatre.com/
+ERROR:root:Timeout error fetching URL status for http://www.pinkshollywood.com/
+ERROR:root:Timeout error fetching URL status for http://www.pinkshollywood.com/
+ERROR:root:Client error fetching URL status for nan: nan
+ERROR:root:Client error fetching URL status for nan: nan
+ERROR:root:Error fetching WHOIS information for nan: 'NoneType' object is not iterable
+ERROR:root:Client error fetching URL status for nan: nan
+ERROR:root:Client error fetching URL status for nan: nan
+ERROR:root:Error fetching WHOIS information for nan: 'NoneType' object is not iterable
+ERROR:root:Client error fetching URL status for nan: nan
+ERROR:root:Client error fetching URL status for nan: nan
+ERROR:root:Error fetching WHOIS information for nan: 'NoneType' object is not iterable
+ERROR:root:Timeout error fetching URL status for https://foursquare.com/explore?q=Travel%20and%20Transportation&near=Los%20Angeles%2C%20CA
+ERROR:root:Timeout error fetching URL status for https://foursquare.com/explore?q=Travel%20and%20Transportation&near=Los%20Angeles%2C%20CA
+ERROR:root:Timeout error fetching URL status for https://www.motel6.com/en/motels.ca.inglewood.1260.html?corporatePlusNumber=CP792N5W&travelAgentNumber=TA001305
+ERROR:root:Timeout error fetching URL status for https://www.motel6.com/en/motels.ca.inglewood.1260.html?corporatePlusNumber=CP792N5W&travelAgentNumber=TA001305
+ERROR:root:Client error fetching URL status for http://www.tradewindsallsuitehotel.com/: [Errno 104] Connection reset by peer
+ERROR:root:Timeout error fetching URL status for https://www.motel6.com/en/motels.ca.hollywood.4044.html?corporatePlusNumber=CP792N5W&travelAgentNumber=TA001305
+ERROR:root:Timeout error fetching URL status for https://www.motel6.com/en/motels.ca.hollywood.4044.html?corporatePlusNumber=CP792N5W&travelAgentNumber=TA001305
+ERROR:root:Timeout error fetching URL status for http://www.safariburbank.com/
+ERROR:root:Timeout error fetching URL status for http://www.safariburbank.com/
+ERROR:root:Client error fetching URL status for nan: nan
+ERROR:root:Client error fetching URL status for nan: nan
+ERROR:root:Error fetching WHOIS information for nan: 'NoneType' object is not iterable
+ERROR:root:Timeout error fetching URL status for https://www.choicehotels.com/california/hawthorne/comfort-inn-hotels/caa01?mc=llyxyxpx
+ERROR:root:Timeout error fetching URL status for https://www.choicehotels.com/california/hawthorne/comfort-inn-hotels/caa01?mc=llyxyxpx
+ERROR:root:Timeout error fetching URL status for http://www.hollywoodcityinn.net/
+ERROR:root:Timeout error fetching URL status for http://www.hollywoodcityinn.net/
+ERROR:root:Client error fetching URL status for https://www.carlyle-inn.com/: Cannot connect to host www.carlyle-inn.com:443 ssl:True [SSLCertVerificationError: (1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1007)')]
+ERROR:root:Client error fetching URL status for https://www.carlyle-inn.com/: Cannot connect to host www.carlyle-inn.com:443 ssl:True [SSLCertVerificationError: (1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1007)')]
+ERROR:root:Timeout error fetching URL status for https://www.choicehotels.com/california/lomita/quality-inn-hotels/cae98?mc=llyxyxpx
+ERROR:root:Timeout error fetching URL status for https://www.choicehotels.com/california/lomita/quality-inn-hotels/cae98?mc=llyxyxpx
+ERROR:root:Timeout error fetching URL status for https://www.choicehotels.com/california/el-segundo/cambria-hotels/cad84?mc=llyxyxpx
+ERROR:root:Timeout error fetching URL status for https://www.choicehotels.com/california/el-segundo/cambria-hotels/cad84?mc=llyxyxpx
+ERROR:root:Client error fetching URL status for https://www.elanhotel.com/: Cannot connect to host www.elanhotel.com:443 ssl:True [SSLCertVerificationError: (1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1007)')]
+ERROR:root:Client error fetching URL status for https://www.elanhotel.com/: Cannot connect to host www.elanhotel.com:443 ssl:True [SSLCertVerificationError: (1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1007)')]

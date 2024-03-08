@@ -2,6 +2,7 @@
 import asyncio
 import datetime
 import logging
+# Use python-whois module instead of whois 
 import whois
 import aiohttp
 from typing import List
