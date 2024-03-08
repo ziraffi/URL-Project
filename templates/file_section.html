@@ -1,0 +1,107 @@
+<!-- file-section.html -->
+<div id="file-section">
+  <div class="formInput-container">
+    <div class="form-wrapper col-8">
+      <div class="col-2">
+        <button class="btn btn-secondary" id="toggle_file">Upload File</button>
+      </div>
+<!-- ******************************************************************* -->
+      <!-- File Form Section Start From Here -->
+<!-- ******************************************************************* -->
+      <div class="wrapper-inner">
+      <div class="frmOnly col-12">
+      <div id="fileForm-section">
+        <section id="input_section">
+        <form id="file_form" enctype="multipart/form-data">
+          <fieldset>
+            <!-- Form elements for uploading file -->
+            <label for="file" class="formTitle">Choose your file:</label><br>
+            <div class="file-input-field">
+            <input
+              type="file"
+              id="file"
+              name="file"
+              accept=".csv,.xlsx"
+              required
+            />
+          </div>
+            <p class="file-help-message">Supported file formats: CSV, XLSX</p>
+                        <!-- Additional form elements -->
+
+            <div class="dropdown-fields">
+                          <!-- Options for sheet names -->
+            <div class="sht-dropdown">
+            <label for="sheet-name">Choose your sheet:</label>
+            <select id="sheet-name" name="sheet-name" required>
+            </select>
+            </div>
+                          <!-- Options for column names -->
+            <div class="clm-dropdown">
+            <label for="column-name">Choose your column:</label>
+            <select id="column-name" name="column-name" required>
+            </select>
+            </div>
+          </div>
+        </fieldset>
+        </form>
+      </section>
+      </div>
+<!-- ******************************************************************* -->
+      <!-- MAnual Form Section Start From Here -->
+<!-- ******************************************************************* -->
+      <div id="mnlForm-section">
+        <section id="input_section">
+        <!-- Manual entry form -->
+        <form class="form-group" id="manual_form" style="display: none">
+          <fieldset>
+            <!-- Form elements for manual entry -->
+            <div class="formTitle">
+            <label for="manual-data">Enter URLs (one per line):</label><br>
+            </div>
+            <textarea
+              id="manual-data"
+              name="manual-data"
+              rows="10"
+              cols="50"
+            ></textarea
+            ><br>
+            <input class="btn btn-primary" type="submit" id="manual-form-submit" value="Submit" />
+        </fieldset>
+        </form>
+      </section>
+      </div>
+    </div>
+  </div>
+<!-- ******************************************************************* -->
+      <!-- File Form Section End From Here -->
+<!-- ******************************************************************* -->
+      <div class="col-2">
+        <button class="btn btn-secondary" id="toggle_manual">Manual Entry</button>
+      </div>
+  </div>
+</div>
+<!-- ******************************************************************* -->
+      <!-- URL container Start From Here -->
+<!-- ******************************************************************* -->
+
+    <section class="url-container" id="url-container">
+      <div class="url-wrapper">
+        <div id="valid_list">
+          <!-- URLs will be displayed here -->
+        </div>
+        <div id="invalid_list">
+          <!-- Invalid URLs will be displayed here -->
+        </div>
+      </div>
+    </section>
+<!-- ******************************************************************* -->
+      <!-- Dynamic Load next Sections Button -->
+<!-- ******************************************************************* -->
+  <div class="container-btm">
+    <button id="load-next-section-button">Continue</button>
+    <!-- Continue button and error message -->
+    <div id="error-message" style="color: red"></div>
+  </div>
+</div>
+
+<script src="../static/myfrnt.js"></script>

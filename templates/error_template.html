@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='url_css.css') }}">  </head>
+<body>
+    <h1>An error occurred</h1>
+    <p>{{ error_message }}</p>  <p><a href="{{ url_for(templates, filename'url_Project.html') }}">Go back to the main page</a></p>
+</body>
+</html>
