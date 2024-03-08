@@ -104,7 +104,7 @@ async def process_urls_async(urls: List[str], semaphore) -> pd.DataFrame:
 if __name__ == '__main__':
     try:
         # Load URLs from CSV
-        df = pd.read_csv(r'C:\Users\HP\Desktop\wkd_pt\pythonfile\squarehotel.csv')
+        df = pd.read_csv(r'/workspaces/URL-Project/squarehotel.csv')
         urls = df['squarehotel'].astype(str).tolist()
 
         # Set the semaphore value
