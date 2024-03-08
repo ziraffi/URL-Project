@@ -34,13 +34,9 @@ async def get_domain_info_async(url, session, semaphore):
         print(f"Processing URL: {url}")  # Print the URL before processing
         start_time = datetime.datetime.now()
 
-        status_code, status_message = await fetch_url_status(url, session, semaphore)
-
-        if status_code is None:
-            return None  # Skip processing if status code is None
-
+        url_status_task = asyncio.create_task(fetch_url_status(url, session, semaphore))
         whois_info = await asyncio.to_thread(whois.whois, url)
-
+        url_status,status_message = await url_status_task
         end_time = datetime.datetime.now()
         response_time = (end_time - start_time).total_seconds()
 
@@ -67,7 +63,7 @@ async def get_domain_info_async(url, session, semaphore):
         print(f'Domain Status: {domain_status}\nExpiration Date: {expiration_date}\nFor Sale: {for_sale_indicator}')
         return {
             'URL': url,
-            'Status Code': status_code,
+            'Status Code': url_status,
             'Response Message': status_message,
             'Domain Status': domain_status,
             'Expiration Date': expiration_date,
