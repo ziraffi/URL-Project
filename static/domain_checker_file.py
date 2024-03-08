@@ -101,7 +101,7 @@ if __name__ == '__main__':
     try:
         # Load URLs from CSV
         df = pd.read_csv(r'/workspaces/URL-Project/squarehotel.csv')
-        urls = df['squarehotel'].astype(str).tolist()
+        urls = df['hotels_websitelist_losangels-href'].astype(str).tolist()
 
         # Set the semaphore value
         semaphore = asyncio.Semaphore(8)  # Adjust the value as needed
