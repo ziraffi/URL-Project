@@ -1,4 +1,4 @@
-// frnt.js
+// myfrnt.js
 // Global variable to store the selected sheet
 var selectedSheet = null;
 // Flag to track if the file section has been loaded
