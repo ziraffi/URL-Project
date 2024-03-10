@@ -184,6 +184,7 @@ $(document).ready(function () {
         let mnl_clmNum = [];
         let mnl_rwNum = [];
         let mnl_shtNum = [];
+        const entry_type = ["Entered Data Manually"]
 
         // Iterate through columnData array
         for (let i = 0; i < columnData.length; i++) {
@@ -209,26 +210,27 @@ $(document).ready(function () {
             }
         }
 
-        // Construct the mnl_data_set object
-        let mnl_data_set = {
+        // Construct the manualDataSet object
+        let manualDataSet = {
             data: mnl_data,
             column_number: mnl_clmNum,
             row_number: mnl_rwNum,
-            sheet_number: mnl_shtNum
+            sheet_number: mnl_shtNum,
+            choosen: entry_type
         };
 
         // Append valid URLs to the URL container
-        mnl_data_set.data.forEach((data, index) => {
+        manualDataSet.data.forEach((data, index) => {
             const urlDiv = $('<div>').addClass('url-item');
             urlDiv.text(data);
-            urlDiv.attr('sheet_number', mnl_data_set.sheet_number[index]);
-            urlDiv.attr('row_number', mnl_data_set.row_number[index]);
-            urlDiv.attr('column_number', mnl_data_set.column_number[index]);
+            urlDiv.attr('sheet_number', manualDataSet.sheet_number[index]);
+            urlDiv.attr('row_number', manualDataSet.row_number[index]);
+            urlDiv.attr('column_number', manualDataSet.column_number[index]);
             $('#valid_list').append($('<a class="hover-underline-animation"></a>').attr('href', data).text(data));
             $('#valid_list').append('<br>');
         });
 
-        console.log("mnl_data_set:", mnl_data_set);
+        console.log("manualDataSet:", manualDataSet);
 
 
         // Show or hide valid_list based on the presence of valid data
@@ -270,105 +272,149 @@ $(document).ready(function () {
 
     // let dataFetched = false; // Flag to track if data has been fetched
 
-    // Function to fetch column Data
-    async function fetchColumnURLs(formData) {
-        // Initialize dataSet
-        let dataSet = {
-            data: [],
-            column_number: [],
-            row_number: [],
-            sheet_number: []
-        };
-        // if (dataFetched) {
-        //     // If data is already fetched, do nothing
-        //     return;
-        // }
+// Function to fetch column Data
+async function fetchColumnURLs(formData) {
+    // Initialize dataSet
+    let fileDataSet = {
+        data: [],
+        column_number: [],
+        row_number: [],
+        sheet_number: [],
+        choosen: [] // Changed from array to single value
+    };
 
-        try {
-            const response = await fetch('/input_section', {
-                method: 'POST',
-                body: formData
+    try {
+        const response = await fetch('/input_section', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch column Data');
+        }
+
+        const data = await response.json();
+        console.log("Received data frequency:", data);
+        // Display column Data in the valid_list and invalid_list divs
+        $('#valid_list').empty();
+        $('#invalid_list').empty(); // Clear invalid list
+        $('#url-container').show();
+
+        var raw_data = data.column_data;
+        const file_name = data.selected_file;
+        if (raw_data && raw_data.length > 0) {
+            let validDataExists = false;
+            let invalidDataExists = false;
+
+            // Check if choosen is already set
+            if (fileDataSet.choosen.length === 0) {
+                fileDataSet.choosen.push(file_name);
+            }
+
+            raw_data.forEach(item => {
+                let list_url = item.data;
+                let column_number = item.column_number;
+                let row_number = item.row_number;
+                let sheet_number = item.sheet_number;
+
+                // Check if the data is a valid URL
+                if (testValidURL(list_url)) {
+                    // Add data to dataSet
+                    fileDataSet.column_number.push(column_number);
+                    fileDataSet.row_number.push(row_number);
+                    fileDataSet.sheet_number.push(sheet_number);
+                    fileDataSet.data.push(list_url);
+
+                    // Display valid URLs
+                    $('#valid_list').append($('<a class="hover-underline-animation"></a>').attr('href', list_url).text(list_url));
+                    $('#valid_list').append('<br>');
+                    validDataExists = true;
+                } else {
+                    // Skip null values
+                    if (list_url === null) {
+                        return;
+                    }
+                    $('#invalid_list').append($('<p></p>').text(list_url));
+                    $('#invalid_list').append('<br>');
+                    invalidDataExists = true;
+                }
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch column Data');
-            }
-
-            const data = await response.json();
-            // dataFetched = true; // Set flag to true indicating data has been fetched
-            console.log("Data at column Fetching Stage",data);
-            // Display column Data in the valid_list and invalid_list divs
-            $('#valid_list').empty();
-            $('#invalid_list').empty(); // Clear invalid list
-            $('#url-container').show();
-
-            var raw_data = data.column_data;
-            if (raw_data && raw_data.length > 0) {
-                let validDataExists = false;
-                let invalidDataExists = false;
-
-                raw_data.forEach(item => {
-                    let list_url = item.data;
-                    let column_number = item.column_number;
-                    let row_number = item.row_number;
-                    let sheet_number = item.sheet_number;
-
-                    // Check if the data is a valid URL
-                    if (testValidURL(list_url)) {
-                        // Add data to dataSet
-                        dataSet.data.push(list_url);
-                        dataSet.column_number.push(column_number);
-                        dataSet.row_number.push(row_number);
-                        dataSet.sheet_number.push(sheet_number);
-
-                        // Display valid URLs
-                        $('#valid_list').append($('<a class="hover-underline-animation"></a>').attr('href', list_url).text(list_url));
-                        $('#valid_list').append('<br>');
-                        validDataExists = true;
-                    } else {
-                        // Skip null values
-                        if (list_url === null) {
-                            return;
-                        }
-                        $('#invalid_list').append($('<p></p>').text(list_url));
-                        $('#invalid_list').append('<br>');
-                        invalidDataExists = true;
-                    }
-                });
-
-                // Show or hide valid_list based on the presence of valid data
-                if (validDataExists) {
-                    $('#valid_list').prepend($('<h3>Fetched URLs:</h3>'));
-                    $('#valid_list').show();
-                } else {
-                    $('#valid_list').hide();
-                }
-
-                // Show or hide invalid_list based on the presence of invalid data
-                if (invalidDataExists) {
-                    $('#invalid_list').prepend($('<h3>Junk:</h3>'));
-                    $('#invalid_list').show();
-                } else {
-                    $('#invalid_list').hide();
-                }
-
-                // Show or hide url-container based on the presence of valid or invalid data
-                if (validDataExists || invalidDataExists) {
-                    $('#url-container').show();
-                } else {
-                    $('#url-container').hide();
-                }
+            // Show or hide valid_list based on the presence of valid data
+            if (validDataExists) {
+                $('#valid_list').prepend($('<h3>Fetched URLs:</h3>'));
+                $('#valid_list').show();
             } else {
-                $('#valid_list').append($('<p>No URLs found for the selected column.</p>'));
-                $('#invalid_list').hide(); // Hide invalid list if no data
-                $('#valid_list').hide(); // Hide valid list if no data
-                $('#url-container').hide(); // Hide url-container if no data
+                $('#valid_list').hide();
             }
-        } catch (error) {
-            console.error('Error fetching column Data:', error);
+
+            // Show or hide invalid_list based on the presence of invalid data
+            if (invalidDataExists) {
+                $('#invalid_list').prepend($('<h3>Junk:</h3>'));
+                $('#invalid_list').show();
+            } else {
+                $('#invalid_list').hide();
+            }
+
+            // Show or hide url-container based on the presence of valid or invalid data
+            if (validDataExists || invalidDataExists) {
+                $('#url-container').show();
+            } else {
+                $('#url-container').hide();
+            }
+        } else {
+            $('#valid_list').append($('<p>No URLs found for the selected column.</p>'));
+            $('#invalid_list').hide(); // Hide invalid list if no data
+            $('#valid_list').hide(); // Hide valid list if no data
+            $('#url-container').hide(); // Hide url-container if no data
         }
-        console.log("dataSet:", dataSet); // Logging the dataSet
+    } catch (error) {
+        console.error('Error fetching column Data:', error);
     }
+    console.log("dataSet:", fileDataSet); // Logging the dataSet
+    // displayDataSetsInTable(fileDataSet);
+}
+
+// Function to display data sets in tabular format
+function displayDataSetsInTable(fileDataSet, manualDataSet) {
+    // Clear previous tables if any
+    $('#file-data-table').empty();
+    $('#manual-data-table').empty();
+
+    // Display file data in a table
+    displayDataSetInTable(fileDataSet, '#file-data-table', 'File Data');
+
+    // Display manual data in a table
+    displayDataSetInTable(manualDataSet, '#manual-data-table', 'Manual Data');
+}
+
+// Function to display a data set in a table
+function displayDataSetInTable(dataSet, tableId, tableName) {
+    const table = $('<table>').addClass('data-table');
+    const tableCaption = $('<caption>').text(tableName);
+    table.append(tableCaption);
+
+    // Create table headers
+    const headersRow = $('<tr>');
+    for (let key in dataSet) {
+        headersRow.append($('<th>').text(key));
+    }
+    table.append(headersRow);
+
+    // Create table rows
+    for (let i = 0; i < dataSet.data.length; i++) {
+        const dataRow = $('<tr>');
+        for (let key in dataSet) {
+            const cellData = dataSet[key][i];
+            dataRow.append($('<td>').text(cellData));
+        }
+        table.append(dataRow);
+    }
+
+    // Append the table to the specified container
+    $(tableId).append(table);
+}
+
 
     // Function to fetch sheet names and column names asynchronously
     function fetchSheetAndColumnNames(formData) {
@@ -493,7 +539,6 @@ $(document).ready(function () {
             // Pass the FormData object to fetch column Data
             fetchColumnURLs(formData);
         } else {
-            // Handle the case when the default option is selected (selectedColumn is null or empty)
             console.log('No valid column selected.');
         }
     });

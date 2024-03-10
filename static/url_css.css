@@ -637,7 +637,20 @@ button {
   transform: scaleX(1);
   transform-origin: bottom left;
 }
-
+/* Tabular representation of dataSet  */
+.data-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.data-table th, .data-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+.data-table th {
+  background-color: #f2f2f2;
+}
+/* Footer Section start from here  */
 footer {
   background-color: #856594;
   color: #ffffff;
