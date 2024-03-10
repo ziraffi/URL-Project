@@ -3,13 +3,15 @@
   box-sizing: border-box;
 }
 
-body {
+body,html {
   outline: unset;
-  min-height: 100vh;
-  max-width: 100vw;
+  display: flex;
+  flex-direction: column;
   font-family: 'Lato', sans-serif;
   font-weight: 400;
-  margin: 0;
+  min-height: 100vh;
+  width: 100% !important;
+  margin: 0 !important;
   padding: 0;
   color: #ffffff;
   background-color: #433939 !important;
@@ -45,6 +47,8 @@ header {
   transition: top 0.5s;
   padding: 0.5rem 0;
   z-index: 1000;
+  max-height: fit-content;
+
 }
 
 .hero-container {
@@ -57,6 +61,7 @@ header {
   font-family: "Montserrat", sans-serif;
   font-optical-sizing: auto;
   color: #ebc263;
+  text-align: center;
   font-size: 1.7rem;
   font-weight: 800;
   margin-left: 20px;
@@ -142,7 +147,9 @@ nav ul li:hover::after {
       left: 50%;
       transform: translate(-50%, -10%);
   }
-
+  .dnlh{
+    display: none;
+  }
   /* Hide the navigation initially */
   .navigation {
       display: none;
@@ -204,6 +211,7 @@ main {
   justify-content: center;
   min-height: 80vh;
   color: #fff;
+  margin-bottom: 5rem;
 }
 
 .hero-banner {
@@ -247,10 +255,24 @@ p span.hope{
   color: #000000;
   font-weight: bolder;
 }
+form{
+  display: block; 
+  background-color: #e8e6e6;
+  margin: auto !important;
+  border-radius: 0.5rem;
+}
+.login-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 5rem;
+  box-sizing: border-box;
+  box-shadow: 0px 0px 10px 5px rgba(145, 155, 193, 0.25);
+}
 .form-container {
   width: 100%;
-  padding: 20px;
-  border: 2px solid #db00ff;
+  /* padding: 20px; */
   border-radius: 8px;
   background-color: #47433a;
 }
@@ -260,40 +282,81 @@ p span.hope{
   width: 100%;
   text-align: center;
   justify-content: space-between;
-  border: 2px solid #db00ff;
-  border-radius: 8px;
-  background-color: yellowgreen;
 }
 /* Continue button in the bottom */
 .container-btm{
-  border: 2px solid #db00ff;
   align-items: center;
   justify-content: center;
 }
 /* Container For Both Forms Wrapper and Bottom Button */
 .formInput-container{
   display: inline-block;
-  /* padding: 3% 0; */
-  align-items: center;
+  margin-top: 5rem;
   justify-content: center;
-  background-color: #e8e6e6;
+  box-sizing: border-box;
+  box-shadow: 0px 0px 10px 5px rgba(145, 155, 193, 0.25);
+  border-radius: 8px;
 }
 /* Container Wrapper for */
 .form-wrapper{
   display: inline-flex;
   align-items: center;
+  width: 100%;
   justify-content: space-evenly;
-  position: relative;
-  border: 2px solid #ff0048;
-  background-color: #cbe2a0;
-  min-width: 370px;
-  min-height: 450px;
+  /* min-width: 370px;
+  min-height: 450px; */
 }
+
+/* button#toggle_file::before{
+  color: #FFDB00;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  border-radius: 5px;
+
+}
+button#toggle_manual::after {
+  content: "\f0d9"; 
+  color: #FFDB00;
+  top: 50%;
+  pointer-events: none;
+  transition: background-color 0.3s ease;
+  border-radius: 5px;
+
+}
+/* Change background color on hover */
+/* button#toggle_manual:hover::after,
+button#toggle_manual:hover::before {
+  background-color: #e8e6e6;
+} */
+
+/* Change background color on click */
+/* button#toggle_manual:active::after,
+button#toggle_manual:active::before {
+  background-color: #FFDB00 !important;
+} */
+/* Change background color on hover */
+/* button#toggle_file:hover::after,
+button#toggle_file:hover::before {
+  background-color: #e8e6e6;
+} */
+
+/* Change background color on click */
+/* button#toggle_file:active::after,
+button#toggle_file:active::before {
+  background-color: #FFDB00 !important;
+}
+.caret{
+  margin: auto 1px;
+}  */
 .wrapper-inner{
-  z-index: 997;
   align-items: center;
   justify-content: center;
+  background-color: #e8e6e6;
+
 }
+
 .frmOnly {
   border: 2px solid #4f3553;
   overflow: hidden;
@@ -301,12 +364,12 @@ p span.hope{
   padding: 1%;
 
 }
-#input_section{
+/* #input_section{
   border: 2px solid #f89808;
-}
-.formTitle{
+} */
+/* .formTitle{
   min-width: 25rem;
-}
+} */
 @keyframes slideInLeft{
   from{
     transform: translateX(-100%);
@@ -327,7 +390,7 @@ p span.hope{
 }
 .left-side {
   animation-name: slideInLeft;
-  animation-duration: 0.5s;
+  animation-duration: 1.5s;
   animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
   animation-iteration-count: 1;
   animation-direction: normal;
@@ -335,7 +398,7 @@ p span.hope{
 }
 .right-side {
   animation-name: slideInRight;
-  animation-duration: 0.5s;
+  animation-duration: 1.5s;
   animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
   animation-iteration-count: 1;
   animation-direction: normal;
@@ -356,17 +419,33 @@ p span.hope{
   text-align: center;
   margin-bottom: 2rem;
 }
+.login-fields{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
 /* Style the label */
 label[for="sheet-name"],
 label[for="column-name"],
-label[for="file"] {
+label[for="file"],
+label[for="email"],
+label[for="password"],
+label[for="manual-data"] {
   margin-bottom: 5px;
   color: #626161;
 }
-label[for="file"]{
+label[for="email"],
+label[for="password"],
+label[for="file"],
+label[for="manual-data"] {
   padding-top: 2rem;
   font-family: "Playfair Display", serif;
   font-weight: 800;
+}
+label[for="email"],
+label[for="password"]{
+  min-width: 25rem;
 }
 /* Style the select element */
 select#sheet-name,
@@ -563,7 +642,9 @@ footer {
   background-color: #856594;
   color: #ffffff;
   text-align: center;
-  padding: 20px 0;
+  padding: 20px 0 0;
+  width: 100% !important;
   bottom: 0;
-  width: 100%;
+  position:absolute;
+
 }

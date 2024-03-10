@@ -6,7 +6,45 @@ var fileSectionLoaded = false;
 // Flag to track if sheet names have been fetched
 var sheetNamesFetched = false;
 
+
 $(document).ready(function () {
+    var windowHeight = $(window).height(); // Get the window height
+    var footer = $("footer");
+    var header = $("header");
+    var lastScrollTop = 0; // Variable to store the last scroll position
+
+    $(window).scroll(function() {
+        var scrollPosition = $(this).scrollTop();
+        var scrollThreshold = windowHeight * 0.60; // 45% of window height
+
+        // Animation for header
+        if (scrollPosition > scrollThreshold || lastScrollTop < scrollPosition) {
+            // Hide the header with fade out animation
+            header.stop().animate({
+                top: '-100px', // Move header off-screen
+                opacity: 0
+            }, 500);
+        } else {
+            // Show the header with fade in animation
+            header.stop().animate({
+                top: '0', // Move header back to its original position
+                opacity: 1                
+            }, 500);
+        }
+
+        // Animation for footer
+        if ($(window).scrollTop() > lastScrollTop) {
+            if(scrollPosition + $(window).height() >= $(document).height()) {
+                // Show the footer with fade in animation
+                footer.fadeIn();
+            }
+        } else {
+            // Hide the footer with fade out animation
+            footer.fadeOut();
+        }
+        lastScrollTop = scrollPosition; // Update the last scroll position
+    });
+ 
     // Event listener for toggling between file form and manual form
     $('#toggle_file').on("click", function () {
         $('#manual_form').removeClass('right-side').hide();

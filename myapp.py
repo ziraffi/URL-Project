@@ -8,6 +8,13 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('url_Project.html')
+@app.route('/login.html')
+def login():
+    return render_template('login.html')
+
+@app.route('/registration.html')
+def register():
+    return render_template('register.html')
 
 @app.route('/templates/<section_name>.html')
 def serve_template(section_name):
@@ -70,13 +77,14 @@ def process_file(uploaded_file, selected_sheet, selected_column):
             selected_column = selected_column or columns[0]  # Use the first column by default
             # Get URLs for the selected column
             column_data = [{'data': val, 'sheet_number': 1, 'row_number': idx + 2, 'column_number': 1} for idx, val in enumerate(df[selected_column].tolist()) if pd.notna(val)]
-            return {'sheet_columns': columns, 'column_data': column_data, 'selected_sheet': filename, 'is_csv': True}
+            return {'sheet_columns': columns, 'column_data': column_data, 'selected_sheet': filename, 'Choosen': selected_file,'is_csv': True}
         elif uploaded_file.filename.endswith(".xlsx"):
             # For Excel files, extract sheet names and column names
             wb = openpyxl.load_workbook(filename=BytesIO(file_contents), data_only=True)
             sheet_names = wb.sheetnames
             sheet_columns = {}
             column_data = []
+            selected_file= uploaded_file.filename.split('.')[0]            
             # Set a default value for selected sheet and column if not provided
             selected_sheet = selected_sheet or sheet_names[0]
             for sheet_number, sheet_name in enumerate(sheet_names, start=1):
@@ -114,7 +122,7 @@ def process_file(uploaded_file, selected_sheet, selected_column):
                 sheet_columns[sheet_name] = column_titles
             
             # Return the processed data
-            return {'sheet_names': sheet_names, 'sheet_columns': sheet_columns, 'column_data': column_data, 'column_titles': column_titles, 'selected_sheet': selected_sheet, 'selected_column': selected_column, 'is_csv': False}
+            return { 'choosen': selected_file,'sheet_names': sheet_names, 'sheet_columns': sheet_columns, 'column_data': column_data, 'column_titles': column_titles, 'selected_sheet': selected_sheet, 'selected_column': selected_column, 'is_csv': False}
         else:
             return {'error_message': "Unsupported file format"}
     except Exception as e:

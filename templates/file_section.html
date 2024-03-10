@@ -1,15 +1,15 @@
 <!-- file-section.html -->
 <div id="file-section">
   <div class="formInput-container">
-    <div class="form-wrapper col-8">
+    <div class="form-wrapper">
       <div class="col-2">
-        <button class="btn btn-secondary" id="toggle_file">Upload File</button>
+        <button class="btn btn-secondary py-1" id="toggle_file"><span class="fa-solid fa-angles-left"></span><span class="d-none d-md-inline">Upload</span></button>
       </div>
 <!-- ******************************************************************* -->
       <!-- File Form Section Start From Here -->
 <!-- ******************************************************************* -->
-      <div class="wrapper-inner">
-      <div class="frmOnly col-12">
+      <div class="wrapper-inner my-3 col-8">
+      <div class="frmOnly">
       <div id="fileForm-section">
         <section id="input_section">
         <form id="file_form" enctype="multipart/form-data">
@@ -62,10 +62,10 @@
               id="manual-data"
               name="manual-data"
               rows="10"
-              cols="50"
+              cols="100"
             ></textarea
             ><br>
-            <input class="btn btn-primary" type="submit" id="manual-form-submit" value="Submit" />
+            <input class="btn btn-primary py-1 " type="submit" id="manual-form-submit" value="Submit" />
         </fieldset>
         </form>
       </section>
@@ -76,7 +76,7 @@
       <!-- File Form Section End From Here -->
 <!-- ******************************************************************* -->
       <div class="col-2">
-        <button class="btn btn-secondary" id="toggle_manual">Manual Entry</button>
+        <button class="btn btn-secondary" id="toggle_manual"><span class="d-none d-md-inline">Manual</span><span class="fa-solid fa-angles-right"></span></button>
       </div>
   </div>
 </div>
@@ -97,11 +97,12 @@
 <!-- ******************************************************************* -->
       <!-- Dynamic Load next Sections Button -->
 <!-- ******************************************************************* -->
-  <div class="container-btm">
+  <div class="container-btm d-none">
     <button id="load-next-section-button">Continue</button>
     <!-- Continue button and error message -->
     <div id="error-message" style="color: red"></div>
   </div>
 </div>
+<br>
 
 <script src="../static/myfrnt.js"></script>

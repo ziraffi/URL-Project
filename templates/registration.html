@@ -1,0 +1,86 @@
+{% extends "base.html" %} 
+<title>{% block title %}Registration Page{% endblock %}</title>
+
+{% block content %}
+<br>
+<div class="fileForm-section my-5"></div>
+<div class="login-container"><br>
+    <!-- <h1 class="text-success text-center hero-container my-3 py-3"> 
+        Register and Explore 
+    </h1>  -->
+<form>
+    <h2 class="text-success text-center hero-container my-3 py-3"> 
+        Registration Form
+    </h2> 
+    <div class="wrapper-inner my-2 px-3 "> 
+    <div class="row my-3">
+        <div class="col-md-6">
+            <div class="form-outline">
+                <label class="form-label" for="typeText">First name</label>
+                <input type="text" id="typeText" class="form-control" />
+                
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-outline">
+                <label class="form-label" for="typeText">Surname</label>
+                <input type="text" id="typeText" class="form-control" />
+                
+            </div>
+        </div>
+    </div>
+    <div class="row my-3">
+        <div class="col-md-12">
+            <div class="form-outline">
+                <label class="form-label" for="typeText">Adress 1</label> 
+                <input type="text" id="typeText" class="form-control" />
+                
+            </div>
+        </div>
+    </div>
+    <div class="row my-3">
+        <div class="col-md-12">
+            <div class="form-outline">
+                <label class="form-label" for="typeText">Adress 2</label> 
+                <input type="text" id="typeText" class="form-control" />
+            </div>
+        </div>
+    </div>
+    <div class="row my-3">
+        <div class="col-md-6">
+            <div class="form-outline">
+                <label class="form-label" for="typeText">City</label> 
+                <input type="text" id="typeText" class="form-control" />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-outline">
+                <label class="form-label" for="typeText">Zip code</label> 
+                <input type="text" id="typeText" class="form-control" />
+            </div>
+        </div>
+    </div>
+    <div class="row my-3">
+        <div class="col-md-6">
+            <div class="form-outline">
+                <label class="form-label" for="typeEmail">Email</label> 
+                <input type="email" id="typeEmail" class="form-control" />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-outline">
+                <label class="form-label" for="typePhone">Phone number </label> 
+                <input type="tel" id="typePhone" class="form-control" />
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center">
+        <button type="button" class="btn btn-primary">Sign up</button> 
+    </div>
+    </div>
+</form>
+<br>
+
+</div>
+<div class="fileForm-section my-5"></div>
+{% endblock  %}
