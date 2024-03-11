@@ -1,11 +1,10 @@
 // myfrnt.js
 // Global variable to store the selected sheet
-var selectedSheet = null;
+// var selectedSheet = null;
 // Flag to track if the file section has been loaded
 var fileSectionLoaded = false;
 // Flag to track if sheet names have been fetched
 var sheetNamesFetched = false;
-
 
 $(document).ready(function () {
     var windowHeight = $(window).height(); // Get the window height
@@ -52,6 +51,10 @@ $(document).ready(function () {
         $('#manual_form').hide();
         $('#url-container').hide();
         $('#manual-data').val('');
+
+        $('#manual-data-table').empty();
+        $('#mnl-tbl').hide();
+
     });
 
     $('#toggle_manual').on("click", function () {
@@ -61,6 +64,8 @@ $(document).ready(function () {
         $('#file').val('');
         $('#sheet-name').empty();
         $('#column-name').empty();
+        $('#file-data-table').empty();
+        $('#file-tbl').hide();
     });
 
     const openNavButton = $('.fa-bars');
@@ -174,87 +179,87 @@ $(document).ready(function () {
         });
     }
 
-    // Function to append column data to URL container
-    function appendColumnDataToUrlContainer(columnData) {
-        let validUrlExists = false;
-        let invalidDataExists = false;
+// Function to append column data to URL container
+function appendColumnDataToUrlContainer(columnData) {
+    let validUrlExists = false;
+    let invalidDataExists = false;
+    $('#valid_list').empty();
+    $('#invalid_list').empty();
+    // Arrays to store data for each property
+    let mnl_data = [];
+    let mnl_clmNum = [];
+    let mnl_rwNum = [];
+    let mnl_shtNum = [];
+    const entry_type = ["Entered Data Manually"];
 
-        // Arrays to store data for each property
-        let mnl_data = [];
-        let mnl_clmNum = [];
-        let mnl_rwNum = [];
-        let mnl_shtNum = [];
-        const entry_type = ["Entered Data Manually"]
+    // Iterate through columnData array
+    for (let i = 0; i < columnData.length; i++) {
+        const data = columnData[i].data;
+        const column_number = columnData[i].column_number;
+        const row_number = columnData[i].row_number;
+        const sheet_number = columnData[i].sheet_number;
 
-        // Iterate through columnData array
-        for (let i = 0; i < columnData.length; i++) {
-            const data = columnData[i].data;
-            const column_number = columnData[i].column_number;
-            const row_number = columnData[i].row_number;
-            const sheet_number = columnData[i].sheet_number;
-
-            // Append data to respective arrays if it's a valid URL
-            if (testValidURL(data)) {
-                mnl_data.push(data);
-                mnl_clmNum.push(column_number);
-                mnl_rwNum.push(row_number);
-                mnl_shtNum.push(sheet_number);
-                validUrlExists = true;
-            } else {
-                // Skip null values
-                if (data === null) {
-                    continue;
-                }
-                invalidDataExists = true;
-                $('#invalid_list').append(data);
-            }
-        }
-
-        // Construct the manualDataSet object
-        let manualDataSet = {
-            data: mnl_data,
-            column_number: mnl_clmNum,
-            row_number: mnl_rwNum,
-            sheet_number: mnl_shtNum,
-            choosen: entry_type
-        };
-
-        // Append valid URLs to the URL container
-        manualDataSet.data.forEach((data, index) => {
-            const urlDiv = $('<div>').addClass('url-item');
-            urlDiv.text(data);
-            urlDiv.attr('sheet_number', manualDataSet.sheet_number[index]);
-            urlDiv.attr('row_number', manualDataSet.row_number[index]);
-            urlDiv.attr('column_number', manualDataSet.column_number[index]);
+        // Append data to respective arrays if it's a valid URL
+        if (testValidURL(data)) {
+            mnl_data.push(data);
+            mnl_clmNum.push(column_number);
+            mnl_rwNum.push(row_number);
+            mnl_shtNum.push(sheet_number);
+            validUrlExists = true;
             $('#valid_list').append($('<a class="hover-underline-animation"></a>').attr('href', data).text(data));
             $('#valid_list').append('<br>');
-        });
-
-        console.log("manualDataSet:", manualDataSet);
-
-
-        // Show or hide valid_list based on the presence of valid data
-        if (validUrlExists) {
-            $('#valid_list').prepend($('<h3>Fetched URLs:</h3>'));
-            $('#valid_list').show();
         } else {
-            $('#valid_list').hide();
-        }
-
-        // Show or hide invalid_list based on the presence of invalid data
-        if (invalidDataExists) {
-            $('#invalid_list').prepend($('<h3>Junk:</h3>'));
-            $('#invalid_list').show();
-        } else {
-            $('#invalid_list').hide();
-        }
-
-        if (validUrlExists || invalidDataExists) {
-            $('#url-container').show();
-        } else {
-            $('#url-container').append('<p>No Data Received Please Enter Valid URLs</p>');
+            // Check if the data is empty
+            if (data.trim() !== '') {
+                invalidDataExists = true;
+                $('#invalid_list').append($('<p></p>').text(data));
+            }
         }
     }
+
+    // Construct the manualDataSet object
+    let manualDataSet = {
+        data: mnl_data,
+        column_number: mnl_clmNum,
+        row_number: mnl_rwNum,
+        sheet_number: mnl_shtNum,
+        choosen: entry_type
+    };
+
+    // Show or hide valid_list based on the presence of valid data
+    if (validUrlExists) {
+        console.log("manualDataSet:", manualDataSet);
+        $('#valid_list').prepend($('<h3>Fetched URLs:</h3>'));
+        $('#valid_list').show();
+    } else {
+        $('#valid_list').hide();
+    }
+
+    // Show or hide invalid_list based on the presence of invalid data
+    if (invalidDataExists) {
+        $('#invalid_list').prepend($('<h3>Junk:</h3>'));
+        $('#invalid_list').show();
+    } else {
+        $('#invalid_list').hide();
+    }
+
+    // Show or hide url-container based on the presence of valid or invalid data
+    if (validUrlExists || invalidDataExists) {
+        $('#url-container').show();
+    } else {
+        $('#url-container').hide();
+    }
+    // if (manualDataSet && Object.keys(manualDataSet).length !== 0) {
+    //     displayDataSetsInTable(null,manualDataSet);
+    // }
+    if (manualDataSet && manualDataSet.data && manualDataSet.data.length !== 0) {
+        displayDataSetsInTable(null, manualDataSet);
+    } else{
+        $('#manual-data-table').empty();
+        $('#mnl-tbl').hide();
+    }  
+}
+
 // ***********************************************************************
             // Manual form Section end from here
 // ***********************************************************************
@@ -270,8 +275,6 @@ $(document).ready(function () {
         return pattern.test(list_url);
     }
 
-    // let dataFetched = false; // Flag to track if data has been fetched
-
 // Function to fetch column Data
 async function fetchColumnURLs(formData) {
     // Initialize dataSet
@@ -280,7 +283,7 @@ async function fetchColumnURLs(formData) {
         column_number: [],
         row_number: [],
         sheet_number: [],
-        choosen: [] // Changed from array to single value
+        choosen: [] 
     };
 
     try {
@@ -294,10 +297,9 @@ async function fetchColumnURLs(formData) {
         }
 
         const data = await response.json();
-        console.log("Received data frequency:", data);
         // Display column Data in the valid_list and invalid_list divs
         $('#valid_list').empty();
-        $('#invalid_list').empty(); // Clear invalid list
+        $('#invalid_list').empty(); 
         $('#url-container').show();
 
         var raw_data = data.column_data;
@@ -335,19 +337,17 @@ async function fetchColumnURLs(formData) {
                         return;
                     }
                     $('#invalid_list').append($('<p></p>').text(list_url));
-                    $('#invalid_list').append('<br>');
                     invalidDataExists = true;
                 }
             });
-
             // Show or hide valid_list based on the presence of valid data
             if (validDataExists) {
                 $('#valid_list').prepend($('<h3>Fetched URLs:</h3>'));
                 $('#valid_list').show();
+                console.log("dataSet:", fileDataSet); // Logging the dataSet
             } else {
                 $('#valid_list').hide();
             }
-
             // Show or hide invalid_list based on the presence of invalid data
             if (invalidDataExists) {
                 $('#invalid_list').prepend($('<h3>Junk:</h3>'));
@@ -363,212 +363,247 @@ async function fetchColumnURLs(formData) {
                 $('#url-container').hide();
             }
         } else {
-            $('#valid_list').append($('<p>No URLs found for the selected column.</p>'));
-            $('#invalid_list').hide(); // Hide invalid list if no data
+            $('#invalid_list').append($('<p>No URLs found for the selected column.</p>'));
+            $('#invalid_list').show(); // Hide invalid list if no data
             $('#valid_list').hide(); // Hide valid list if no data
-            $('#url-container').hide(); // Hide url-container if no data
+            $('#url-container').show(); // Hide url-container if no data
         }
     } catch (error) {
         console.error('Error fetching column Data:', error);
     }
-    console.log("dataSet:", fileDataSet); // Logging the dataSet
-    // displayDataSetsInTable(fileDataSet);
+    if (fileDataSet && fileDataSet.data && fileDataSet.data.length !== 0) {
+        displayDataSetsInTable(fileDataSet, null);
+    } else{
+        $('#file-data-table').empty();
+        $('#file-tbl').hide();
+    }   
 }
 
-// Function to display data sets in tabular format
 function displayDataSetsInTable(fileDataSet, manualDataSet) {
     // Clear previous tables if any
-    $('#file-data-table').empty();
     $('#manual-data-table').empty();
+    $('#file-tbl').hide(); // Hide file table by default
+    $('#mnl-tbl').hide(); // Hide manual table by default
 
-    // Display file data in a table
-    displayDataSetInTable(fileDataSet, '#file-data-table', 'File Data');
+    if (fileDataSet) {
+        displayDataSetInTable(fileDataSet, '#file-data-table');
+        $('#file-tbl').show(); // Show file table
+        // $('#mnl-tbl').empty(); // empty manual table
+        $('#manual-data-table').hide();
+        $('#file-data-table').show();
 
-    // Display manual data in a table
-    displayDataSetInTable(manualDataSet, '#manual-data-table', 'Manual Data');
+    } 
+
+    if (manualDataSet) {
+        displayDataSetInTable(manualDataSet, '#manual-data-table');
+        $('#mnl-tbl').show(); // Show manual table
+        // $('#file-tbl').empty(); // empty file table
+        $('#file-data-table').hide();
+        $('#manual-data-table').show();
+    }
+        // Show the table section after updating tables
+        $('#tbl-section').show();    
 }
 
-// Function to display a data set in a table
-function displayDataSetInTable(dataSet, tableId, tableName) {
+function displayDataSetInTable(dataSet, tableId) {
+    if (!dataSet || !dataSet.data || dataSet.data.length === 0) {
+        console.error("Error: DataSet is undefined or empty");
+        $(tableId).empty(); // Clear the table if data is empty
+        return;
+    }
+
     const table = $('<table>').addClass('data-table');
-    const tableCaption = $('<caption>').text(tableName);
+    const tableCaption = $('<caption>').text(dataSet.choosen[0]); // Displaying the value of "choosen" as caption
     table.append(tableCaption);
 
     // Create table headers
+    const keys = Object.keys(dataSet);
     const headersRow = $('<tr>');
-    for (let key in dataSet) {
-        headersRow.append($('<th>').text(key));
-    }
+
+    // Add Action header to the first cell
+    headersRow.append(createDropdown());
+
+    // Add other headers
+    keys.forEach(key => {
+        if (key !== 'choosen') {
+            headersRow.append($('<th>').text(key));
+        }
+    });
     table.append(headersRow);
 
     // Create table rows
     for (let i = 0; i < dataSet.data.length; i++) {
         const dataRow = $('<tr>');
-        for (let key in dataSet) {
-            const cellData = dataSet[key][i];
-            dataRow.append($('<td>').text(cellData));
+
+        // Add dropdown cell only to the first cell of the first column
+        if (i >= 0) {
+            // For other rows, add checkboxes in the first column
+            const checkboxCell = $('<td>').append(
+                $('<input>').attr('type', 'checkbox').addClass('row-checkbox')
+            );
+            dataRow.append(checkboxCell);
         }
+
+        // Add cells for other columns
+        keys.forEach(key => {
+            if (key !== 'choosen') {
+                const cellData = dataSet[key][i];
+                dataRow.append($('<td>').text(cellData));
+            }
+        });
         table.append(dataRow);
     }
 
     // Append the table to the specified container
-    $(tableId).append(table);
+    $(tableId).empty().append(table); // Empty the table container before appending
+}
+
+// Function to create the dropdown
+function createDropdown() {
+    const dropdownHeader = $('<th>').text('Action'); // Create a header cell for the dropdown
+    const dropdown = $('<select>').append(
+        $('<option>').text('First 50').attr('value', 'Option 1'),
+        $('<option>').text('First 100').attr('value', 'Option 2'),
+        $('<option>').text('First 150').attr('value', 'Option 3'),
+        $('<option>').text('More').attr('value', 'Choose').prop('disabled', true)
+    ).on('change', function() {
+        // Handle dropdown selection
+        const selectedValue = $(this).val();
+        console.log('Selected action:', selectedValue);
+    });
+    dropdownHeader.append(dropdown); // Append the dropdown to the header cell
+    return dropdownHeader; // Return the dropdown header cell
 }
 
 
-    // Function to fetch sheet names and column names asynchronously
-    function fetchSheetAndColumnNames(formData) {
-        try {
-            fetch('/input_section', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch sheet names and column names');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Sheet names and column names fetched successfully:', data);
+// Global variable to store the selected sheet
+let selectedSheet;
 
-                    // Update the selected sheet based on the server's response
-                    selectedSheet = data.selected_sheet;
-                    if (!data.is_csv) {
-                        // For XLSX files
-                        populateSheetDropdown(selectedSheet, data.sheet_names);
-                        // Populate column dropdown with column names for the selected sheet
-                        populateColumnDropdown(data.sheet_columns[selectedSheet], selectedSheet, data.column_data);
-                        // Update the selected sheet without resetting
-                        $('#sheet-name').val(selectedSheet);
-                        // Show sheet dropdown for XLSX files
-                        $('#sheet-name').show();
-                        // Show label for XLSX files
-                        $('label[for="sheet-name"]').show();
-                    } else {
-                        // For CSV files
-                        populateColumnDropdown(data.sheet_columns, selectedSheet, data.column_data);
-                        // Hide sheet dropdown for CSV files
-                        $('#sheet-name').empty().hide();
-                        // Hide label for CSV files
-                        $('label[for="sheet-name"]').hide();
-                    }
-
-                    // Fetch column data for the default selected column
-                    var selectedColumn = $('#column-name').val(); // Get the selected column
-                    if (selectedColumn) {
-                        var formData = new FormData(); // Initialize FormData object
-                        formData.append('file', $('#file')[0].files[0]); // Include the file data
-                        formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
-                        formData.append('selected_column', selectedColumn); // Pass the selected column
-                        // Pass the FormData object to fetch column Data
-                        fetchColumnURLs(formData);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching sheet names and column names:', error);
-                });
-        } catch (error) {
-            console.error('Error fetching sheet names and column names:', error);
-        }
-    }
-
-    // Function to populate sheet dropdown
-    async function populateSheetDropdown(selectedSheet, sheetNames) {
-        var sheetDropdown = $('#sheet-name');
-        sheetDropdown.empty();
-        if (sheetNames && sheetNames.length > 0) {
-            $.each(sheetNames, function (_, sheetName) {
-                sheetDropdown.append($('<option></option>').val(sheetName).text(sheetName));
-            });
-
-            // Set the selected sheet to the first sheet by default if not provided
-            if (!selectedSheet) {
-                selectedSheet = sheetNames[0];
+// Function to fetch sheet names and column names asynchronously
+function fetchSheetAndColumnNames(formData) {
+    try {
+        fetch('/input_section', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch sheet names and column names');
             }
-        } else {
-            console.error('No sheet names available.');
-            sheetDropdown.append($('<option disabled selected>Please choose a sheet</option>'));
-        }
+            return response.json();
+        })
+        .then(data => {
+            selectedSheet = data.selected_sheet; // Update the selected sheet based on the server's response
+            if (!data.is_csv) {
+                populateSheetDropdown(selectedSheet, data.sheet_names); // Populate sheet dropdown for XLSX files
+                populateColumnDropdown(data.sheet_columns[selectedSheet], selectedSheet, data.column_data); // Populate column dropdown for the selected sheet
+                $('#sheet-name').val(selectedSheet); // Update the selected sheet without resetting
+                $('#sheet-name').show(); // Show sheet dropdown for XLSX files
+                $('label[for="sheet-name"]').show(); // Show label for XLSX files
+            } else {
+                populateColumnDropdown(data.sheet_columns, selectedSheet, data.column_data); // Populate column dropdown for CSV files
+                $('#sheet-name').empty().hide(); // Hide sheet dropdown for CSV files
+                $('label[for="sheet-name"]').hide(); // Hide label for CSV files
+            }
+            // Fetch column data for the default selected column
+            var selectedColumn = $('#column-name').val(); // Get the selected column
+            if (selectedColumn) {
+                var formData = new FormData(); // Initialize FormData object
+                formData.append('file', $('#file')[0].files[0]); // Include the file data
+                formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
+                formData.append('selected_column', selectedColumn); // Pass the selected column
+                fetchColumnURLs(formData); // Pass the FormData object to fetch column Data
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching sheet names and column names:', error);
+        });
+    } catch (error) {
+        console.error('Error fetching sheet names and column names:', error);
     }
+}
 
-    // Function to populate column dropdown
-    async function populateColumnDropdown(columnNames, selectedSheet) {
-        var columnDropdown = $('#column-name');
-        columnDropdown.empty();
-
-        if (columnNames) {
-            $.each(columnNames, function (_, columnName) {
-                columnDropdown.append($('<option></option>').val(columnName).text(columnName));
-                
-            });
-        } else {
-            console.error('No column names available for the selected sheet:', selectedSheet);
-            columnDropdown.append($('<option disabled selected>No columns available</option>'));
+// Function to populate sheet dropdown
+async function populateSheetDropdown(selectedSheet, sheetNames) {
+    var sheetDropdown = $('#sheet-name');
+    sheetDropdown.empty();
+    if (sheetNames && sheetNames.length > 0) {
+        $.each(sheetNames, function (_, sheetName) {
+            sheetDropdown.append($('<option></option>').val(sheetName).text(sheetName));
+        });
+        // Set the selected sheet to the first sheet by default if not provided
+        if (!selectedSheet) {
+            selectedSheet = sheetNames[0];
         }
-
-        // Get the default selected column
-        var selectedColumn = columnDropdown.val();
-
-        // Fetch column data for the default selected column
-        if (selectedColumn) {
-            console.log("Selected Column:", selectedColumn);
-            var formData = new FormData(); // Initialize FormData object
-            formData.append('file', $('#file')[0].files[0]); // Include the file data
-            formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
-            formData.append('selected_column', selectedColumn); // Pass the selected column
-            // Pass the FormData object to fetch column Data
-            fetchColumnURLs(formData);
-        }
+    } else {
+        console.error('No sheet names available.');
+        sheetDropdown.append($('<option disabled selected>Please choose a sheet</option>'));
     }
+}
 
-
-    // Handle column dropdown change event
-    $(document).on('change', '#column-name', function () {
-        // Get the selected column
-        var selectedColumn = $(this).val();
-        console.log("Selected Column:", selectedColumn);
-
-        // Check if the selected column is not null or empty
-        if (selectedColumn) {
-            selectedSheet= $('#sheet-name').val();
-            var formData = new FormData(); // Initialize FormData object
-            formData.append('file', $('#file')[0].files[0]); // Include the file data
-            formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
-            formData.append('selected_column', selectedColumn); // Pass the selected column
-            // Pass the FormData object to fetch column Data
-            fetchColumnURLs(formData);
-        } else {
-            console.log('No valid column selected.');
-        }
-    });
-
-    // Function to handle sheet dropdown change event
-    $(document).on('change', '#sheet-name', function () {
-        selectedSheet = $(this).val(); // Update the selected sheet value
-        // Construct FormData object with selected sheet value
-        var formData = new FormData();
-        formData.append('file', $('#file')[0].files[0]); // Include the file data
-        formData.append('selected_sheet', selectedSheet); // Use the first sheet if selectedSheet is null
-        // Pass the FormData object to fetch sheet and column names
-        fetchSheetAndColumnNames(formData);
-    });
-
-    // Function to handle file change event
-    $(document).on('change', '#file', function () {
-        // Display column Data in the valid_list div
-        $('#valid_list').empty();
-        var fileInput = $(this)[0].files[0];
-        console.log("Received File", fileInput, typeof fileInput);
+// Function to populate column dropdown
+async function populateColumnDropdown(columnNames, selectedSheet) {
+    var columnDropdown = $('#column-name');
+    columnDropdown.empty();
+    if (columnNames) {
+        $.each(columnNames, function (_, columnName) {
+            columnDropdown.append($('<option></option>').val(columnName).text(columnName));
+        });
+    } else {
+        console.error('No column names available for the selected sheet:', selectedSheet);
+        columnDropdown.append($('<option disabled selected>No columns available</option>'));
+    }
+    // Get the default selected column
+    var selectedColumn = columnDropdown.val();
+    // Fetch column data for the default selected column
+    if (selectedColumn) {
         var formData = new FormData(); // Initialize FormData object
+        formData.append('file', $('#file')[0].files[0]); // Include the file data
+        formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
+        formData.append('selected_column', selectedColumn); // Pass the selected column
+        fetchColumnURLs(formData); // Pass the FormData object to fetch column Data
+    }
+}
 
-        if (fileInput) {
-            formData.append('file', fileInput);
+// Handle column dropdown change event
+$(document).on('change', '#column-name', function () {
+    var selectedColumn = $(this).val(); // Get the selected column
+    if (selectedColumn) {
+        selectedSheet= $('#sheet-name').val();
+        var formData = new FormData(); // Initialize FormData object
+        formData.append('file', $('#file')[0].files[0]); // Include the file data
+        formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
+        formData.append('selected_column', selectedColumn); // Pass the selected column
+        fetchColumnURLs(formData); // Pass the FormData object to fetch column Data
+    } else {
+        console.log('No valid column selected.');
+    }
+});
 
-            // Pass the FormData object to fetch sheet and column names
-            fetchSheetAndColumnNames(formData);
-        } else {
-            console.error('No file selected.');
-        }
-    });
+// Function to handle sheet dropdown change event
+$(document).on('change', '#sheet-name', function () {
+    selectedSheet = $(this).val(); // Update the selected sheet value
+    var formData = new FormData(); // Construct FormData object with selected sheet value
+    formData.append('file', $('#file')[0].files[0]); // Include the file data
+    formData.append('selected_sheet', selectedSheet); // Use the first sheet if selectedSheet is null
+    fetchSheetAndColumnNames(formData); // Pass the FormData object to fetch sheet and column names
+});
+
+// Function to handle file change event
+$(document).on('change', '#file', function () {
+    $('#valid_list').empty(); // Clear the valid_list div
+    var fileInput = $(this)[0].files[0]; // Get the selected file
+    var formData = new FormData(); // Initialize FormData object
+    if (fileInput) {
+        formData.append('file', fileInput); // Include the file data
+        fetchSheetAndColumnNames(formData); // Pass the FormData object to fetch sheet and column names
+    } else {
+        console.error('No file selected.');
+        $('#tbl-section').hide();
+        $('#url-container').hide();
+        $('#sheet-name').empty();
+        $('#column-name').empty();
+    }
+});
+
 });
