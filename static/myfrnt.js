@@ -378,7 +378,6 @@ async function fetchColumnURLs(formData) {
         $('#file-tbl').hide();
     }   
 }
-
 function displayDataSetsInTable(fileDataSet, manualDataSet) {
     // Clear previous tables if any
     $('#manual-data-table').empty();
@@ -411,7 +410,14 @@ function displayDataSetInTable(dataSet, tableId) {
         $(tableId).empty(); // Clear the table if data is empty
         return;
     }
+    // Create the table container
+    let tableContainer = $('<div>');
+        // Create the heading
+    let heading = $('<h3>').text(dataSet.choosen[0]);
 
+    // Append the heading to the table container
+    tableContainer.append(heading);
+    
     const table = $('<table>').addClass('data-table');
     const tableCaption = $('<caption>').text(dataSet.choosen[0]); // Displaying the value of "choosen" as caption
     table.append(tableCaption);
@@ -453,27 +459,193 @@ function displayDataSetInTable(dataSet, tableId) {
         });
         table.append(dataRow);
     }
-
+    // Append the table to the table container
+    tableContainer.append(table);
+    
     // Append the table to the specified container
     $(tableId).empty().append(table); // Empty the table container before appending
 }
+// *************************************************************************************************************************
+// ************************************   Dropdown Based dataSet preperation Start  *********************************************
+// *************************************************************************************************************************
 
 // Function to create the dropdown
 function createDropdown() {
     const dropdownHeader = $('<th>').text('Action'); // Create a header cell for the dropdown
     const dropdown = $('<select>').append(
+        $('<option>').text('select'),
         $('<option>').text('First 50').attr('value', 'Option 1'),
         $('<option>').text('First 100').attr('value', 'Option 2'),
         $('<option>').text('First 150').attr('value', 'Option 3'),
         $('<option>').text('More').attr('value', 'Choose').prop('disabled', true)
-    ).on('change', function() {
-        // Handle dropdown selection
-        const selectedValue = $(this).val();
-        console.log('Selected action:', selectedValue);
-    });
+    );
+
     dropdownHeader.append(dropdown); // Append the dropdown to the header cell
     return dropdownHeader; // Return the dropdown header cell
 }
+    // Dropdown change event handler
+    $(document).on("change", "select", function() {
+        var selection = $(this).val();
+        handleCheckboxSelection(selection);
+    });
+
+    // Check_all checkbox click event handler
+    $(document).on("click", "#check_all", function() {
+        if ($(this).prop("checked")) {
+            $("input:checkbox.row-checkbox").prop("checked", true);
+        } else {
+            $("input:checkbox.row-checkbox").prop("checked", false);
+        }
+    });
+
+// Checkbox change event handler
+$(document).on("change", "input:checkbox.row-checkbox", function() {
+    var selectedValue = $("select").val(); // Get the current dropdown selection
+    var totalChecked = $("input:checkbox.row-checkbox:checked").length; // Get the total checked checkboxes
+
+    // Check if the selected checkboxes exceed the limit
+    if (totalChecked > 150) {
+        $(this).prop("checked", false); // Uncheck the current checkbox if the limit is exceeded
+        return; // Exit the function to prevent further processing
+    }
+
+    updateCheckAllCheckbox();
+    handleCheckboxSelection(selectedValue); // Apply limit after checkbox status changes
+});
+
+// Function to handle checkbox selection based on dropdown selection
+function handleCheckboxSelection(selection) {
+    // Enable all checkboxes and remove disabled attribute
+    $("input:checkbox.row-checkbox").prop("disabled", false);
+
+    // Uncheck all checkboxes if the first option is selected
+    if (selection === "select") {
+        $("input:checkbox.row-checkbox").prop("checked", false);
+    }
+
+    // Check checkboxes based on selection, limiting to 150 checkboxes
+    if (selection === "Option 1") { // First 50
+        checkLimitedCheckboxes(50);
+    } else if (selection === "Option 2") { // First 100
+        checkLimitedCheckboxes(100);
+    } else if (selection === "Option 3") { // First 150
+        checkLimitedCheckboxes(150);
+    }
+
+    // Update check_all checkbox based on checked checkboxes
+    updateCheckAllCheckbox();
+
+    // Store checked checkbox values in the dataset
+    storeCheckedValues();
+}
+
+// Function to check a limited number of checkboxes
+function checkLimitedCheckboxes(limit) {
+    var $checkboxes = $("input:checkbox.row-checkbox");
+    $checkboxes.prop("checked", false); // Uncheck all checkboxes first
+    $checkboxes.slice(0, limit).prop("checked", true); // Check only up to the specified limit
+
+    // Disable remaining checkboxes if the limit is reached
+    if ($checkboxes.length > limit) {
+        $checkboxes.slice(limit).prop("disabled", true);
+    }
+}
+
+// Checkbox change event handler
+$("input:checkbox.row-checkbox").on("change", function() {
+    updateCheckAllCheckbox();
+    handleCheckboxSelection($("select").val()); // Apply limit after checkbox status changes
+});
+
+// Function to update the check_all checkbox based on checked checkboxes
+function updateCheckAllCheckbox() {
+    var total_check_boxes = $("input:checkbox.row-checkbox").length;
+    var total_checked_boxes = $("input:checkbox.row-checkbox:checked").length;
+
+    // If all checkboxes are checked, check the check_all checkbox
+    $("#check_all").prop("checked", total_check_boxes === total_checked_boxes);
+}
+
+// Function to store checked checkbox values in the dataset
+function storeCheckedValues() {
+    // Initialize clientUrlSet object
+    var clientUrlSet = {
+        url_list: [],
+        column_number: [],
+        row_number: [],
+        sheet_number: [],
+        choosen: []
+    };
+    // Retrieve the caption value once
+    var captionText = $("caption").text();
+    // Iterate through checked checkboxes and store values
+    $("input:checkbox.row-checkbox:checked").each(function() {
+        var $row = $(this).closest("tr");
+        clientUrlSet.url_list.push($row.find("td:nth-child(2)").text());
+        clientUrlSet.column_number.push($row.find("td:nth-child(3)").text());
+        clientUrlSet.row_number.push($row.find("td:nth-child(4)").text());
+        clientUrlSet.sheet_number.push($row.find("td:nth-child(5)").text());
+
+    });
+    // Push the caption value to the choosen array once
+    clientUrlSet.choosen.push(captionText);
+
+    // Check if data is empty
+    if (clientUrlSet.url_list.length === 0) {
+        console.error("Error: No data found");
+        return null; // Return null if no data is found
+    }
+    // Bind click event to send data to server
+    $("#send_serve").off("click").on("click", function() {
+        sendDataToServer(clientUrlSet);
+        // Output the dataset for verification
+        console.log("Before Sending to server:",clientUrlSet);
+});
+}
+
+// Function to send data to the server asynchronously
+async function sendDataToServer(clientUrlSet) {
+    try {
+        // Make sure dataSet is not empty
+        if (!clientUrlSet || !clientUrlSet.url_list || clientUrlSet.url_list.length === 0) {
+            console.error("Error: DataSet is undefined or empty");
+            return;
+        } else {
+            console.log("Before Sending to server:", clientUrlSet);
+            console.log("Stringified Data:", JSON.stringify(clientUrlSet)); // Log the stringified data
+
+            // Perform an asynchronous POST request to the server endpoint
+            const response = await fetch("/process_url_data", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(clientUrlSet)
+            });
+
+            // Parse the response JSON
+            const responseData = await response.json();
+
+            // Check if there was an error in the response
+            if (responseData.error) {
+                console.error("Error from server:", responseData.error);
+                // Handle the specific error message here
+            } else {
+                console.log("Data sent successfully:", responseData);
+                // Process the successful response data here
+            }
+        }
+    } catch (error) {
+        console.error("Error sending data to server:", error);
+        // Handle the error here if needed
+    }
+}
+
+// *************************************************************************************************************************
+// ************************************   Dropdown Based dataSet preperation Ended  *********************************************
+// *************************************************************************************************************************
+
+
 
 
 // Global variable to store the selected sheet

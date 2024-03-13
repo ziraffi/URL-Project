@@ -2,7 +2,12 @@ from flask import Flask, render_template, request, jsonify
 import pandas as pd
 from io import StringIO,BytesIO
 import openpyxl
-
+import logging
+import asyncio
+import pandas as pd
+import os
+import sys
+from domain_checker import process_urls_async
 app = Flask(__name__)
 
 @app.route('/')
@@ -128,8 +133,56 @@ def process_file(uploaded_file, selected_sheet, selected_column):
     except Exception as e:
         return {'error_message': f"Error processing file: {str(e)}"}
 
+# Set up logging configuration
+logging.basicConfig(level=logging.DEBUG)  # Set the logging level to DEBUG
 
-@app.route('/submit', methods=['POST'])
+# Define function to process dataSet containing URLs asynchronously
+async def process_dataSet_urls(urlSet, semaphore):
+    try:
+        if not urlSet or 'url_list' not in urlSet:
+            logging.error("Empty or missing 'url_list' key in urlSet")
+            return jsonify({'error': 'Missing data in request'})
+        else:
+            urls = urlSet['url_list']
+            logging.info(f"Processing {len(urls)} URLs asynchronously")
+            return await process_urls_async(urls, semaphore)  # Call the process_urls_async function
+    except Exception as e:
+        logging.error(f"Error processing URLs: {e}")
+        return pd.DataFrame()
+
+# Define route to process urlSet data from the client
+@app.route('/process_url_data', methods=['POST', 'GET'])
+def process_clienturl_data():
+    
+    try:
+        # Get the dataSet from the request
+        urlSet = request.json
+
+        app.logger.info(f"Received dataSet: {urlSet} (type: {type(urlSet)})") #Review the current dataSet which is going to be processed
+        
+        # Run asynchronous tasks to process URLs
+        semaphore = asyncio.Semaphore(8)  # Adjust the semaphore value as needed
+        logging.info("Starting URL processing")
+        result_df = asyncio.run(process_dataSet_urls(urlSet, semaphore))
+        logging.info("URL processing completed")
+
+        # Save results to a CSV file
+        if not result_df.empty:
+            output_file_path = 'domain_info.csv'
+            count = 1
+            while os.path.exists(output_file_path):
+                output_file_path = f'domain_info_{count}.csv'
+                count += 1
+            result_df.to_csv(output_file_path, index=False)
+            logging.info(f"Results saved to {output_file_path}")
+            return jsonify({'message': 'URL data processed successfully', 'output_file': output_file_path})
+        else:
+            logging.error("No data retrieved")
+            return jsonify({'error': 'No data retrieved'})
+    except Exception as e:
+        logging.error(f"Error processing URL data: {e}")
+        return jsonify({'error': str(e)})
+    
 def submit_form():
     file_type = request.form.get('file')
     batch = request.form.get('batch')

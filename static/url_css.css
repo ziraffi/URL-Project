@@ -128,20 +128,6 @@ nav ul li:hover::after {
 
 /* Adjust the navigation styles for screens below 768px */
 @media (max-width: 768px) {
-    /* Adjust table layout for mobile devices */
-    .data-table {
-      width: 100%;
-  }
-  .data-table th,
-  .data-table td {
-      padding: 8px;
-      text-align: left;
-      width: 100%;
-      display: block;
-  }
-  .data-table th {
-      text-align: center;
-  }
   .fa.fa-bars {
       display: block;
       position: absolute;
@@ -603,6 +589,9 @@ button {
   margin-bottom: 0.3rem;
   padding: 0.7rem;
   justify-content: center;
+  overflow-y: auto;
+  min-height: 10vh;
+  max-height: 40vh;
   box-sizing: border-box;
   border: rgb(194, 61, 228) solid;
   border-radius: 0.8rem;
@@ -658,6 +647,16 @@ button {
 /* Tabular representation of dataSet  */
 #tbl-section{
   display: none;
+
+}
+.table{
+  overflow-y: auto;
+  min-height: 10vh;
+  max-height: 40vh;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
 }
 .data-table {
   border-collapse: collapse;
@@ -668,17 +667,17 @@ button {
   border: 1px solid #ddd;
   background-color: #e8e6e6;
   padding: 8px;
-  text-align: left; 
+  text-align: center; 
 }
 .data-table th {
   color: #000000;
   border: 1px solid #ddd;
   padding: 8px;
   text-align: center;
-}
-.data-table th {
   background-color: #f2f2f2;
+  
 }
+
 .data-table caption{
   color: bisque;
 }
