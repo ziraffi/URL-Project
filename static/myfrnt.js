@@ -602,50 +602,66 @@ function storeCheckedValues() {
         console.log("Before Sending to server:",clientUrlSet);
 });
 }
-
-// Function to send data to the server asynchronously
+// Function to send data to the server
 async function sendDataToServer(clientUrlSet) {
-    try {
-        // Make sure dataSet is not empty
-        if (!clientUrlSet || !clientUrlSet.url_list || clientUrlSet.url_list.length === 0) {
-            console.error("Error: DataSet is undefined or empty");
-            return;
-        } else {
-            console.log("Before Sending to server:", clientUrlSet);
-            console.log("Stringified Data:", JSON.stringify(clientUrlSet)); // Log the stringified data
+    // Record start time
+    var startTime = new Date().getTime();
 
-            // Perform an asynchronous POST request to the server endpoint
-            const response = await fetch("/process_url_data", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(clientUrlSet)
+    // Display loading indicator
+    $('#loadingIndicator').show();
+
+    // Make sure dataSet is not empty
+    if (!clientUrlSet || !clientUrlSet.url_list || clientUrlSet.url_list.length === 0) {
+        console.error("Error: DataSet is undefined or empty");
+        return;
+    } else {
+        console.log("Before Sending to server:",clientUrlSet);
+        console.log("Stringified Data:", JSON.stringify(clientUrlSet)); // Log the stringified data
+        try {
+            // Perform an asynchronous AJAX POST request to the server endpoint
+            const response = await $.ajax({
+                url: "/process_url_data",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(clientUrlSet)
             });
 
-            // Parse the response JSON
-            const responseData = await response.json();
+            // Calculate processing time
+            var endTime = new Date().getTime();
+            var processingTime = endTime - startTime;
 
-            // Check if there was an error in the response
-            if (responseData.error) {
-                console.error("Error from server:", responseData.error);
+            // Format processing time
+            var formattedTime;
+            if (processingTime < 1000) {
+                formattedTime = processingTime + " milliseconds";
+            } else if (processingTime < 60000) {
+                formattedTime = (processingTime / 1000).toFixed(2) + " seconds";
+            } else {
+                formattedTime = (processingTime / 60000).toFixed(2) + " minutes";
+            }
+            console.log("Processing time:", formattedTime);
+
+            if (response.error) {
+                console.error("Error from server:", response.error);
                 // Handle the specific error message here
             } else {
-                console.log("Data sent successfully:", responseData);
+                console.log("Data sent successfully:", response);
                 // Process the successful response data here
             }
+        } catch (error) {
+            console.error("Error sending data to server:", error);
+            // Handle the error here if needed
+        } finally {
+            // Hide loading indicator after request completes
+            $('#loadingIndicator').hide();
         }
-    } catch (error) {
-        console.error("Error sending data to server:", error);
-        // Handle the error here if needed
     }
 }
+
 
 // *************************************************************************************************************************
 // ************************************   Dropdown Based dataSet preperation Ended  *********************************************
 // *************************************************************************************************************************
-
-
 
 
 // Global variable to store the selected sheet

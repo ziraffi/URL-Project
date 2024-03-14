@@ -174,6 +174,7 @@ def process_clienturl_data():
                 output_file_path = f'domain_info_{count}.csv'
                 count += 1
             result_df.to_csv(output_file_path, index=False)
+            
             logging.info(f"Results saved to {output_file_path}")
             return jsonify({'message': 'URL data processed successfully', 'output_file': output_file_path})
         else:

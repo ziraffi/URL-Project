@@ -8,6 +8,7 @@ import aiohttp
 from tqdm import tqdm
 from typing import List
 
+
 # Logging setup with enhanced logging of successful and failed requests
 logging.basicConfig(level=logging.INFO, filename='domain_info_checker.log')
 # if(#check)
@@ -79,7 +80,6 @@ async def get_domain_info_async(url, session, semaphore):
             'Domain Status': domain_status,
             'Expiration Date': expiration_date,
             'For Sale': for_sale_indicator,
-            'WHOIS Info': [whois_info],
             'Response Time': response_time,            
         }
     except Exception as e:
@@ -91,7 +91,6 @@ async def get_domain_info_async(url, session, semaphore):
             'Domain Status': f'WHOIS Error: {e}',
             'Expiration Date': None,
             'For Sale': None,
-            'WHOIS Info': None,
             'Response Time': None,            
         }
 
