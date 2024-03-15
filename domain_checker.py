@@ -6,15 +6,21 @@ import pandas as pd
 import whois
 import aiohttp
 from tqdm import tqdm
-from typing import List
+import time
+from typing import List, AsyncGenerator, Dict, Any
 
 
 # Logging setup with enhanced logging of successful and failed requests
 logging.basicConfig(level=logging.INFO, filename='domain_info_checker.log')
-# if(#check)
+
 async def fetch_url_status(url, session, semaphore, retry_attempts=2):
+    # Ensure URL has a protocol (http:// or https://)
+    if not url.startswith("http://") and not url.startswith("https://"):
+        # Assuming HTTP as default protocol
+        url = "http://" + url
+
     # Log the received dataSet
-    logging.info(f"Received dataSet: {url}") #Review the current dataSet which is going to be processed
+    logging.info(f"Received dataSet: {url}")  # Review the current dataSet which is going to be processed
     
     for _ in range(retry_attempts):
         try:
@@ -31,6 +37,7 @@ async def fetch_url_status(url, session, semaphore, retry_attempts=2):
             logging.error(f"Error fetching URL status for {url}: {e}")
         await asyncio.sleep(2)            
     return None, None
+
 
 async def get_domain_info_async(url, session, semaphore):
     try:
@@ -66,7 +73,7 @@ async def get_domain_info_async(url, session, semaphore):
         if expiration_dates:
             # Handle the case where expiration_dates is a non-empty list
             domain_status = 'Expired' if any(date < datetime.datetime.now() for date in expiration_dates) else 'For Sale' if for_sale_indicator == 'Yes' else 'Fresh'
-            expiration_date = max(expiration_dates, default=None)
+            expiration_date = max(expiration_dates, default=None) #.strftime('%d-%m-%Y %I:%M:%S')  # Format expiration date
         else:
             # Handle other cases, including when expiration_dates is an empty list or not a list
             expiration_date = whois_info.expiration_date
@@ -88,24 +95,42 @@ async def get_domain_info_async(url, session, semaphore):
             'URL': url,
             'Status Code': None,
             'Response Message': None,            
-            'Domain Status': f'WHOIS Error: {e}',
+            'Domain Status': f'{e}',
             'Expiration Date': None,
             'For Sale': None,
             'Response Time': None,            
         }
 
-async def process_urls_async(urls: List[str], semaphore) -> pd.DataFrame:
+async def process_urls_async(urls: List[str], semaphore) -> AsyncGenerator[Dict[str, Any], None]:
     try:
         domain_info_list = []
+        start_time = time.time()  # Record start time
 
         async with aiohttp.ClientSession() as session:
-            for url in tqdm(urls, desc="Processing URLs"):
+            for idx, url in enumerate(tqdm(urls, desc="Processing URLs"), 1):
                 domain_info = await get_domain_info_async(url, session, semaphore)
-                if domain_info is not None:                
+                if domain_info is not None:
                     domain_info_list.append(domain_info)
+                    
+                    # Calculate time taken for this iteration
+                    iteration_time = time.time() - start_time
 
-        df = pd.DataFrame(domain_info_list)
-        return df
+                    # Calculate mean time per iteration
+                    mean_time_per_iteration = iteration_time / idx
+
+                    # Calculate estimated remaining time
+                    remaining_iterations = len(urls) - idx
+                    estimated_remaining_time = remaining_iterations * mean_time_per_iteration
+
+                    # Yield statistics continuously
+                    yield {
+                        'current_iteration': idx,
+                        'estimated_remaining_time': estimated_remaining_time,
+                        'mean_time_per_iteration': mean_time_per_iteration,
+                        'domain_info': domain_info
+                    }
     except Exception as e:
-        logging.error(f"Error in process_urls_async: {e}")
-        return pd.DataFrame()
+        logging.error(f"Error processing URLs: {e}")
+    except Exception as e:
+        logging.error(f"Error processing URLs: {e}")
+

@@ -465,6 +465,7 @@ function displayDataSetInTable(dataSet, tableId) {
     // Append the table to the specified container
     $(tableId).empty().append(table); // Empty the table container before appending
 }
+
 // *************************************************************************************************************************
 // ************************************   Dropdown Based dataSet preperation Start  *********************************************
 // *************************************************************************************************************************
@@ -602,6 +603,7 @@ function storeCheckedValues() {
         console.log("Before Sending to server:",clientUrlSet);
 });
 }
+
 // Function to send data to the server
 async function sendDataToServer(clientUrlSet) {
     // Record start time
@@ -615,7 +617,7 @@ async function sendDataToServer(clientUrlSet) {
         console.error("Error: DataSet is undefined or empty");
         return;
     } else {
-        console.log("Before Sending to server:",clientUrlSet);
+        console.log("Before Sending to server:", clientUrlSet);
         console.log("Stringified Data:", JSON.stringify(clientUrlSet)); // Log the stringified data
         try {
             // Perform an asynchronous AJAX POST request to the server endpoint
@@ -646,7 +648,8 @@ async function sendDataToServer(clientUrlSet) {
                 // Handle the specific error message here
             } else {
                 console.log("Data sent successfully:", response);
-                // Process the successful response data here
+                // Display the processed data in a table
+                displayProcessedData(response.data);
             }
         } catch (error) {
             console.error("Error sending data to server:", error);
@@ -658,11 +661,70 @@ async function sendDataToServer(clientUrlSet) {
     }
 }
 
+// Function to display processed data in a table
+function displayProcessedData(responseData) {
+    // Your existing code for generating the table
+    var data = JSON.parse(responseData); // Parse the JSON string to an array
+    try {
+
+        var table = '<table id="dataTable" class="data-table" border="1">' + // Start table with border
+            '<thead>' +
+            '<tr>' +
+            '<th>Sr.No</th>' +
+            '<th>URL</th>' +
+            '<th>Status Code</th>' +
+            '<th>Response Message</th>' +
+            '<th>Domain Status</th>' +
+            '<th>Expiration Date</th>' +
+            '<th>For Sale</th>' +
+            '<th>Response Time</th>' +
+            '</tr>' +
+            '</thead>' +
+            '<tbody>';
+    
+        // Loop through each data item
+        data.forEach(function(item, index) {
+            var domainInfo = item.domain_info; // Access the domain_info object within each element
+            // Convert timestamp to date
+            var expirationDate = new Date(domainInfo['Expiration Date']);
+            // Construct the table row using the keys of the domain_info object
+            var row = '<tr>' +
+                '<td>' + (index + 1) + '</td>' +
+                '<td>' + domainInfo.URL + '</td>' +
+                '<td>' + domainInfo['Status Code'] + '</td>' +
+                '<td>' + domainInfo['Response Message'] + '</td>' +
+                '<td>' + domainInfo['Domain Status'] + '</td>' +
+                '<td>' + expirationDate + '</td>' + // Convert timestamp to readable date format
+                '<td>' + domainInfo['For Sale'] + '</td>' +
+                '<td>' + domainInfo['Response Time'] + '</td>' +
+                '</tr>';
+    
+            table += row; // Append the row to the table
+        });
+    
+        table += '</tbody></table>'; // Close table
+        $('#dataTableContainer').html(table); // Set table HTML to the container
+        // ...
+    } catch (error) {
+        console.error("Error parsing JSON:", error);
+        // Handle the error gracefully (e.g., display an error message to the user)
+    }
+}
+// Function to generate a random alphanumeric string
+// function generateRandomString(length) {
+//     var result = '';
+//     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+//     var charactersLength = characters.length;
+//     for (var i = 0; i < length; i++) {
+//         result += characters.charAt(Math.floor(Math.random() * charactersLength));
+//     }
+//     return result;
+// }
+
 
 // *************************************************************************************************************************
 // ************************************   Dropdown Based dataSet preperation Ended  *********************************************
 // *************************************************************************************************************************
-
 
 // Global variable to store the selected sheet
 let selectedSheet;
@@ -793,5 +855,4 @@ $(document).on('change', '#file', function () {
         $('#column-name').empty();
     }
 });
-
 });

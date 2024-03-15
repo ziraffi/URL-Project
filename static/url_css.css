@@ -649,6 +649,10 @@ button {
   display: none;
 
 }
+.data-table tbody tr td:nth-child(2), .data-table tr td:nth-child(2) {
+  /* Your CSS styles for the second <td> element */
+  text-align: left;
+}
 .table{
   overflow-y: auto;
   min-height: 10vh;
@@ -663,7 +667,7 @@ table {
   width: 100%;
 }
 .data-table td{
-  color: #ddd;
+  /* color: #ddd; */
   border: 1px solid #ddd;
   background-color: #e8e6e6;
   padding: 8px;
@@ -677,11 +681,12 @@ table {
   background-color: #f2f2f2;
   
 }
-
 .data-table caption{
   color: bisque;
 }
-
+/* .tbl-data-cell{
+  color: #000000 !important;
+} */
 /* Footer Section start from here  */
 footer {
   background-color: #856594;

@@ -6,7 +6,7 @@ import logging
 import asyncio
 import pandas as pd
 import os
-import sys
+import pytz
 from domain_checker import process_urls_async
 app = Flask(__name__)
 
@@ -82,7 +82,7 @@ def process_file(uploaded_file, selected_sheet, selected_column):
             selected_column = selected_column or columns[0]  # Use the first column by default
             # Get URLs for the selected column
             column_data = [{'data': val, 'sheet_number': 1, 'row_number': idx + 2, 'column_number': 1} for idx, val in enumerate(df[selected_column].tolist()) if pd.notna(val)]
-            return {'sheet_columns': columns, 'column_data': column_data, 'selected_sheet': filename, 'selected_file': selected_file,'is_csv': True}
+            return {'sheet_columns': columns, 'column_data': column_data, 'selected_sheet': filename, 'is_csv': True}                       
         elif uploaded_file.filename.endswith(".xlsx"):
             # For Excel files, extract sheet names and column names
             wb = openpyxl.load_workbook(filename=BytesIO(file_contents), data_only=True)
@@ -134,56 +134,83 @@ def process_file(uploaded_file, selected_sheet, selected_column):
         return {'error_message': f"Error processing file: {str(e)}"}
 
 # Set up logging configuration
-logging.basicConfig(level=logging.DEBUG)  # Set the logging level to DEBUG
+# logging.basicConfig(level=logging.DEBUG)  # Set the logging level to DEBUG
 
 # Define function to process dataSet containing URLs asynchronously
 async def process_dataSet_urls(urlSet, semaphore):
     try:
         if not urlSet or 'url_list' not in urlSet:
             logging.error("Empty or missing 'url_list' key in urlSet")
-            return jsonify({'error': 'Missing data in request'})
+            yield jsonify({'error': 'Missing data in request'})
         else:
             urls = urlSet['url_list']
             logging.info(f"Processing {len(urls)} URLs asynchronously")
-            return await process_urls_async(urls, semaphore)  # Call the process_urls_async function
+            async for stats in process_urls_async(urls, semaphore):
+                yield stats
     except Exception as e:
         logging.error(f"Error processing URLs: {e}")
-        return pd.DataFrame()
+        yield jsonify({'error': str(e)})
+
 
 # Define route to process urlSet data from the client
 @app.route('/process_url_data', methods=['POST', 'GET'])
-def process_clienturl_data():
-    
+async def process_clienturl_data():
     try:
         # Get the dataSet from the request
         urlSet = request.json
 
-        app.logger.info(f"Received dataSet: {urlSet} (type: {type(urlSet)})") #Review the current dataSet which is going to be processed
+        app.logger.info(f"Received dataSet: {urlSet} (type: {type(urlSet)})") 
         
         # Run asynchronous tasks to process URLs
         semaphore = asyncio.Semaphore(8)  # Adjust the semaphore value as needed
-        logging.info("Starting URL processing")
-        result_df = asyncio.run(process_dataSet_urls(urlSet, semaphore))
-        logging.info("URL processing completed")
+        # logging.info("Starting URL processing")
+        data = []
+        async for stats in process_dataSet_urls(urlSet, semaphore):        
+            # Process statistics or yield them to the client
+            data.append(stats)  # Collect statistics
+        # logging.info("URL processing completed")
 
-        # Save results to a CSV file
-        if not result_df.empty:
+        # Convert the collected data to JSON
+        result_json = jsonify(data)
+
+        # Convert the result JSON data to a DataFrame (if needed)
+        result_df = pd.DataFrame(data)
+
+        # Convert the result DataFrame to JSON
+        result_json = result_df.to_json(orient='records')
+
+        # Extract the 'domain_info' data from the DataFrame
+        domain_info_df = result_df['domain_info'].apply(pd.Series)
+
+        # Define the IST timezone
+        ist_tz = pytz.timezone('Asia/Kolkata')
+        # Save the 'domain_info' DataFrame to a CSV file
+        if not domain_info_df.empty:
+            
             output_file_path = 'domain_info.csv'
             count = 1
             while os.path.exists(output_file_path):
                 output_file_path = f'domain_info_{count}.csv'
                 count += 1
-            result_df.to_csv(output_file_path, index=False)
+
+            # Convert Expiration Date to datetime objects and make them timezone-aware
+            domain_info_df['Expiration Date'] = pd.to_datetime(domain_info_df['Expiration Date'], unit='ms').dt.tz_localize('UTC').dt.tz_convert(ist_tz)
+
+            domain_info_df.to_csv(output_file_path, index=False)
             
             logging.info(f"Results saved to {output_file_path}")
-            return jsonify({'message': 'URL data processed successfully', 'output_file': output_file_path})
+            return jsonify({'message': 'URL data processed successfully', 
+                            'output_file': output_file_path,
+                            'data': result_json})
+
         else:
             logging.error("No data retrieved")
             return jsonify({'error': 'No data retrieved'})
     except Exception as e:
         logging.error(f"Error processing URL data: {e}")
         return jsonify({'error': str(e)})
-    
+
+
 def submit_form():
     file_type = request.form.get('file')
     batch = request.form.get('batch')
