@@ -1,4 +1,7 @@
-from flask import Flask, render_template, request, jsonify
+import random
+import string
+import time
+from flask import Flask, render_template, request, jsonify, send_file,make_response
 import pandas as pd
 from io import StringIO,BytesIO
 import openpyxl
@@ -7,6 +10,7 @@ import asyncio
 import pandas as pd
 import os
 import pytz
+import csv
 from domain_checker import process_urls_async
 app = Flask(__name__)
 
@@ -134,7 +138,7 @@ def process_file(uploaded_file, selected_sheet, selected_column):
         return {'error_message': f"Error processing file: {str(e)}"}
 
 # Set up logging configuration
-# logging.basicConfig(level=logging.DEBUG)  # Set the logging level to DEBUG
+logging.basicConfig(level=logging.DEBUG)  # Set the logging level to DEBUG
 
 # Define function to process dataSet containing URLs asynchronously
 async def process_dataSet_urls(urlSet, semaphore):
@@ -151,65 +155,101 @@ async def process_dataSet_urls(urlSet, semaphore):
         logging.error(f"Error processing URLs: {e}")
         yield jsonify({'error': str(e)})
 
+def generate_unique_filename(base_filename):
+    directory = os.path.dirname(base_filename)
+    filename = os.path.basename(base_filename)
+    
+    if not os.path.exists(base_filename):
+        return base_filename  # If the file doesn't exist, use the base filename
 
-# Define route to process urlSet data from the client
+    # If the file exists, generate a unique filename
+    alphabet_hex = ''.join(random.choice(string.hexdigits) for _ in range(8))  # Generate a random hexadecimal code
+    unique_filename = f"rk-{alphabet_hex}-{filename}"
+    return os.path.join(directory, unique_filename)
+
 @app.route('/process_url_data', methods=['POST', 'GET'])
 async def process_clienturl_data():
     try:
-        # Get the dataSet from the request
-        urlSet = request.json
+        # Ensure request contains JSON data
+        if not request.is_json:
+            return jsonify({'error': 'Request content must be in JSON format'})
 
-        app.logger.info(f"Received dataSet: {urlSet} (type: {type(urlSet)})") 
-        
+        url_set = request.json
+
+        app.logger.info(f"Received dataSet: {url_set} (type: {type(url_set)})")
+
         # Run asynchronous tasks to process URLs
         semaphore = asyncio.Semaphore(8)  # Adjust the semaphore value as needed
-        # logging.info("Starting URL processing")
+        logging.info("Starting URL processing")
+
         data = []
-        async for stats in process_dataSet_urls(urlSet, semaphore):        
-            # Process statistics or yield them to the client
+        async for stats in process_dataSet_urls(url_set, semaphore):
             data.append(stats)  # Collect statistics
-        # logging.info("URL processing completed")
 
-        # Convert the collected data to JSON
-        result_json = jsonify(data)
+        logging.info("URL processing completed")
 
-        # Convert the result JSON data to a DataFrame (if needed)
-        result_df = pd.DataFrame(data)
+        # Combine processing time calculations
+        total_process_time = sum(stat['mean_time_per_iteration'] for stat in data)
+        total_estimated_remaining_time = sum(stat['estimated_remaining_time'] for stat in data)
 
-        # Convert the result DataFrame to JSON
-        result_json = result_df.to_json(orient='records')
+        # Convert data to DataFrame (if needed)
+        if data:
+            result_df = pd.DataFrame(data)
+            domain_info_df = result_df['domain_info'].apply(pd.Series)
 
-        # Extract the 'domain_info' data from the DataFrame
-        domain_info_df = result_df['domain_info'].apply(pd.Series)
+            # Convert Expiration Date to datetime objects and make them timezone-aware (if needed)
+            if 'Expiration Date' in domain_info_df.columns:
+                domain_info_df['Expiration Date'] = pd.to_datetime(domain_info_df['Expiration Date'], unit='ms').dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
 
-        # Define the IST timezone
-        ist_tz = pytz.timezone('Asia/Kolkata')
-        # Save the 'domain_info' DataFrame to a CSV file
-        if not domain_info_df.empty:
-            
-            output_file_path = 'domain_info.csv'
-            count = 1
-            while os.path.exists(output_file_path):
-                output_file_path = f'domain_info_{count}.csv'
-                count += 1
+            # Save domain information as CSV (if data exists)
+            if not domain_info_df.empty:
+                csv_filename = 'rk.csv'
+                unique_csv_filename = generate_unique_filename(csv_filename)
 
-            # Convert Expiration Date to datetime objects and make them timezone-aware
-            domain_info_df['Expiration Date'] = pd.to_datetime(domain_info_df['Expiration Date'], unit='ms').dt.tz_localize('UTC').dt.tz_convert(ist_tz)
+                # Save DataFrame as CSV using the unique filename
+                domain_info_df.to_csv(unique_csv_filename, index=False)
 
-            domain_info_df.to_csv(output_file_path, index=False)
-            
-            logging.info(f"Results saved to {output_file_path}")
-            return jsonify({'message': 'URL data processed successfully', 
-                            'output_file': output_file_path,
-                            'data': result_json})
+                return jsonify({
+                    'message': 'URL data processed successfully',
+                    'has_downloadable_data': True,
+                    'data': result_df.to_json(orient='records'),
+                    'csv_filename': unique_csv_filename,  # Send the filename to the client
+                    'estimated_process_time': total_process_time,
+                    'estimated_remaining_time': total_estimated_remaining_time,
+                })
+            else:
+                return jsonify({'error': 'No domain information available to download'})
 
         else:
             logging.error("No data retrieved")
             return jsonify({'error': 'No data retrieved'})
+
     except Exception as e:
         logging.error(f"Error processing URL data: {e}")
         return jsonify({'error': str(e)})
 
+@app.route('/download/<csvFilename>', methods=['GET'])
+def download_csv(csvFilename):
+    try:
+        csv_path = f'C:\\Users\\HP\\Desktop\\project_Experiment\\{csvFilename}'  # Update with the actual path to your CSV directory
+        
+        # Check if the file exists
+        if os.path.exists(csv_path):
+            # Open the file in binary mode
+            with open(csv_path, 'rb') as file:
+                # Create a Flask response object
+                response = make_response(file.read())
+                
+            # Set the appropriate content type for CSV files
+            response.headers.set('Content-Type', 'text/csv')
+            # Set the Content-Disposition header to specify the filename
+            response.headers.set('Content-Disposition', f'attachment; filename={csvFilename}')
+            
+            return response
+        else:
+            return jsonify({'error': 'File not found'})
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 def submit_form():
     file_type = request.form.get('file')

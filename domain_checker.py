@@ -104,33 +104,34 @@ async def get_domain_info_async(url, session, semaphore):
 async def process_urls_async(urls: List[str], semaphore) -> AsyncGenerator[Dict[str, Any], None]:
     try:
         domain_info_list = []
-        start_time = time.time()  # Record start time
+        start_time = time.time()
 
         async with aiohttp.ClientSession() as session:
             for idx, url in enumerate(tqdm(urls, desc="Processing URLs"), 1):
                 domain_info = await get_domain_info_async(url, session, semaphore)
+
                 if domain_info is not None:
                     domain_info_list.append(domain_info)
-                    
-                    # Calculate time taken for this iteration
-                    iteration_time = time.time() - start_time
 
-                    # Calculate mean time per iteration
-                    mean_time_per_iteration = iteration_time / idx
+                # Calculate time taken for this iteration
+                iteration_time = time.time() - start_time
 
-                    # Calculate estimated remaining time
-                    remaining_iterations = len(urls) - idx
-                    estimated_remaining_time = remaining_iterations * mean_time_per_iteration
+                # Calculate mean time per iteration (avoid division by zero)
+                mean_time_per_iteration = iteration_time / max(idx, 1)
 
-                    # Yield statistics continuously
-                    yield {
-                        'current_iteration': idx,
-                        'estimated_remaining_time': estimated_remaining_time,
-                        'mean_time_per_iteration': mean_time_per_iteration,
-                        'domain_info': domain_info
-                    }
+                # Calculate estimated remaining time
+                remaining_iterations = len(urls) - idx
+                estimated_remaining_time = remaining_iterations * mean_time_per_iteration
+
+                yield {
+                    'current_iteration': idx,
+                    'estimated_remaining_time': estimated_remaining_time,
+                    'mean_time_per_iteration': mean_time_per_iteration,
+                    'domain_info': domain_info
+                }
+
     except Exception as e:
         logging.error(f"Error processing URLs: {e}")
-    except Exception as e:
-        logging.error(f"Error processing URLs: {e}")
+        yield None
+
 

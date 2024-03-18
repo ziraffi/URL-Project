@@ -602,7 +602,9 @@ function storeCheckedValues() {
         // Output the dataset for verification
         console.log("Before Sending to server:",clientUrlSet);
 });
+
 }
+
 
 // Function to send data to the server
 async function sendDataToServer(clientUrlSet) {
@@ -628,6 +630,9 @@ async function sendDataToServer(clientUrlSet) {
                 data: JSON.stringify(clientUrlSet)
             });
 
+            // Assign the response to the variable
+            block_output = response;
+
             // Calculate processing time
             var endTime = new Date().getTime();
             var processingTime = endTime - startTime;
@@ -649,7 +654,32 @@ async function sendDataToServer(clientUrlSet) {
             } else {
                 console.log("Data sent successfully:", response);
                 // Display the processed data in a table
-                displayProcessedData(response.data);
+                displayProcessedData(response.data,response.csv_filename);
+
+                // Display estimated process time
+                if ('estimated_process_time' in response) {
+                    $('#processingTime').text('Estimated Process Time: ' + response.estimated_process_time + ' seconds');
+                    console.log(response.estimated_process_time);
+                } else {
+                    console.error('Error: Estimated Process Time undefined in response');
+                }
+
+                // Display estimated remaining time
+                if ('estimated_remaining_time' in response) {
+                    $('#remainingTime').text('Estimated Remaining Time: ' + response.estimated_remaining_time + ' seconds');
+                    console.log(response.estimated_remaining_time);
+                } else {
+                    console.error('Error: Estimated Remaining Time undefined in response');
+                }
+
+                // Check if the server has downloadable data
+                if (response.has_downloadable_data) {
+                    // Display a button to download the CSV file
+                    $('#downloadButtonContainer').show();
+                } else {
+                    // Hide the download button if no downloadable data
+                    $('#downloadButtonContainer').hide();
+                }
             }
         } catch (error) {
             console.error("Error sending data to server:", error);
@@ -659,12 +689,14 @@ async function sendDataToServer(clientUrlSet) {
             $('#loadingIndicator').hide();
         }
     }
+    
 }
 
 // Function to display processed data in a table
-function displayProcessedData(responseData) {
+function displayProcessedData(responseData,responseFile) {
     // Your existing code for generating the table
     var data = JSON.parse(responseData); // Parse the JSON string to an array
+    var csvFilename = responseFile;
     try {
 
         var table = '<table id="dataTable" class="data-table" border="1">' + // Start table with border
@@ -709,19 +741,51 @@ function displayProcessedData(responseData) {
         console.error("Error parsing JSON:", error);
         // Handle the error gracefully (e.g., display an error message to the user)
     }
+    $('#downloadButton').click(async function(rfile) {
+        try {
+            // Confirm with the user before proceeding with the download
+            if (confirm("Do you want to download the processed data?")) {
+                // Make the request to the server to process URL data
+                console.log("Response only:",csvFilename, typeof(csvFilename));
+
+                // Construct the URL for downloading the CSV file
+                const csvUrl = `/download/${csvFilename}`;
+    
+                // Create a temporary anchor element to trigger the download
+                const link = document.createElement('a');
+                link.href = csvUrl;
+                link.download = csvFilename; // Set the filename for the downloaded file
+                document.body.appendChild(link);
+                
+                // Trigger the click event to initiate the download
+                link.click();
+    
+                // Clean up
+                document.body.removeChild(link);
+    
+                // Inform the user that the download has started
+                alert('CSV file download started.');
+    
+                // Wait for the user to confirm the download before proceeding
+                // This prevents the script from continuing until the user finishes downloading
+                await new Promise(resolve => {
+                    // Wait for the user to confirm the download
+                    link.addEventListener('click', () => {
+                        resolve();
+                    });
+                });
+    
+                // Proceed with further actions after the download is confirmed
+                console.log('User confirmed CSV file download.');
+            }
+        } catch (error) {
+            // Handle errors
+            console.error('Error downloading CSV:', error);
+            alert('Error downloading CSV: Please try again.');
+        }
+    });
+    
 }
-// Function to generate a random alphanumeric string
-// function generateRandomString(length) {
-//     var result = '';
-//     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-//     var charactersLength = characters.length;
-//     for (var i = 0; i < length; i++) {
-//         result += characters.charAt(Math.floor(Math.random() * charactersLength));
-//     }
-//     return result;
-// }
-
-
 // *************************************************************************************************************************
 // ************************************   Dropdown Based dataSet preperation Ended  *********************************************
 // *************************************************************************************************************************
@@ -855,4 +919,7 @@ $(document).on('change', '#file', function () {
         $('#column-name').empty();
     }
 });
+
+  
+
 });
