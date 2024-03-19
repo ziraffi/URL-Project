@@ -15,7 +15,7 @@
         <form id="file_form" enctype="multipart/form-data">
           <fieldset>
             <!-- Form elements for uploading file -->
-            <label for="file" class="formTitle">Choose your file:</label><br>
+            <label for="file" class="formTitle">Choose your file</label><br>
             <div class="file-input-field">
             <input
               type="file"
@@ -31,13 +31,13 @@
             <div class="dropdown-fields">
                           <!-- Options for sheet names -->
             <div class="sht-dropdown">
-            <label for="sheet-name">Choose your sheet:</label>
+            <label for="sheet-name">Choose your sheet</label>
             <select id="sheet-name" name="sheet-name" required>
             </select>
             </div>
                           <!-- Options for column names -->
             <div class="clm-dropdown">
-            <label for="column-name">Choose your column:</label>
+            <label for="column-name">Choose your column</label>
             <select id="column-name" name="column-name" required>
             </select>
             </div>
@@ -56,13 +56,14 @@
           <fieldset>
             <!-- Form elements for manual entry -->
             <div class="formTitle">
-            <label for="manual-data">Enter URLs (one per line):</label><br>
+            <label for="manual-data">Enter URLs <span> (one per line)</span></label><br>
             </div>
             <textarea
               id="manual-data"
               name="manual-data"
-              rows="10"
+              rows="9"
               cols="100"
+              placeholder="Please Enter URLs"
             ></textarea
             ><br>
             <input class="btn btn-primary py-1 " type="submit" id="manual-form-submit" value="Submit" />
@@ -84,7 +85,7 @@
       <!-- URL container Start From Here -->
 <!-- ******************************************************************* -->
 
-    <section class="url-container" id="url-container">
+    <section class="url-container" id="url-container" style="display: none;">
       <div class="url-wrapper">
         <div id="valid_list">
           <!-- URLs will be displayed here -->
@@ -110,16 +111,23 @@
     <div id="loadingIndicator" style="display: none;">
       <!-- Add your loading indicator design here -->
       Loading...
-      <div id="processingTime" style="display: none;">
+      <div id="progressPercentage" style="display: none;">
         <!-- Processing time will be displayed here -->
-    </div>
+        <p id="progressText">Progress: <span id="progressPercentage">0%</span></p>
+      </div>
+  </div>
+  <div id="totalProcessingTime">
+    <p></p>
   </div>
 
 <!-- ******************************************************************* -->
       <!-- Dynamic Load next Sections Button -->
 <!-- ******************************************************************* -->
+<div id="processedTable" style="display: none">
 <div class="table" id="dataTableContainer">
   <!-- Data table will be dynamically generated here -->
+
+</div>
   <div  id="downloadButtonContainer" style="display: none;">
     <button type="button" id="downloadButton">Download CSV</button>
   </div>

@@ -13,11 +13,14 @@ body,html {
   width: 100% !important;
   margin: 0 !important;
   padding: 0;
-  color: #ffffff;
+  color:  #384241 ;
   background-color: #433939 !important;
   position: relative;
 }
+div#loadingIndicator{
+  color: #384241 ;
 
+}
 body::before {
   content: "";
   width: 100% !important;
@@ -40,7 +43,6 @@ h1, h2, h3, h4, h5, h6 {
 /* Fix the header styles */
 header {
   position: fixed;
-  top: 0;
   width: 100%;
   background-color: #384241;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -48,7 +50,7 @@ header {
   padding: 0.5rem 0;
   z-index: 1000;
   max-height: fit-content;
-
+  min-height: 6rem;
 }
 
 /* Adjust the logo styles */
@@ -59,7 +61,6 @@ header {
   text-align: center;
   font-size: 1.7rem;
   font-weight: 800;
-  margin-left: 20px;
   letter-spacing: 1.6px;
   line-height: 60px;
   float: left;
@@ -74,6 +75,9 @@ header {
   }
 }
 
+.fa-bars:before{
+  color: #e8e6e6;
+}
 /* Adjust the navigation styles */
 nav {
   float: right;
@@ -122,9 +126,9 @@ nav ul li::after {
 nav ul li:hover::after {
   width: 100%;
 }
-@media only screen and (max-width: 600px) {
+/* @media only screen and (max-width: 600px) {
 
-}
+} */
 
 /* Adjust the navigation styles for screens below 768px */
 @media (max-width: 768px) {
@@ -135,6 +139,12 @@ nav ul li:hover::after {
       left: 10px;
   }
 
+  div#dataTableContainer.table, div#file-data-table.table{
+    overflow-x: scroll !important;
+    padding: 0 2% !important;
+    min-height: 6rem !important;
+    max-height: 15rem !important;
+  }
   .logo {
       font-size: 1.3rem;
       line-height: 24px;
@@ -145,7 +155,7 @@ nav ul li:hover::after {
       left: 50%;
       transform: translate(-50%, -10%);
   }
-  .dnlh{
+  p.dnlh{
     display: none;
   }
   /* Hide the navigation initially */
@@ -221,9 +231,9 @@ main {
   font-family: "Playfair Display", serif;
   width: auto;
   text-align: center;
-  background-color: #e8e6e6;
-  height: 350px;
-  padding-top: 140px;
+  background-color: #f6f4f0;
+  height: 442px;
+  padding-top: 224px;
   z-index: 999;
 }
 
@@ -240,10 +250,6 @@ p.dnlh,p span.hope{
   letter-spacing: 1.2rem;
   color: #f79f48;
 }
-p span.hope::after{
-  height: 2px;
-  background-color: #FFDB00;
-}
 p.dnlh{
   font-weight: 600;
 }
@@ -258,9 +264,31 @@ p span.hope{
   color: #000000;
   font-weight: bolder;
 }
+/* ********************************************************************************* */
+p span.source{
+  color: #f79f48;
+  font-weight: 600; 
+}
+p span.source::after{
+  height: 1px;
+  background-color: #ab55f1;
+}
+p span.source:hover{
+  color: #c300ff;
+
+}
+p span.source:hover::after{
+  width: 90%;
+}
+
+p span.hope::after{
+  height: 2px;
+  background-color: #FFDB00;
+}
+/* ********************************************************************* */
 form{
   display: block; 
-  background-color: #e8e6e6;
+  background-color: #ffffff;
   margin: auto !important;
   border-radius: 0.5rem;
 }
@@ -275,9 +303,9 @@ form{
 }
 .form-container {
   width: 100%;
-  /* padding: 20px; */
+  padding: 20px;
   border-radius: 8px;
-  background-color: #47433a;
+  background-color: #f6f4f0;
 }
 #file-section {
   display: flex;
@@ -294,7 +322,7 @@ form{
 /* Container For Both Forms Wrapper and Bottom Button */
 .formInput-container{
   display: inline-block;
-  margin-top: 5rem;
+  /* margin-top: 5rem; */
   justify-content: center;
   box-sizing: border-box;
   box-shadow: 0px 0px 10px 5px rgba(145, 155, 193, 0.25);
@@ -306,64 +334,30 @@ form{
   align-items: center;
   width: 100%;
   justify-content: space-evenly;
-  /* min-width: 370px;
-  min-height: 450px; */
+  /* /* min-width: 370px; */
+  min-height: 40rem; 
 }
-
-/* button#toggle_file::before{
-  color: #FFDB00;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  border-radius: 5px;
-
+label[for="file"],label[for="manual-data"]{
+  font-size: x-large ;
 }
-button#toggle_manual::after {
-  content: "\f0d9"; 
-  color: #FFDB00;
-  top: 50%;
-  pointer-events: none;
-  transition: background-color 0.3s ease;
-  border-radius: 5px;
-
+textarea#manual-data {
+  border-radius: 8px;
 }
-/* Change background color on hover */
-/* button#toggle_manual:hover::after,
-button#toggle_manual:hover::before {
-  background-color: #e8e6e6;
-} */
-
-/* Change background color on click */
-/* button#toggle_manual:active::after,
-button#toggle_manual:active::before {
-  background-color: #FFDB00 !important;
-} */
-/* Change background color on hover */
-/* button#toggle_file:hover::after,
-button#toggle_file:hover::before {
-  background-color: #e8e6e6;
-} */
-
-/* Change background color on click */
-/* button#toggle_file:active::after,
-button#toggle_file:active::before {
-  background-color: #FFDB00 !important;
+label[for="sheet-name"],label[for="column-name"],label[for="manual-data"] span{
+  font-size: large !important;
 }
-.caret{
-  margin: auto 1px;
-}  */
 .wrapper-inner{
   align-items: center;
   justify-content: center;
-  background-color: #e8e6e6;
+  background-color: #047374;
+  border-radius: 19px;
 
 }
 
 .frmOnly {
-  border: 2px solid #4f3553;
+  border: 1px solid #4f3553;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 94px;
   padding: 1%;
 
 }
@@ -420,7 +414,7 @@ button#toggle_file:active::before {
   align-items: center;
   justify-content: center;
   text-align: center;
-  margin-bottom: 2rem;
+  padding: 2.8vmax;
 }
 .login-fields{
   display: flex;
@@ -448,12 +442,12 @@ label[for="manual-data"] {
 }
 label[for="email"],
 label[for="password"]{
-  min-width: 25rem;
+  min-width: 20rem;
 }
 /* Style the select element */
 select#sheet-name,
 select#column-name {
-  width: 75%;
+  width: 85%;
   padding: 4px;
   border: 1px solid #ccc;
   border-radius: 3px;
@@ -464,7 +458,7 @@ select#column-name {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.6vmax;
+  padding-top: 1.31vmax;
   box-sizing: border-box;
 }
 input[type="file"] {
@@ -563,13 +557,14 @@ select#column-name::after {
   transform: translateY(-50%);
   pointer-events: none;
 }
-
+input#manual-form-submit{
+  margin-bottom: 0.5rem;
+}
 button {
   padding: 0.4rem 0.7rem;
   margin: 0 1rem;
   border: none;
   border-radius: 5px;
-  background: #3150d0;
   color: #fff;
   font-size: 1.3rem;
   cursor: pointer;
@@ -579,8 +574,21 @@ button {
 
 .url-container {
   display: none;
+  padding: 5% 16%;
 }
-
+div.url-wrapper h3,div#file-tbl h3{
+  color: #000000;
+  text-decoration: underline;
+  text-underline-position: under;
+  font-weight: 400;
+  font-family: 'Playfair Display';
+  margin-top: 1rem;
+}
+.firstCap{
+  text-align: left;
+  color: #047374;
+  font-weight: 800;
+}
 .url-wrapper {
   display: flex;
   flex-wrap: wrap;
@@ -604,12 +612,12 @@ button {
 }
 
 #valid_list a:link {
-  color: bisque !important;
+  color: #270ec6;
   text-decoration: none;
 }
 
-#invalid_list a:link {
-  color: rgba(164, 234, 99, 0.592);
+#invalid_list p {
+  color: rgba(222, 82, 21, 0.949);
 }
 
 #valid_list a:visited {
@@ -619,6 +627,7 @@ button {
 
 #valid_list a:hover {
   text-decoration: none;
+  font-weight: bolder;
 }
 
 .hover-underline-animation {
@@ -647,16 +656,30 @@ button {
 /* Tabular representation of dataSet  */
 #tbl-section{
   display: none;
-
+  margin-bottom: 2rem;
+}
+input[type=submit]:not(:disabled), button:not(:disabled){
+  background-color: #068182;
+  height: 3rem;
+  border-radius: 8px;
+}
+input[type=submit]:not(:disabled):hover,button:not(:disabled):hover{
+  background-color: #ebc263;
 }
 .data-table tbody tr td:nth-child(2), .data-table tr td:nth-child(2) {
-  /* Your CSS styles for the second <td> element */
   text-align: left;
 }
-.table{
-  overflow-y: auto;
-  min-height: 10vh;
-  max-height: 40vh;
+div#file-data-table.table{
+  padding: 0 21%;
+  min-height: 6rem;
+  max-height: 27rem;
+  overflow-x: hidden;
+}
+div#dataTableContainer.table{
+  padding: 0 10%;
+  min-height: 6rem;
+  max-height: 27rem;
+  overflow-x: hidden;
 }
 table {
   border-collapse: collapse;
@@ -669,7 +692,7 @@ table {
 .data-table td{
   /* color: #ddd; */
   border: 1px solid #ddd;
-  background-color: #e8e6e6;
+  /* background-color: #e8e6e6; */
   padding: 8px;
   text-align: center; 
 }
@@ -684,9 +707,19 @@ table {
 .data-table caption{
   color: bisque;
 }
-/* .tbl-data-cell{
-  color: #000000 !important;
-} */
+button#buttonDownload{
+  background-color: #068182;
+  height: 3rem;
+  border-radius: 8px;
+}
+button#buttonDownload:hover{
+  background-color: #068182;
+}
+#totalProcessingTime{
+  color: #000000;
+  padding: 0 10%; 
+  text-align: left;
+}
 /* Footer Section start from here  */
 footer {
   background-color: #856594;
@@ -697,4 +730,25 @@ footer {
   bottom: 0;
   position:absolute;
 
+}
+/* ********************************************************************************************************************* */
+/* **************************************     Registration     **************************************************************** */
+/* ********************************************************************************************************************* */
+div.form-outline label.form-label{
+  margin-left: 0.4rem;
+  color: #e8e6e6;
+}
+button#btn-signup{
+  background-color: #ebc263;
+  color: #12032d;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+button#btn-signup:hover{
+  background-color: #a0cfdf;
+
+}
+h2.text-success{
+  color: #fc8670 !important;
+  
 }

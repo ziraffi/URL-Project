@@ -2,7 +2,7 @@
 import asyncio
 import datetime
 import logging
-import pandas as pd
+from flask import jsonify
 import whois
 import aiohttp
 from tqdm import tqdm
@@ -100,7 +100,26 @@ async def get_domain_info_async(url, session, semaphore):
             'For Sale': None,
             'Response Time': None,            
         }
+        
+# Variable to store progress information
+progress_info = {
+    'processed_urls': 0,
+    'total_urls': 0,
+    'status': 'Processing',
+    'iteration_times': [],  # Store processing times of completed iterations
+    'progress_percentage': 0  # Initialize progress percentage
+}      
 
+# Update progress information after each iteration
+def update_progress(total_iterations, completed_iterations):
+    if total_iterations > 0:
+        progress_info['total_urls'] = total_iterations
+        progress_info['processed_urls'] = completed_iterations
+        progress_info['progress_percentage'] = (completed_iterations / total_iterations) * 100
+    else:
+        logging.error("Total iterations cannot be zero.")
+
+# Function to simulate processing URLs
 async def process_urls_async(urls: List[str], semaphore) -> AsyncGenerator[Dict[str, Any], None]:
     try:
         domain_info_list = []
@@ -116,6 +135,13 @@ async def process_urls_async(urls: List[str], semaphore) -> AsyncGenerator[Dict[
                 # Calculate time taken for this iteration
                 iteration_time = time.time() - start_time
 
+                # Update progress after each iteration
+                update_progress(len(urls), idx)
+
+                # Check if all URLs have been processed
+                if idx == len(urls):
+                    break
+
                 # Calculate mean time per iteration (avoid division by zero)
                 mean_time_per_iteration = iteration_time / max(idx, 1)
 
@@ -124,14 +150,17 @@ async def process_urls_async(urls: List[str], semaphore) -> AsyncGenerator[Dict[
                 estimated_remaining_time = remaining_iterations * mean_time_per_iteration
 
                 yield {
+                    'mean_time_per_iteration': mean_time_per_iteration,
                     'current_iteration': idx,
                     'estimated_remaining_time': estimated_remaining_time,
-                    'mean_time_per_iteration': mean_time_per_iteration,
                     'domain_info': domain_info
                 }
 
     except Exception as e:
         logging.error(f"Error processing URLs: {e}")
-        yield None
+        yield {'error': str(e)}
+
+
+
 
 

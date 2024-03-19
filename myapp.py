@@ -1,7 +1,6 @@
 import random
 import string
-import time
-from flask import Flask, render_template, request, jsonify, send_file,make_response
+from flask import Flask, render_template, request, jsonify, make_response
 import pandas as pd
 from io import StringIO,BytesIO
 import openpyxl
@@ -9,10 +8,9 @@ import logging
 import asyncio
 import pandas as pd
 import os
-import pytz
-import csv
-from domain_checker import process_urls_async
+from domain_checker import process_urls_async, progress_info
 app = Flask(__name__)
+
 
 @app.route('/')
 def index():
@@ -86,7 +84,8 @@ def process_file(uploaded_file, selected_sheet, selected_column):
             selected_column = selected_column or columns[0]  # Use the first column by default
             # Get URLs for the selected column
             column_data = [{'data': val, 'sheet_number': 1, 'row_number': idx + 2, 'column_number': 1} for idx, val in enumerate(df[selected_column].tolist()) if pd.notna(val)]
-            return {'sheet_columns': columns, 'column_data': column_data, 'selected_sheet': filename, 'is_csv': True}                       
+            print("Current File name for CSV Test: ",filename)                   
+            return {'sheet_columns': columns, 'column_data': column_data, 'selected_sheet': filename, 'selected_file': filename, 'is_csv': True}    
         elif uploaded_file.filename.endswith(".xlsx"):
             # For Excel files, extract sheet names and column names
             wb = openpyxl.load_workbook(filename=BytesIO(file_contents), data_only=True)
@@ -134,6 +133,7 @@ def process_file(uploaded_file, selected_sheet, selected_column):
             return { 'selected_file': selected_file,'sheet_names': sheet_names, 'sheet_columns': sheet_columns, 'column_data': column_data, 'column_titles': column_titles, 'selected_sheet': selected_sheet, 'selected_column': selected_column, 'is_csv': False}
         else:
             return {'error_message': "Unsupported file format"}
+
     except Exception as e:
         return {'error_message': f"Error processing file: {str(e)}"}
 
@@ -227,7 +227,6 @@ async def process_clienturl_data():
     except Exception as e:
         logging.error(f"Error processing URL data: {e}")
         return jsonify({'error': str(e)})
-
 @app.route('/download/<csvFilename>', methods=['GET'])
 def download_csv(csvFilename):
     try:
@@ -250,6 +249,41 @@ def download_csv(csvFilename):
             return jsonify({'error': 'File not found'})
     except Exception as e:
         return jsonify({'error': str(e)})
+
+@app.route('/process_urls', methods=['POST'])
+async def process_urls():
+    try:
+        if not request.is_json:
+            return jsonify({'error': 'Request content must be in JSON format'})
+
+        url_data = request.json
+        urls = url_data.get('urls', [])
+
+        if not urls:
+            return jsonify({'error': 'No URLs provided in the request'})
+
+        semaphore = asyncio.Semaphore(8)  # Adjust the semaphore value as needed
+        logging.info(f"Processing {len(urls)} URLs asynchronously")
+
+        result_data = []
+        async for stats in process_urls_async(urls, semaphore):
+            result_data.append(stats)
+
+        logging.info("URL processing completed")
+
+        return jsonify({
+            'message': 'URLs processed successfully',
+            'data': result_data
+        })
+
+    except Exception as e:
+        logging.error(f"Error processing URLs: {e}")
+        return jsonify({'error': str(e)})
+
+@app.route('/progress', methods=['GET'])
+def get_progress():
+    print("At the End Point: ", progress_info)
+    return jsonify(progress_info)
 
 def submit_form():
     file_type = request.form.get('file')

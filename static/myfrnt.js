@@ -14,7 +14,7 @@ $(document).ready(function () {
 
     $(window).scroll(function() {
         var scrollPosition = $(this).scrollTop();
-        var scrollThreshold = windowHeight * 0.60; // 45% of window height
+        var scrollThreshold = windowHeight * 0.60;
 
         // Animation for header
         if (scrollPosition > scrollThreshold || lastScrollTop < scrollPosition) {
@@ -28,7 +28,7 @@ $(document).ready(function () {
             header.stop().animate({
                 top: '0', // Move header back to its original position
                 opacity: 1                
-            }, 500);
+            }, 200);
         }
 
         // Animation for footer
@@ -51,7 +51,6 @@ $(document).ready(function () {
         $('#manual_form').hide();
         $('#url-container').hide();
         $('#manual-data').val('');
-
         $('#manual-data-table').empty();
         $('#mnl-tbl').hide();
 
@@ -206,7 +205,7 @@ function appendColumnDataToUrlContainer(columnData) {
             mnl_rwNum.push(row_number);
             mnl_shtNum.push(sheet_number);
             validUrlExists = true;
-            $('#valid_list').append($('<a class="hover-underline-animation"></a>').attr('href', data).text(data));
+            $('#valid_list').append($('<a class="hover-underline-animation linkText"></a>').attr('href', data).text(data));
             $('#valid_list').append('<br>');
         } else {
             // Check if the data is empty
@@ -328,7 +327,7 @@ async function fetchColumnURLs(formData) {
                     fileDataSet.data.push(list_url);
 
                     // Display valid URLs
-                    $('#valid_list').append($('<a class="hover-underline-animation"></a>').attr('href', list_url).text(list_url));
+                    $('#valid_list').append($('<a class="hover-underline-animation linkText"></a>').attr('href', list_url).text(list_url));
                     $('#valid_list').append('<br>');
                     validDataExists = true;
                 } else {
@@ -342,7 +341,7 @@ async function fetchColumnURLs(formData) {
             });
             // Show or hide valid_list based on the presence of valid data
             if (validDataExists) {
-                $('#valid_list').prepend($('<h3>Fetched URLs:</h3>'));
+                $('#valid_list').prepend($('<h3>Fetched URLs</h3>'));
                 $('#valid_list').show();
                 console.log("dataSet:", fileDataSet); // Logging the dataSet
             } else {
@@ -406,21 +405,19 @@ function displayDataSetsInTable(fileDataSet, manualDataSet) {
 
 function displayDataSetInTable(dataSet, tableId) {
     if (!dataSet || !dataSet.data || dataSet.data.length === 0) {
-        console.error("Error: DataSet is undefined or empty");
         $(tableId).empty(); // Clear the table if data is empty
         return;
     }
+    
     // Create the table container
     let tableContainer = $('<div>');
-        // Create the heading
-    let heading = $('<h3>').text(dataSet.choosen[0]);
-
-    // Append the heading to the table container
-    tableContainer.append(heading);
-    
-    const table = $('<table>').addClass('data-table');
+    // Create table caption
     const tableCaption = $('<caption>').text(dataSet.choosen[0]); // Displaying the value of "choosen" as caption
-    table.append(tableCaption);
+    const captionDiv = $('<div class="firstCap">'+ '<p>Source Of Data: '+ '<span class="source">' + tableCaption.text() + '</span>' +'</p>' +'</div>');
+    tableContainer.append(captionDiv);
+
+    // Create the table
+    const table = $('<table>').addClass('data-table');
 
     // Create table headers
     const keys = Object.keys(dataSet);
@@ -430,10 +427,9 @@ function displayDataSetInTable(dataSet, tableId) {
     headersRow.append(createDropdown());
 
     // Add other headers
-    keys.forEach(key => {
-        if (key !== 'choosen') {
-            headersRow.append($('<th>').text(key));
-        }
+    const headerTexts = ['Valid URLs', 'Column No.', 'Row No.', 'Sheet No.']; // Specific text for each header
+    headerTexts.forEach(headerText => {
+        headersRow.append($('<th>').text(headerText));
     });
     table.append(headersRow);
 
@@ -459,11 +455,12 @@ function displayDataSetInTable(dataSet, tableId) {
         });
         table.append(dataRow);
     }
+    
     // Append the table to the table container
     tableContainer.append(table);
     
-    // Append the table to the specified container
-    $(tableId).empty().append(table); // Empty the table container before appending
+    // Append the table container to the specified container
+    $(tableId).empty().append(tableContainer); 
 }
 
 // *************************************************************************************************************************
@@ -472,12 +469,14 @@ function displayDataSetInTable(dataSet, tableId) {
 
 // Function to create the dropdown
 function createDropdown() {
-    const dropdownHeader = $('<th>').text('Action'); // Create a header cell for the dropdown
+    const dropdownHeader = $('<th>'); // Create a header cell for the dropdown, Add Followed code for additional Text=>   .text('Action')
     const dropdown = $('<select>').append(
         $('<option>').text('select'),
-        $('<option>').text('First 50').attr('value', 'Option 1'),
-        $('<option>').text('First 100').attr('value', 'Option 2'),
-        $('<option>').text('First 150').attr('value', 'Option 3'),
+        $('<option>').text('First 5').attr('value', 'Option 1'),
+        $('<option>').text('First 10').attr('value', 'Option 2'),
+        $('<option>').text('First 50').attr('value', 'Option 3'),
+        $('<option>').text('First 100').attr('value', 'Option 4'),
+        $('<option>').text('First 150').attr('value', 'Option 5'),
         $('<option>').text('More').attr('value', 'Choose').prop('disabled', true)
     );
 
@@ -525,11 +524,15 @@ function handleCheckboxSelection(selection) {
     }
 
     // Check checkboxes based on selection, limiting to 150 checkboxes
-    if (selection === "Option 1") { // First 50
+    if (selection === "Option 1") { // First 5
+        checkLimitedCheckboxes(5);
+    } else if (selection === "Option 2") { // First 10
+        checkLimitedCheckboxes(10);
+    } else if (selection === "Option 3") { // First 50
         checkLimitedCheckboxes(50);
-    } else if (selection === "Option 2") { // First 100
+    } else if (selection === "Option 4") { // First 100
         checkLimitedCheckboxes(100);
-    } else if (selection === "Option 3") { // First 150
+    } else if (selection === "Option 5") { // First 150
         checkLimitedCheckboxes(150);
     }
 
@@ -586,7 +589,6 @@ function storeCheckedValues() {
         clientUrlSet.column_number.push($row.find("td:nth-child(3)").text());
         clientUrlSet.row_number.push($row.find("td:nth-child(4)").text());
         clientUrlSet.sheet_number.push($row.find("td:nth-child(5)").text());
-
     });
     // Push the caption value to the choosen array once
     clientUrlSet.choosen.push(captionText);
@@ -597,31 +599,89 @@ function storeCheckedValues() {
         return null; // Return null if no data is found
     }
     // Bind click event to send data to server
-    $("#send_serve").off("click").on("click", function() {
-        sendDataToServer(clientUrlSet);
-        // Output the dataset for verification
-        console.log("Before Sending to server:",clientUrlSet);
-});
+    $("#send_serve").off("click").on("click", async function() {
+        $("#processedTable").hide();
+        $('#totalProcessingTime').empty().hide();
 
+        await sendDataToServer(clientUrlSet);
+        console.log("Before Sending to server:", clientUrlSet);
+    });
+}
+// Function to fetch progress information from the server
+function fetchProgress() {
+    $.ajax({
+        url: '/progress',
+        method: 'GET',
+        success: function(data) {
+            // Check if progress percentage is defined before updating
+            if (data.progress_percentage !== undefined) {
+                // Update progress percentage
+                $('#progressPercentage').empty().text(data.progress_percentage.toFixed(2) + '%');
+                $('#progressPercentage').show();
+                // If progress reaches 100%, stop fetching progress
+                if (data.progress_percentage === 100) {
+                    clearInterval(progressInterval);
+                }
+            } else {
+                console.error('Progress percentage is undefined');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching progress:', error);
+        }
+    });
 }
 
+// Fetch progress every second
+var progressInterval = setInterval(fetchProgress, 1000);
+// *************************************************************************************************************************************
+
+// *************************************************************************************************************************************
+
+
+
+// Function to fetch estimated remaining time and update progress
+// async function fetchEstimatedRemainingTime() {
+//     try {
+//         console.log("Fetching estimated remaining time...");
+//         const response = await fetch('/estimated_remaining_time');
+//         const data = await response.json();
+//         const estimatedRemainingTime = data.estimated_remaining_time;
+
+//         // Calculate total estimated time
+//         const totalTime = totalProcessTime + estimatedRemainingTime;
+
+//         // Calculate percentage progress
+//         const progressPercentage = ((totalTime - estimatedRemainingTime) / totalTime) * 100;
+
+//         // Update UI with progress percentage
+//         $('#progressPercentage').text('Progress: ' + progressPercentage.toFixed(2) + '%');
+//         $('#progressPercentage').show(); // Show the container if hidden
+//     } catch (error) {
+//         console.error('Error fetching estimated remaining time:', error);
+//     }
+// }
 
 // Function to send data to the server
 async function sendDataToServer(clientUrlSet) {
-    // Record start time
-    var startTime = new Date().getTime();
+    try {
+        // Start estimation when sending data to the server
+        isEstimationRunning = true;
 
-    // Display loading indicator
-    $('#loadingIndicator').show();
+        // Record start time
+        startTime = new Date().getTime();
 
-    // Make sure dataSet is not empty
-    if (!clientUrlSet || !clientUrlSet.url_list || clientUrlSet.url_list.length === 0) {
-        console.error("Error: DataSet is undefined or empty");
-        return;
-    } else {
-        console.log("Before Sending to server:", clientUrlSet);
-        console.log("Stringified Data:", JSON.stringify(clientUrlSet)); // Log the stringified data
-        try {
+        // Display loading indicator
+        $('#loadingIndicator').show();
+
+        // Make sure dataSet is not empty
+        if (!clientUrlSet || !clientUrlSet.url_list || clientUrlSet.url_list.length === 0) {
+            console.error("Error: DataSet is undefined or empty");
+            return;
+        } else {
+            fetchProgress();
+            console.log("Sending data to server:", clientUrlSet);
+            console.log("Stringified Data:", JSON.stringify(clientUrlSet)); // Log the stringified data
             // Perform an asynchronous AJAX POST request to the server endpoint
             const response = await $.ajax({
                 url: "/process_url_data",
@@ -630,47 +690,24 @@ async function sendDataToServer(clientUrlSet) {
                 data: JSON.stringify(clientUrlSet)
             });
 
-            // Assign the response to the variable
-            block_output = response;
+            // Record end time
+            endTime = new Date().getTime();
 
-            // Calculate processing time
-            var endTime = new Date().getTime();
-            var processingTime = endTime - startTime;
+            // Calculate total processing time
+            totalProcessTime = (endTime - startTime) / 1000; // Convert to seconds
+            // Update UI with total processing time
+            $('#totalProcessingTime').empty().append("<p>Total Processing Time: " + totalProcessTime.toFixed(2) + " seconds</p>");
+            $('#totalProcessingTime').show(); // Show the container if hidden
 
-            // Format processing time
-            var formattedTime;
-            if (processingTime < 1000) {
-                formattedTime = processingTime + " milliseconds";
-            } else if (processingTime < 60000) {
-                formattedTime = (processingTime / 1000).toFixed(2) + " seconds";
-            } else {
-                formattedTime = (processingTime / 60000).toFixed(2) + " minutes";
-            }
-            console.log("Processing time:", formattedTime);
-
+            // Display processed data and handle errors
             if (response.error) {
                 console.error("Error from server:", response.error);
                 // Handle the specific error message here
             } else {
                 console.log("Data sent successfully:", response);
                 // Display the processed data in a table
-                displayProcessedData(response.data,response.csv_filename);
-
-                // Display estimated process time
-                if ('estimated_process_time' in response) {
-                    $('#processingTime').text('Estimated Process Time: ' + response.estimated_process_time + ' seconds');
-                    console.log(response.estimated_process_time);
-                } else {
-                    console.error('Error: Estimated Process Time undefined in response');
-                }
-
-                // Display estimated remaining time
-                if ('estimated_remaining_time' in response) {
-                    $('#remainingTime').text('Estimated Remaining Time: ' + response.estimated_remaining_time + ' seconds');
-                    console.log(response.estimated_remaining_time);
-                } else {
-                    console.error('Error: Estimated Remaining Time undefined in response');
-                }
+                displayProcessedData(response.data, response.csv_filename);
+                $("#processedTable").show();
 
                 // Check if the server has downloadable data
                 if (response.has_downloadable_data) {
@@ -681,25 +718,26 @@ async function sendDataToServer(clientUrlSet) {
                     $('#downloadButtonContainer').hide();
                 }
             }
-        } catch (error) {
-            console.error("Error sending data to server:", error);
-            // Handle the error here if needed
-        } finally {
-            // Hide loading indicator after request completes
-            $('#loadingIndicator').hide();
         }
+    } catch (error) {
+        console.error("Error sending data to server:", error);
+        // Handle the error here if needed
+    } finally {
+        // Hide loading indicator after request completes
+        $('#loadingIndicator').hide();
+        // Stop estimation after processing completes
+        isEstimationRunning = false;
     }
-    
 }
 
-// Function to display processed data in a table
-function displayProcessedData(responseData,responseFile) {
-    // Your existing code for generating the table
-    var data = JSON.parse(responseData); // Parse the JSON string to an array
-    var csvFilename = responseFile;
-    try {
 
-        var table = '<table id="dataTable" class="data-table" border="1">' + // Start table with border
+// Update the function to display processed data in a table
+function displayProcessedData(responseData, responseFile) {
+    var data = JSON.parse(responseData);
+    var csvFilename = responseFile;
+
+    try {
+        var table = '<table id="dataTable" class="data-table" border="1">' +
             '<thead>' +
             '<tr>' +
             '<th>Sr.No</th>' +
@@ -713,79 +751,59 @@ function displayProcessedData(responseData,responseFile) {
             '</tr>' +
             '</thead>' +
             '<tbody>';
-    
-        // Loop through each data item
-        data.forEach(function(item, index) {
-            var domainInfo = item.domain_info; // Access the domain_info object within each element
-            // Convert timestamp to date
-            var expirationDate = new Date(domainInfo['Expiration Date']);
-            // Construct the table row using the keys of the domain_info object
-            var row = '<tr>' +
-                '<td>' + (index + 1) + '</td>' +
-                '<td>' + domainInfo.URL + '</td>' +
-                '<td>' + domainInfo['Status Code'] + '</td>' +
-                '<td>' + domainInfo['Response Message'] + '</td>' +
-                '<td>' + domainInfo['Domain Status'] + '</td>' +
-                '<td>' + expirationDate + '</td>' + // Convert timestamp to readable date format
-                '<td>' + domainInfo['For Sale'] + '</td>' +
-                '<td>' + domainInfo['Response Time'] + '</td>' +
-                '</tr>';
-    
-            table += row; // Append the row to the table
+
+            data.forEach(function(item, index) {
+                var domainInfo = item.domain_info;
+                var expirationDate = new Date(domainInfo['Expiration Date']);
+                var formattedExpirationDate = expirationDate.toLocaleString(); // Correct usage of toLocaleString()
+                var row = '<tr>' +
+                    '<td>' + (index + 1) + '</td>' +
+                    '<td>' + domainInfo.URL + '</td>' +
+                    '<td>' + domainInfo['Status Code'] + '</td>' +
+                    '<td>' + domainInfo['Response Message'] + '</td>' +
+                    '<td>' + domainInfo['Domain Status'] + '</td>' +
+                    '<td>' + formattedExpirationDate + '</td>' + // Use the formatted expiration date
+                    '<td>' + domainInfo['For Sale'] + '</td>' +
+                    '<td>' + domainInfo['Response Time'] + '</td>' +
+                    '</tr>';
+
+            table += row;
         });
-    
-        table += '</tbody></table>'; // Close table
-        $('#dataTableContainer').html(table); // Set table HTML to the container
-        // ...
+
+        table += '</tbody></table>';
+        $('#dataTableContainer').html(table);
+
     } catch (error) {
         console.error("Error parsing JSON:", error);
-        // Handle the error gracefully (e.g., display an error message to the user)
     }
-    $('#downloadButton').click(async function(rfile) {
-        try {
-            // Confirm with the user before proceeding with the download
-            if (confirm("Do you want to download the processed data?")) {
-                // Make the request to the server to process URL data
-                console.log("Response only:",csvFilename, typeof(csvFilename));
 
-                // Construct the URL for downloading the CSV file
+    $('#downloadButton').click(async function() {
+        try {
+            if (confirm("Do you want to download the processed data?")) {
                 const csvUrl = `/download/${csvFilename}`;
-    
-                // Create a temporary anchor element to trigger the download
                 const link = document.createElement('a');
                 link.href = csvUrl;
-                link.download = csvFilename; // Set the filename for the downloaded file
+                link.download = csvFilename;
                 document.body.appendChild(link);
-                
-                // Trigger the click event to initiate the download
                 link.click();
-    
-                // Clean up
                 document.body.removeChild(link);
-    
-                // Inform the user that the download has started
                 alert('CSV file download started.');
-    
-                // Wait for the user to confirm the download before proceeding
-                // This prevents the script from continuing until the user finishes downloading
+
                 await new Promise(resolve => {
-                    // Wait for the user to confirm the download
                     link.addEventListener('click', () => {
                         resolve();
                     });
                 });
-    
-                // Proceed with further actions after the download is confirmed
+
                 console.log('User confirmed CSV file download.');
             }
         } catch (error) {
-            // Handle errors
             console.error('Error downloading CSV:', error);
             alert('Error downloading CSV: Please try again.');
         }
     });
-    
 }
+
 // *************************************************************************************************************************
 // ************************************   Dropdown Based dataSet preperation Ended  *********************************************
 // *************************************************************************************************************************
@@ -889,6 +907,8 @@ $(document).on('change', '#column-name', function () {
         formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
         formData.append('selected_column', selectedColumn); // Pass the selected column
         fetchColumnURLs(formData); // Pass the FormData object to fetch column Data
+        $('#totalProcessingTime').empty().hide();
+        $("#processedTable").hide();
     } else {
         console.log('No valid column selected.');
     }
@@ -901,6 +921,8 @@ $(document).on('change', '#sheet-name', function () {
     formData.append('file', $('#file')[0].files[0]); // Include the file data
     formData.append('selected_sheet', selectedSheet); // Use the first sheet if selectedSheet is null
     fetchSheetAndColumnNames(formData); // Pass the FormData object to fetch sheet and column names
+    $('totalProcessingTime').empty().hide();
+    $("#processedTable").hide();
 });
 
 // Function to handle file change event
@@ -908,6 +930,10 @@ $(document).on('change', '#file', function () {
     $('#valid_list').empty(); // Clear the valid_list div
     var fileInput = $(this)[0].files[0]; // Get the selected file
     var formData = new FormData(); // Initialize FormData object
+    $("#processedTable").hide();
+    $('caption').empty().hide();
+    $('#totalProcessingTime').empty().hide();
+
     if (fileInput) {
         formData.append('file', fileInput); // Include the file data
         fetchSheetAndColumnNames(formData); // Pass the FormData object to fetch sheet and column names
