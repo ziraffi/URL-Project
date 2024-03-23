@@ -5,7 +5,6 @@
 var fileSectionLoaded = false;
 // Flag to track if sheet names have been fetched
 var sheetNamesFetched = false;
-
 $(document).ready(function () {
     var windowHeight = $(window).height(); // Get the window height
     var footer = $("footer");
@@ -593,81 +592,21 @@ function storeCheckedValues() {
     // Push the caption value to the choosen array once
     clientUrlSet.choosen.push(captionText);
 
-    // Check if data is empty
-    if (clientUrlSet.url_list.length === 0) {
-        console.error("Error: No data found");
-        return null; // Return null if no data is found
-    }
     // Bind click event to send data to server
     $("#send_serve").off("click").on("click", async function() {
         $("#processedTable").hide();
         $('#totalProcessingTime').empty().hide();
 
         await sendDataToServer(clientUrlSet);
-        console.log("Before Sending to server:", clientUrlSet);
-    });
-}
-// Function to fetch progress information from the server
-function fetchProgress() {
-    $.ajax({
-        url: '/progress',
-        method: 'GET',
-        success: function(data) {
-            // Check if progress percentage is defined before updating
-            if (data.progress_percentage !== undefined) {
-                // Update progress percentage
-                $('#progressPercentage').empty().text(data.progress_percentage.toFixed(2) + '%');
-                $('#progressPercentage').show();
-                // If progress reaches 100%, stop fetching progress
-                if (data.progress_percentage === 100) {
-                    clearInterval(progressInterval);
-                }
-            } else {
-                console.error('Progress percentage is undefined');
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching progress:', error);
-        }
     });
 }
 
-// Fetch progress every second
-var progressInterval = setInterval(fetchProgress, 1000);
-// *************************************************************************************************************************************
-
-// *************************************************************************************************************************************
-
-
-
-// Function to fetch estimated remaining time and update progress
-// async function fetchEstimatedRemainingTime() {
-//     try {
-//         console.log("Fetching estimated remaining time...");
-//         const response = await fetch('/estimated_remaining_time');
-//         const data = await response.json();
-//         const estimatedRemainingTime = data.estimated_remaining_time;
-
-//         // Calculate total estimated time
-//         const totalTime = totalProcessTime + estimatedRemainingTime;
-
-//         // Calculate percentage progress
-//         const progressPercentage = ((totalTime - estimatedRemainingTime) / totalTime) * 100;
-
-//         // Update UI with progress percentage
-//         $('#progressPercentage').text('Progress: ' + progressPercentage.toFixed(2) + '%');
-//         $('#progressPercentage').show(); // Show the container if hidden
-//     } catch (error) {
-//         console.error('Error fetching estimated remaining time:', error);
-//     }
-// }
+let progressInterval;
 
 // Function to send data to the server
 async function sendDataToServer(clientUrlSet) {
     try {
-        // Start estimation when sending data to the server
-        isEstimationRunning = true;
-
+     
         // Record start time
         startTime = new Date().getTime();
 
@@ -679,9 +618,13 @@ async function sendDataToServer(clientUrlSet) {
             console.error("Error: DataSet is undefined or empty");
             return;
         } else {
-            fetchProgress();
+            // Call fetchProgress after an initial delay of 800 milliseconds
+            await fetchProgress();
+            // Set interval to call fetchProgress every 2000 milliseconds (2 seconds)
+            progressInterval = setInterval(fetchProgress, 2000);   
             console.log("Sending data to server:", clientUrlSet);
             console.log("Stringified Data:", JSON.stringify(clientUrlSet)); // Log the stringified data
+
             // Perform an asynchronous AJAX POST request to the server endpoint
             const response = await $.ajax({
                 url: "/process_url_data",
@@ -694,9 +637,23 @@ async function sendDataToServer(clientUrlSet) {
             endTime = new Date().getTime();
 
             // Calculate total processing time
-            totalProcessTime = (endTime - startTime) / 1000; // Convert to seconds
+            totalProcessTime = Math.floor((endTime - startTime) / 1000);
+            // Format total processing time
+            var formattedTotalTime;
+            if (totalProcessTime < 60) {
+                formattedTotalTime = totalProcessTime + " seconds";
+            } else if (totalProcessTime < 3600) {
+                var minutes = Math.floor(totalProcessTime / 60);
+                var seconds = (totalProcessTime % 60).toFixed(2);
+                formattedTotalTime = minutes + " minutes " + seconds + " seconds";
+            } else {
+                var hours = Math.floor(totalProcessTime / 3600);
+                var remainingSeconds = totalProcessTime % 3600;
+                var minutes = Math.floor(remainingSeconds / 60);
+                formattedTotalTime = hours + " hours " + minutes + " minutes " + seconds + " seconds";
+            }
             // Update UI with total processing time
-            $('#totalProcessingTime').empty().append("<p>Total Processing Time: " + totalProcessTime.toFixed(2) + " seconds</p>");
+            $('#totalProcessingTime').empty().append("<p>Total Processing Time: " + formattedTotalTime + " </p>");
             $('#totalProcessingTime').show(); // Show the container if hidden
 
             // Display processed data and handle errors
@@ -717,18 +674,87 @@ async function sendDataToServer(clientUrlSet) {
                     // Hide the download button if no downloadable data
                     $('#downloadButtonContainer').hide();
                 }
+
             }
+
         }
+
     } catch (error) {
         console.error("Error sending data to server:", error);
         // Handle the error here if needed
     } finally {
+        clearInterval(progressInterval); // Clear interval after processing
         // Hide loading indicator after request completes
         $('#loadingIndicator').hide();
-        // Stop estimation after processing completes
-        isEstimationRunning = false;
     }
 }
+
+// Function to fetch progress information from the server
+async function fetchProgress() {
+    try {
+        const response = await $.ajax({
+            url: '/progress',
+            method: 'GET'
+        });
+        // Update progress percentage
+        var progressPercentage = response.tryPercent.toFixed();
+        // Check if progress data is received
+        if (progressPercentage !== undefined) {
+            $('#progressPercentage span').text(progressPercentage + '%');
+            $('#progressBlock').css('--value', progressPercentage);
+
+            $('#progressPercentage').show();
+            console.log('Progress percentage updated:', progressPercentage + '%');
+
+            // Call generateTable with the progress data
+            generateTable(response.pInfo_obj);
+
+      
+        } else {
+            console.error('Progress percentage is undefined');
+        }
+    } catch (error) {
+        console.error('Error fetching progress:', error);
+    }
+}
+// Async function to dynamically generate table
+async function generateTable(progressData) {
+    // Clear existing table content
+    $('#tableDiv').empty();
+    $('#tableDiv').show();
+    console.log('ProgressData for Object: ', progressData);
+
+    // Check if progressData is empty or undefined
+    if (!progressData) {
+        console.error('Progress data is empty or undefined.');
+        return;
+    }
+    $('#try_table').show();
+    // Create table header
+    let tableHeader = '<table class="table"><thead><tr>';
+    // Get keys from the first object to use as table headers
+    let keys = Object.keys(progressData[0]);
+    keys.forEach((key) => {
+        tableHeader += `<th>${key}</th>`;
+    });
+    tableHeader += '</tr></thead><tbody>';
+
+    // Append table header to table
+    $('#tableDiv').append(tableHeader);
+
+    // Iterate over each object in progressData and create table rows
+    progressData.forEach((item) => {
+        let row = '<tr>';
+        keys.forEach((key) => {
+            row += `<td>${item[key]}</td>`;
+        });
+        row += '</tr>';
+        $('#tableDiv tbody').append(row);
+    });
+    // Close table tag
+    $('#tableDiv').append('</tbody></table>');
+}
+
 
 
 // Update the function to display processed data in a table
@@ -907,6 +933,8 @@ $(document).on('change', '#column-name', function () {
         formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
         formData.append('selected_column', selectedColumn); // Pass the selected column
         fetchColumnURLs(formData); // Pass the FormData object to fetch column Data
+        initialProgressSkipped = false; // Flag to track if the initial 100% progress has been encountered
+
         $('#totalProcessingTime').empty().hide();
         $("#processedTable").hide();
     } else {
@@ -923,6 +951,8 @@ $(document).on('change', '#sheet-name', function () {
     fetchSheetAndColumnNames(formData); // Pass the FormData object to fetch sheet and column names
     $('totalProcessingTime').empty().hide();
     $("#processedTable").hide();
+    initialProgressSkipped = false; // Flag to track if the initial 100% progress has been encountered
+
 });
 
 // Function to handle file change event
@@ -933,6 +963,7 @@ $(document).on('change', '#file', function () {
     $("#processedTable").hide();
     $('caption').empty().hide();
     $('#totalProcessingTime').empty().hide();
+    initialProgressSkipped = false; // Flag to track if the initial 100% progress has been encountered
 
     if (fileInput) {
         formData.append('file', fileInput); // Include the file data

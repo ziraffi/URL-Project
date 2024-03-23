@@ -183,17 +183,15 @@ async def process_clienturl_data():
         logging.info("Starting URL processing")
 
         data = []
-        async for stats in process_dataSet_urls(url_set, semaphore):
-            data.append(stats)  # Collect statistics
+        async for result in process_urls_async(url_set['url_list'], semaphore):
+            if 'domain_info' in result:
+                data.append(result)
 
         logging.info("URL processing completed")
 
-        # Combine processing time calculations
-        total_process_time = sum(stat['mean_time_per_iteration'] for stat in data)
-        total_estimated_remaining_time = sum(stat['estimated_remaining_time'] for stat in data)
-
         # Convert data to DataFrame (if needed)
         if data:
+            print("Server Returning Data", data)
             result_df = pd.DataFrame(data)
             domain_info_df = result_df['domain_info'].apply(pd.Series)
 
@@ -214,8 +212,7 @@ async def process_clienturl_data():
                     'has_downloadable_data': True,
                     'data': result_df.to_json(orient='records'),
                     'csv_filename': unique_csv_filename,  # Send the filename to the client
-                    'estimated_process_time': total_process_time,
-                    'estimated_remaining_time': total_estimated_remaining_time,
+                    
                 })
             else:
                 return jsonify({'error': 'No domain information available to download'})
@@ -227,6 +224,12 @@ async def process_clienturl_data():
     except Exception as e:
         logging.error(f"Error processing URL data: {e}")
         return jsonify({'error': str(e)})
+    
+@app.route('/progress', methods=['GET'])
+def get_progress():
+    print("At the End Point: ", progress_info)
+    return jsonify(progress_info)
+    
 @app.route('/download/<csvFilename>', methods=['GET'])
 def download_csv(csvFilename):
     try:
@@ -249,41 +252,6 @@ def download_csv(csvFilename):
             return jsonify({'error': 'File not found'})
     except Exception as e:
         return jsonify({'error': str(e)})
-
-@app.route('/process_urls', methods=['POST'])
-async def process_urls():
-    try:
-        if not request.is_json:
-            return jsonify({'error': 'Request content must be in JSON format'})
-
-        url_data = request.json
-        urls = url_data.get('urls', [])
-
-        if not urls:
-            return jsonify({'error': 'No URLs provided in the request'})
-
-        semaphore = asyncio.Semaphore(8)  # Adjust the semaphore value as needed
-        logging.info(f"Processing {len(urls)} URLs asynchronously")
-
-        result_data = []
-        async for stats in process_urls_async(urls, semaphore):
-            result_data.append(stats)
-
-        logging.info("URL processing completed")
-
-        return jsonify({
-            'message': 'URLs processed successfully',
-            'data': result_data
-        })
-
-    except Exception as e:
-        logging.error(f"Error processing URLs: {e}")
-        return jsonify({'error': str(e)})
-
-@app.route('/progress', methods=['GET'])
-def get_progress():
-    print("At the End Point: ", progress_info)
-    return jsonify(progress_info)
 
 def submit_form():
     file_type = request.form.get('file')

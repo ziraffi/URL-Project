@@ -110,11 +110,18 @@
 
     <div id="loadingIndicator" style="display: none;">
       <!-- Add your loading indicator design here -->
-      Loading...
-      <div id="progressPercentage" style="display: none;">
+
+      <div id="progressPercentage" class="formInput-container" style="display: none;">
         <!-- Processing time will be displayed here -->
-        <p id="progressText">Progress: <span id="progressPercentage">0%</span></p>
+        <p id="progressText">Progress: <span></span></p>
+        <div id= "progressBlock" role="progressbar" aria-valuenow="0" aria-valuemin="100" aria-valuemax="0" style="--value: "></div>
       </div>
+
+  </div>
+  <div id="try_table" style="display: none">
+    <div class="table" id="tableDiv">
+      <!-- Data table will be dynamically generated here -->
+    </div>
   </div>
   <div id="totalProcessingTime">
     <p></p>
