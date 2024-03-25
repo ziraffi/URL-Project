@@ -139,7 +139,7 @@ nav ul li:hover::after {
       left: 10px;
   }
 
-  div#dataTableContainer.table, div#file-data-table.table{
+  div#dataTableContainer.table, div#tryTable.table, div#file-data-table.table{
     overflow-x: scroll !important;
     padding: 0 2% !important;
     min-height: 6rem !important;
@@ -571,6 +571,30 @@ button {
 }
 
 /* *****************  URL Container Start from Here  *********************** */
+#floatContainer {
+  position: fixed;
+  font-size: x-large;
+  top: 75%;
+  left: -25px;
+  border-radius: 45%;
+  z-index: 9999; /* Ensure it's above other elements */
+  box-shadow: 0px 0px 10px 5px rgba(145, 155, 193, 0.25);
+  display: none; /* Hidden by default */
+}
+
+.floaterIcon {
+  color: #ffffff; /* Example text color */
+  padding: 10px;
+  border-radius: 45%  !important;
+  /* Add additional styles as needed */
+}
+.floaterIcon:active {
+  background-color: #ffffff  !important; /* Example background color */
+  color: #000000  !important; /* Example text color */
+  padding: 10px;
+  border-radius: 45%;
+  /* Add additional styles as needed */
+}
 
 .url-container {
   display: none;
@@ -647,7 +671,15 @@ div.url-wrapper h3,div#file-tbl h3{
   transform-origin: bottom right;
   transition: transform 0.25s ease-out;
 }
-
+.brd-shadow:hover{
+  border-radius: 0rem 0rem 0.6rem 0.6rem !important;
+  box-shadow: 1px -11px 13px 10px rgba(10, 27, 91, 0.25) inset;
+  background: repeating-linear-gradient(-45deg, #fff 0 20px, #f9f9f9 0 40px) ;  
+}
+/* .brd-shadowinr{
+  border-radius: 0.2rem !important;
+  box-shadow: -1px -64px 20px -6px rgba(80,227,194,1) inset;
+} */
 .hover-underline-animation:hover::after {
   transform: scaleX(1);
   transform-origin: bottom left;
@@ -675,7 +707,7 @@ div#file-data-table.table{
   max-height: 27rem;
   overflow-x: hidden;
 }
-div#dataTableContainer.table{
+div#dataTableContainer.table, div#tryTable.table{
   padding: 0 10%;
   min-height: 6rem;
   max-height: 27rem;
@@ -690,9 +722,7 @@ table {
   width: 100%;
 }
 .data-table td{
-  /* color: #ddd; */
   border: 1px solid #ddd;
-  /* background-color: #e8e6e6; */
   padding: 8px;
   text-align: center; 
 }
@@ -766,10 +796,11 @@ h2.text-success{
 
 [role="progressbar"] {
   --percentage: var(--value);
-  --primary: #369;
+  --primary: #068182;
   --secondary: #adf;
   --size: 150px;
   animation: progress 2s 0.5s forwards;
+  box-shadow: 0px 0px 12px 15px rgba(0, 0, 0, 0.75) inset;
   width: var(--size);
   aspect-ratio: 1;
   border-radius: 50%;
@@ -791,6 +822,8 @@ h2.text-success{
   mask-mode: alpha;
   -webkit-mask: radial-gradient(#0000 55%, #000 0);
   -webkit-mask-mode: alpha;
+  box-shadow: 1px -11px 13px 10px rgba(10, 27, 91, 0.25) inset;
+  
 }
 
 [role="progressbar"]::after {

@@ -133,16 +133,16 @@ async def process_urls_async(urls: List[str], semaphore) -> AsyncGenerator[Dict[
                 if ((remaining_iterations > 0) or (remaining_iterations == 0 and idx == len(urls))):
                     try_percentage = (idx / len(urls)) * 100
                     
-                progress_info['tryPercent'] = try_percentage
-                progress_info['total_urls'] = len(urls)
-                progress_info['status'] = "Processing"
-                progress_info['processed_urls'] = idx
-                progress_info['remaining_iterations'] = remaining_iterations                    
-                progress_info['iteration_times'].append(iteration_time)
-                # Append the domain_info object to pInfo_obj list
-                progress_info['pInfo_obj'].append(domain_info)
-                # Append the URL to the domain_info object
-                progress_info['pInfo_obj'][-1]['URL'] = url
+                    progress_info['tryPercent'] = try_percentage
+                    progress_info['total_urls'] = len(urls)
+                    progress_info['status'] = "Processing"
+                    progress_info['processed_urls'] = idx
+                    progress_info['remaining_iterations'] = remaining_iterations                    
+                    progress_info['iteration_times'].append(iteration_time)
+                    # Append the domain_info object to pInfo_obj list
+                    progress_info['pInfo_obj'].append(domain_info)
+                    # Append the URL to the domain_info object
+                    progress_info['pInfo_obj'][-1]['URL'] = url
 
                 yield {
                     'current_iteration': idx,

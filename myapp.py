@@ -1,8 +1,8 @@
+from flask import Flask, render_template, request, jsonify, make_response
+from io import StringIO,BytesIO
 import random
 import string
-from flask import Flask, render_template, request, jsonify, make_response
 import pandas as pd
-from io import StringIO,BytesIO
 import openpyxl
 import logging
 import asyncio
@@ -18,6 +18,9 @@ def index():
 @app.route('/login.html')
 def login():
     return render_template('login.html')
+@app.route('/guide.html')
+def guide():
+    return render_template('guide.html')
 
 @app.route('/registration.html')
 def register():
@@ -225,7 +228,7 @@ async def process_clienturl_data():
         logging.error(f"Error processing URL data: {e}")
         return jsonify({'error': str(e)})
     
-@app.route('/progress', methods=['GET'])
+@app.route('/progress', methods=['POST'])
 def get_progress():
     print("At the End Point: ", progress_info)
     return jsonify(progress_info)

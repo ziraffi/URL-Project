@@ -1,9 +1,13 @@
 // myfrnt.js
 // Global variable to store the selected sheet
+
 // var selectedSheet = null;
+var urlFlag = false;
+
 // Flag to track if the file section has been loaded
 var fileSectionLoaded = false;
 // Flag to track if sheet names have been fetched
+
 var sheetNamesFetched = false;
 $(document).ready(function () {
     var windowHeight = $(window).height(); // Get the window height
@@ -11,6 +15,10 @@ $(document).ready(function () {
     var header = $("header");
     var lastScrollTop = 0; // Variable to store the last scroll position
 
+    // Button click event handler to toggle the visibility of the url-container
+    $("#toggleButton").click(function() {
+        $("#url-container").toggle(); // Toggle the visibility of the url-container
+    });
     $(window).scroll(function() {
         var scrollPosition = $(this).scrollTop();
         var scrollThreshold = windowHeight * 0.60;
@@ -22,7 +30,14 @@ $(document).ready(function () {
                 top: '-100px', // Move header off-screen
                 opacity: 0
             }, 500);
+            if (urlFlag) {
+                $("#floatContainer").show().animate({
+                    left: '50px' // Move to the specified left position
+                }, 1500);            
+            }
+            
         } else {
+            $("#floatContainer").hide();                
             // Show the header with fade in animation
             header.stop().animate({
                 top: '0', // Move header back to its original position
@@ -53,17 +68,28 @@ $(document).ready(function () {
         $('#manual-data-table').empty();
         $('#mnl-tbl').hide();
 
+        $('#tableDiv').hide();
+        $('#tbl-section').hide();
+        $('#downloadButtonContainer').hide();
+        $('#totalProcessingTime').hide();        
+
     });
 
     $('#toggle_manual').on("click", function () {
         $('#file_form').removeClass('left-side').hide();
-        $('#manual_form').show().addClass('right-side');;
+        $('#manual_form').show().addClass('right-side');
         $('#url-container').hide();
         $('#file').val('');
         $('#sheet-name').empty();
         $('#column-name').empty();
         $('#file-data-table').empty();
         $('#file-tbl').hide();
+
+        $('#tableDiv').hide();
+        $('#tbl-section').hide();
+        $('#downloadButtonContainer').hide();
+        $('#totalProcessingTime').hide();
+        
     });
 
     const openNavButton = $('.fa-bars');
@@ -244,8 +270,10 @@ function appendColumnDataToUrlContainer(columnData) {
     // Show or hide url-container based on the presence of valid or invalid data
     if (validUrlExists || invalidDataExists) {
         $('#url-container').show();
+        urlFlag = true;
     } else {
         $('#url-container').hide();
+        urlFlag = false;
     }
     // if (manualDataSet && Object.keys(manualDataSet).length !== 0) {
     //     displayDataSetsInTable(null,manualDataSet);
@@ -357,14 +385,16 @@ async function fetchColumnURLs(formData) {
             // Show or hide url-container based on the presence of valid or invalid data
             if (validDataExists || invalidDataExists) {
                 $('#url-container').show();
+                urlFlag = true;
             } else {
                 $('#url-container').hide();
+                urlFlag = false;
             }
         } else {
             $('#invalid_list').append($('<p>No URLs found for the selected column.</p>'));
             $('#invalid_list').show(); // Hide invalid list if no data
             $('#valid_list').hide(); // Hide valid list if no data
-            $('#url-container').show(); // Hide url-container if no data
+            $('#url-container').show();
         }
     } catch (error) {
         console.error('Error fetching column Data:', error);
@@ -595,6 +625,7 @@ function storeCheckedValues() {
     // Bind click event to send data to server
     $("#send_serve").off("click").on("click", async function() {
         $("#processedTable").hide();
+        $("#tableDiv").hide();
         $('#totalProcessingTime').empty().hide();
 
         await sendDataToServer(clientUrlSet);
@@ -618,8 +649,6 @@ async function sendDataToServer(clientUrlSet) {
             console.error("Error: DataSet is undefined or empty");
             return;
         } else {
-            // Call fetchProgress after an initial delay of 800 milliseconds
-            await fetchProgress();
             // Set interval to call fetchProgress every 2000 milliseconds (2 seconds)
             progressInterval = setInterval(fetchProgress, 2000);   
             console.log("Sending data to server:", clientUrlSet);
@@ -661,100 +690,130 @@ async function sendDataToServer(clientUrlSet) {
                 console.error("Error from server:", response.error);
                 // Handle the specific error message here
             } else {
+
                 console.log("Data sent successfully:", response);
-                // Display the processed data in a table
-                displayProcessedData(response.data, response.csv_filename);
                 $("#processedTable").show();
 
                 // Check if the server has downloadable data
                 if (response.has_downloadable_data) {
+                    // Display the processed data in a table
+                    displayProcessedData(response.data, response.csv_filename);
+                    
                     // Display a button to download the CSV file
                     $('#downloadButtonContainer').show();
+
                 } else {
                     // Hide the download button if no downloadable data
                     $('#downloadButtonContainer').hide();
                 }
-
+            // Call fetchProgress after an initial delay of 800 milliseconds
+            await fetchProgress();
             }
 
+            // Check if the response is empty or not
+            if (!response || !response.pInfo_obj) {
+                // Perform necessary action here, such as returning or emptying the response
+                return; // For example, returning from the function
+            }            
         }
 
     } catch (error) {
         console.error("Error sending data to server:", error);
         // Handle the error here if needed
     } finally {
-        clearInterval(progressInterval); // Clear interval after processing
         // Hide loading indicator after request completes
         $('#loadingIndicator').hide();
+
+        clearInterval(progressInterval); // Clear interval after processing
+    }
+}
+
+// Function to update progress percentage section
+async function updateProgressPercentage(progressPercentage) {
+    try {
+        // Check if progress data is received
+        if (progressPercentage !== undefined) {
+            $('#progressPercentage span').text(progressPercentage + '%');
+            $('#progressBlock').css('--value', progressPercentage);
+            $('#progressPercentage').show();
+            console.log('Progress percentage updated:', progressPercentage + '%');
+        } else {
+            console.error('Progress percentage is undefined');
+        }
+    } catch (error) {
+        console.error('Error updating progress percentage:', error);
     }
 }
 
 // Function to fetch progress information from the server
 async function fetchProgress() {
+    $("#tableDiv").show();
+
     try {
         const response = await $.ajax({
             url: '/progress',
-            method: 'GET'
+            method: 'POST'
         });
-        // Update progress percentage
-        var progressPercentage = response.tryPercent.toFixed();
-        // Check if progress data is received
-        if (progressPercentage !== undefined) {
-            $('#progressPercentage span').text(progressPercentage + '%');
-            $('#progressBlock').css('--value', progressPercentage);
-
-            $('#progressPercentage').show();
-            console.log('Progress percentage updated:', progressPercentage + '%');
-
-            // Call generateTable with the progress data
-            generateTable(response.pInfo_obj);
-
-      
-        } else {
-            console.error('Progress percentage is undefined');
-        }
+        var assumePercent=response.tryPercent.toFixed()
+        var progressData = response.pInfo_obj;
+        // Call generateTable with the progress data
+        generateTable(progressData,assumePercent);
     } catch (error) {
         console.error('Error fetching progress:', error);
     }
 }
-// Async function to dynamically generate table
-async function generateTable(progressData) {
+// Function to dynamically generate table
+async function generateTable(progressData, assumePercent) {
     // Clear existing table content
-    $('#tableDiv').empty();
+    $('#tryTable').empty();
     $('#tableDiv').show();
     console.log('ProgressData for Object: ', progressData);
 
     // Check if progressData is empty or undefined
-    if (!progressData) {
+    if (!progressData || progressData.length === 0) {
         console.error('Progress data is empty or undefined.');
         return;
     }
-    $('#try_table').show();
+    // Call updateProgressPercentage with the progress percentage
+    await updateProgressPercentage(assumePercent);
+    
+    // Define the table variable with the specified format
+    var table = '<table id="innerTrytable" class="data-table" border="1">';
+    
     // Create table header
-    let tableHeader = '<table class="table"><thead><tr>';
-    // Get keys from the first object to use as table headers
-    let keys = Object.keys(progressData[0]);
-    keys.forEach((key) => {
-        tableHeader += `<th>${key}</th>`;
+    table += '<thead><tr>';
+    // Define the order of keys, with 'URL' being the first one
+    let keysOrder = ['Sr.No','URL', 'Domain Status', 'Expiration Date', 'For Sale', 'Response Message', 'Response Time', 'Status Code'];
+    // Append table headers with the defined order
+    keysOrder.forEach((key) => {
+        table += `<th>${key}</th>`;
     });
-    tableHeader += '</tr></thead><tbody>';
-
-    // Append table header to table
-    $('#tableDiv').append(tableHeader);
+    table += '</tr></thead><tbody>';
 
     // Iterate over each object in progressData and create table rows
-    progressData.forEach((item) => {
+    progressData.forEach((item, index) => {
         let row = '<tr>';
-        keys.forEach((key) => {
-            row += `<td>${item[key]}</td>`;
+        // Iterate over keys in the defined order
+        keysOrder.forEach((key) => {
+            if (key === 'Expiration Date') { // Use '===' for comparison, not '='
+                row += `<td>${new Date(item[key]).toLocaleString()}</td>`; // Convert to localized string
+            } 
+            if (key === 'Sr.No') {
+                row += `<td>${(index + 1)}</td>`; // Add 1 to index to make it 1-based
+            } else if (key !== 'Expiration Date') { // Exclude the second occurrence of 'Expiration Date'
+                row += `<td>${item[key]}</td>`;
+            }
         });
         row += '</tr>';
-        $('#tableDiv tbody').append(row);
+        table += row; // Append row to the table
     });
-    // Close table tag
-    $('#tableDiv').append('</tbody></table>');
-}
 
+    // Close table tag
+    table += '</tbody></table>';
+    
+    // Append the table to the tableDiv
+    $('#tryTable').append(table);
+}
 
 
 // Update the function to display processed data in a table
@@ -781,7 +840,7 @@ function displayProcessedData(responseData, responseFile) {
             data.forEach(function(item, index) {
                 var domainInfo = item.domain_info;
                 var expirationDate = new Date(domainInfo['Expiration Date']);
-                var formattedExpirationDate = expirationDate.toLocaleString(); // Correct usage of toLocaleString()
+                var formattedExpirationDate = expirationDate.toLocaleString(); 
                 var row = '<tr>' +
                     '<td>' + (index + 1) + '</td>' +
                     '<td>' + domainInfo.URL + '</td>' +
@@ -803,31 +862,43 @@ function displayProcessedData(responseData, responseFile) {
         console.error("Error parsing JSON:", error);
     }
 
+    let downloadAllowed = true; // Add a flag to track download permission
+
     $('#downloadButton').click(async function() {
         try {
-            if (confirm("Do you want to download the processed data?")) {
-                const csvUrl = `/download/${csvFilename}`;
-                const link = document.createElement('a');
-                link.href = csvUrl;
-                link.download = csvFilename;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                alert('CSV file download started.');
-
-                await new Promise(resolve => {
-                    link.addEventListener('click', () => {
-                        resolve();
+            if (downloadAllowed) { // Check if download is allowed
+                if (confirm("Do you want to download the processed data?")) {
+                    const csvUrl = `/download/${csvFilename}`;
+                    const link = document.createElement('a');
+                    link.href = csvUrl;
+                    link.download = csvFilename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    alert('CSV file download started.');
+                    
+                    // Disable further downloads until user clicks again
+                    downloadAllowed = false;
+    
+                    await new Promise(resolve => {
+                        link.addEventListener('click', () => {
+                            resolve();
+                        });
                     });
-                });
-
-                console.log('User confirmed CSV file download.');
+    
+                    console.log('User confirmed CSV file download.');
+                    
+                    // Enable download again after confirmation
+                    downloadAllowed = true;
+                }
             }
         } catch (error) {
             console.error('Error downloading CSV:', error);
             alert('Error downloading CSV: Please try again.');
+            downloadAllowed = true; // Reset download permission on error
         }
     });
+    
 }
 
 // *************************************************************************************************************************
@@ -933,10 +1004,12 @@ $(document).on('change', '#column-name', function () {
         formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
         formData.append('selected_column', selectedColumn); // Pass the selected column
         fetchColumnURLs(formData); // Pass the FormData object to fetch column Data
-        initialProgressSkipped = false; // Flag to track if the initial 100% progress has been encountered
 
         $('#totalProcessingTime').empty().hide();
         $("#processedTable").hide();
+        $("#tableDiv").hide();
+        $('#downloadButtonContainer').hide();
+        urlFlag = false;
     } else {
         console.log('No valid column selected.');
     }
@@ -951,7 +1024,9 @@ $(document).on('change', '#sheet-name', function () {
     fetchSheetAndColumnNames(formData); // Pass the FormData object to fetch sheet and column names
     $('totalProcessingTime').empty().hide();
     $("#processedTable").hide();
-    initialProgressSkipped = false; // Flag to track if the initial 100% progress has been encountered
+    $("#tableDiv").hide();
+    $('#downloadButtonContainer').hide();
+    urlFlag = false;
 
 });
 
@@ -961,9 +1036,14 @@ $(document).on('change', '#file', function () {
     var fileInput = $(this)[0].files[0]; // Get the selected file
     var formData = new FormData(); // Initialize FormData object
     $("#processedTable").hide();
+    $("#tableDiv").hide();
     $('caption').empty().hide();
     $('#totalProcessingTime').empty().hide();
-    initialProgressSkipped = false; // Flag to track if the initial 100% progress has been encountered
+    $('#downloadButtonContainer').hide();
+
+    $('#url-container').hide();
+    urlFlag = false;
+
 
     if (fileInput) {
         formData.append('file', fileInput); // Include the file data
@@ -971,12 +1051,8 @@ $(document).on('change', '#file', function () {
     } else {
         console.error('No file selected.');
         $('#tbl-section').hide();
-        $('#url-container').hide();
         $('#sheet-name').empty();
         $('#column-name').empty();
     }
 });
-
-  
-
 });

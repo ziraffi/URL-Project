@@ -1,7 +1,7 @@
 <!-- file-section.html -->
 <div id="file-section">
   <div class="formInput-container">
-    <div class="form-wrapper">
+    <div class="form-wrapper mb-2">
       <div class="col-2">
         <button class="btn btn-secondary py-1" id="toggle_file"><span class="fa-solid fa-angles-left"></span><span class="d-none d-md-inline">Upload</span></button>
       </div>
@@ -84,8 +84,13 @@
 <!-- ******************************************************************* -->
       <!-- URL container Start From Here -->
 <!-- ******************************************************************* -->
-
-    <section class="url-container" id="url-container" style="display: none;">
+<div class="formInput-container" id="floatContainer">
+  <button class="floaterIcon" id="toggleButton">
+      <!-- Your exclamation icon or content goes here -->
+      <i class="bi bi-binoculars"></i>
+  </button>
+</div>    
+  <section class="url-container" id="url-container" style="display: none;">
       <div class="url-wrapper">
         <div id="valid_list">
           <!-- URLs will be displayed here -->
@@ -105,7 +110,9 @@
         <h3>Manual Data</h3><br>
         <div class="table" id="manual-data-table"></div>
     </div>
-    <button id="send_serve" class="btn-secondary" type="submit">Lock & GO</button>
+    <div id="send_serve">
+    <button class="btn-secondary" type="submit">Lock & GO</button>
+  </div>
     </section>
 
     <div id="loadingIndicator" style="display: none;">
@@ -118,23 +125,28 @@
       </div>
 
   </div>
-  <div id="try_table" style="display: none">
-    <div class="table" id="tableDiv">
+  <div id="totalProcessingTime">
+    <p></p>
+  </div>  
+  <div id="tableDiv" style="display: none">
+    <div class="table" id="tryTable">
       <!-- Data table will be dynamically generated here -->
     </div>
   </div>
-  <div id="totalProcessingTime">
-    <p></p>
-  </div>
+
+
+<!-- ******************************************************************* -->
+      <!--******************************** DO NOT DELET THIS BLOCK  *************************************-->
+<!-- ******************************************************************* -->
+<!-- <div id="processedTable" style="display: none">
+<div class="table" id="dataTableContainer">
+  Data table will be dynamically generated here 
+
+</div> -->
 
 <!-- ******************************************************************* -->
       <!-- Dynamic Load next Sections Button -->
 <!-- ******************************************************************* -->
-<div id="processedTable" style="display: none">
-<div class="table" id="dataTableContainer">
-  <!-- Data table will be dynamically generated here -->
-
-</div>
   <div  id="downloadButtonContainer" style="display: none;">
     <button type="button" id="downloadButton">Download CSV</button>
   </div>
