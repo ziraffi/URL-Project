@@ -1,5 +1,5 @@
 <!-- url_Project.html file -->
-{% extends "base.html" %} 
+{% extends "base.html" %}
 <title>{% block title %}Home Page{% endblock %}</title>
 
 {% block content %}
@@ -7,16 +7,107 @@
   <div class="hero-container">
     <div class="hero-banner">
       <div class="bnr-txt">
-        <h1 class="banner-heading">Welcome To URL Project</h1><br>
-        <p class="dnlh">Do Not Loose Your <span class="hope hover-underline-animation">HOPE!</span></p>
+        <h1 class="banner-heading">Welcome To URL Project</h1>
+        <br />
+        <p class="dnlh">
+          Do Not Loose Your
+          <span class="hope hover-underline-animation">HOPE!</span>
+        </p>
       </div>
       <!-- <div class="carousel">
       </div> -->
-  </div>
-  </div>
-    <div id="form-container" class="form-container">
-        <!-- Form will be loaded dynamically here -->
+      <div class="textOne">
+        <p style="color: #384241">
+          Welcome to CheckURL, the ultimate tool for businesses and SEO agencies
+          looking to optimize their online presence. With our advanced URL
+          status checker, you can ensure that your website delivers a seamless
+          user experience and maximizes its visibility on search engines.
+        <p>
+      </div>
     </div>
-    {% block response_table %}{% endblock  %}
+    <hr class="dotted divider">
+    <div class="form-container " style="padding: 2rem 2rem 3rem 2rem">
+      <div id="file-section">
+        <div class="features">
+        <h3>Features</h3>
+      </div>
+        <div class="card-group gap-3 text-center">
+
+          <div
+            class="card text-left min-w-60 lg:my-4 shadow-md hover:shadow-lg rounded-lg bg-gray-100 dark:bg-gray-600"
+            id="card1"
+          >
+            <img
+              class="card-img-top overflow-hidden rounded-t-lg max-h-50 object-cover w-80"
+              src="../static/images/Enterprise software development.webp"
+              alt="Card image cap"
+            />
+            <div class="card-body">
+              <h5 class="card-title">Status Checker Excellence</h5>
+              <p class="card-text">
+                Ensure your website's URLs are functioning properly with our
+                comprehensive status checker.
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="card text-left min-w-60 lg:my-4 shadow-md hover:shadow-lg rounded-lg bg-gray-100 dark:bg-gray-600"
+            id="card2"
+          >
+            <img
+              class="card-img-top overflow-hidden rounded-t-lg max-h-50 object-cover w-80"
+              src="../static/images/file_thumb.webp"
+              alt="Card image cap"
+            />
+            <div class="card-body">
+              <h5 class="card-title">Streamlined URL Input</h5>
+              <p class="card-text">
+                Easily input URLs manually or in bulk, or upload files in CSV or
+                XLSX formats for streamlined processing.
+              </p>
+            </div>
+          </div>
+          <div
+            class="card text-left min-w-60 lg:my-4 shadow-md hover:shadow-lg rounded-lg bg-gray-100 dark:bg-gray-600"
+            id="card3"
+          >
+            <img
+              class="card-img-top overflow-hidden rounded-t-lg max-h-50 object-cover w-80"
+              src="../static/images/link-building.webp"
+              alt="Card image cap"
+            />
+            <div class="card-body">
+              <h5 class="card-title">SEO Made Simple</h5>
+              <p class="card-text">
+                Seamlessly optimize your website for search engines with
+                accurate and reliable data.
+              </p>
+            </div>
+          </div>
+          <div
+            class="card text-left min-w-60 lg:my-4 shadow-md hover:shadow-lg rounded-lg bg-gray-100 dark:bg-gray-600"
+            id="card1"
+          >
+            <img
+              class="card-img-top overflow-hidden rounded-t-lg max-h-50 object-cover w-80"
+              src="../static/images/Download_csv.webp"
+              alt="Card image cap"
+            />
+            <div class="card-body">
+              <h5 class="card-title">Integrated Data Export</h5>
+              <p class="card-text">
+                Downloadable CSV option provides processed data for seamless integration into your workflow.
+              </p>
+            </div>
+          </div>          
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="form-container" class="form-container">
+    <!-- Form will be loaded dynamically here -->
+  </div>
+  {% block response_table %}{% endblock %}
 </main>
-{% endblock  %}
+{% endblock %}

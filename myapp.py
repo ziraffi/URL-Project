@@ -182,7 +182,7 @@ async def process_clienturl_data():
         app.logger.info(f"Received dataSet: {url_set} (type: {type(url_set)})")
 
         # Run asynchronous tasks to process URLs
-        semaphore = asyncio.Semaphore(8)  # Adjust the semaphore value as needed
+        semaphore = asyncio.Semaphore(10)  # Adjust the semaphore value as needed
         logging.info("Starting URL processing")
 
         data = []
@@ -230,7 +230,7 @@ async def process_clienturl_data():
     
 @app.route('/progress', methods=['POST'])
 def get_progress():
-    print("At the End Point: ", progress_info)
+    # print("At the End Point: ", progress_info)
     return jsonify(progress_info)
     
 @app.route('/download/<csvFilename>', methods=['GET'])

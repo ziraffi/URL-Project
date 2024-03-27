@@ -12,8 +12,7 @@ from typing import List, AsyncGenerator, Dict, Any
 
 # Logging setup with enhanced logging of successful and failed requests
 logging.basicConfig(level=logging.INFO, filename='domain_info_checker.log')
-
-async def fetch_url_status(url, session, semaphore):
+async def fetch_url_status(url, session, semaphore, max_redirects=15, max_retries=3):
     # Ensure URL has a protocol (http:// or https://)
     if not url.startswith("http://") and not url.startswith("https://"):
         # Assuming HTTP as default protocol
@@ -21,21 +20,35 @@ async def fetch_url_status(url, session, semaphore):
 
     # Log the received dataSet
     logging.info(f"Received dataSet: {url}")  # Review the current dataSet which is going to be processed
-    try:
-        async with semaphore, session.get(url, timeout=8) as response:
-            status_code = response.status
-            status_message = response.reason
-            return status_code, status_message
-    except aiohttp.ClientError as ce:
-        logging.error(f"Client error fetching URL status for {url}: {ce}")        
-    except asyncio.TimeoutError:
-        logging.error(f"Timeout error fetching URL status for {url}")
-        return None, None
-    except Exception as e:
-        logging.error(f"Error fetching URL status for {url}: {e}")
-    await asyncio.sleep(2)            
-    return None
+    
+    retry_count = 0
+    while retry_count < max_retries:
+        try:
+            async with semaphore, session.get(url, timeout=10, allow_redirects=True) as response:
+                status_codes = [response.status]
+                status_messages = [response.reason]
 
+                # Follow redirects and capture status codes
+                while response.history:
+                    response = response.history[0]
+                    status_codes.append(response.status)
+                    status_messages.append(response.reason)
+
+                return status_codes, status_messages
+
+        except aiohttp.ClientError as ce:
+            logging.error(f"Client error fetching URL status for {url}: {ce}")        
+        except asyncio.TimeoutError:
+            logging.error(f"Timeout error fetching URL status for {url}. Retrying...")
+            retry_count += 1
+        except Exception as e:
+            logging.error(f"Error fetching URL status for {url}: {e}")
+
+        await asyncio.sleep(2)  # Add a delay before retrying
+        logging.info("Retrying...")
+    
+    logging.warning(f"Exceeded maximum retries for URL: {url}")
+    return [None], ["Exceeded maximum retries"]
 
 async def get_domain_info_async(url, session, semaphore):
     try:
@@ -61,7 +74,7 @@ async def get_domain_info_async(url, session, semaphore):
         )
 
         # Check for specific name servers associated with domain parking or sales platforms
-        for name_server in whois_info.name_servers:
+        for name_server in whois_info.name_servers or []:
             if any(keyword in name_server.lower() for keyword in ['afternic', 'sedo', 'parking']):
                 for_sale_indicator = 'Yes'
                 break
@@ -98,7 +111,7 @@ async def get_domain_info_async(url, session, semaphore):
             'For Sale': None,
             'Response Time': None,            
         }
-        
+     
 # Variable to store progress information
 progress_info = {
     'tryPercent' : 0,

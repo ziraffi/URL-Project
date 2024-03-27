@@ -1,6 +1,5 @@
 // myfrnt.js
 // Global variable to store the selected sheet
-
 // var selectedSheet = null;
 var urlFlag = false;
 
@@ -29,20 +28,24 @@ $(document).ready(function () {
             header.stop().animate({
                 top: '-100px', // Move header off-screen
                 opacity: 0
-            }, 500);
+            }, 200);
             if (urlFlag) {
                 $("#floatContainer").show().animate({
                     left: '50px' // Move to the specified left position
                 }, 1500);            
+            }else{
+                $("#floatContainer").hide();
             }
             
         } else {
-            $("#floatContainer").hide();                
+            $("#floatContainer").stop().animate({
+                left: '-50px' // Move to the specified left position
+            }, 1500);                
             // Show the header with fade in animation
-            header.stop().animate({
+            header.animate({
                 top: '0', // Move header back to its original position
                 opacity: 1                
-            }, 200);
+            }, 0);
         }
 
         // Animation for footer
@@ -67,6 +70,7 @@ $(document).ready(function () {
         $('#manual-data').val('');
         $('#manual-data-table').empty();
         $('#mnl-tbl').hide();
+        urlFlag = false;
 
         $('#tableDiv').hide();
         $('#tbl-section').hide();
@@ -84,6 +88,7 @@ $(document).ready(function () {
         $('#column-name').empty();
         $('#file-data-table').empty();
         $('#file-tbl').hide();
+        urlFlag = false;
 
         $('#tableDiv').hide();
         $('#tbl-section').hide();
@@ -185,7 +190,7 @@ $(document).ready(function () {
             success: function (data) {
                 $('#valid_list').empty();
                 $('#invalid_list').empty(); // Clear invalid list
-                $('#url-container').show();
+                // $('#url-container').show();
                 // Handle server response
                 if (data.error_message) {
                     $('#error-message').text(data.error_message);
@@ -269,10 +274,10 @@ function appendColumnDataToUrlContainer(columnData) {
 
     // Show or hide url-container based on the presence of valid or invalid data
     if (validUrlExists || invalidDataExists) {
-        $('#url-container').show();
+        // $('#url-container').show();
         urlFlag = true;
     } else {
-        $('#url-container').hide();
+        // $('#url-container').hide();
         urlFlag = false;
     }
     // if (manualDataSet && Object.keys(manualDataSet).length !== 0) {
@@ -326,7 +331,7 @@ async function fetchColumnURLs(formData) {
         // Display column Data in the valid_list and invalid_list divs
         $('#valid_list').empty();
         $('#invalid_list').empty(); 
-        $('#url-container').show();
+        // $('#url-container').show();
 
         var raw_data = data.column_data;
         const file_name = data.selected_file;
@@ -384,17 +389,17 @@ async function fetchColumnURLs(formData) {
 
             // Show or hide url-container based on the presence of valid or invalid data
             if (validDataExists || invalidDataExists) {
-                $('#url-container').show();
+                // $('#url-container').show();
                 urlFlag = true;
             } else {
-                $('#url-container').hide();
+                // $('#url-container').hide();
                 urlFlag = false;
             }
         } else {
             $('#invalid_list').append($('<p>No URLs found for the selected column.</p>'));
             $('#invalid_list').show(); // Hide invalid list if no data
             $('#valid_list').hide(); // Hide valid list if no data
-            $('#url-container').show();
+            // $('#url-container').show();
         }
     } catch (error) {
         console.error('Error fetching column Data:', error);
@@ -505,7 +510,7 @@ function createDropdown() {
         $('<option>').text('First 10').attr('value', 'Option 2'),
         $('<option>').text('First 50').attr('value', 'Option 3'),
         $('<option>').text('First 100').attr('value', 'Option 4'),
-        $('<option>').text('First 150').attr('value', 'Option 5'),
+        // $('<option>').text('First 150').attr('value', 'Option 5'),
         $('<option>').text('More').attr('value', 'Choose').prop('disabled', true)
     );
 
@@ -527,20 +532,28 @@ function createDropdown() {
         }
     });
 
-// Checkbox change event handler
+// Corrected Checkbox Change Event Handler:
 $(document).on("change", "input:checkbox.row-checkbox", function() {
-    var selectedValue = $("select").val(); // Get the current dropdown selection
-    var totalChecked = $("input:checkbox.row-checkbox:checked").length; // Get the total checked checkboxes
-
-    // Check if the selected checkboxes exceed the limit
-    if (totalChecked > 150) {
-        $(this).prop("checked", false); // Uncheck the current checkbox if the limit is exceeded
-        return; // Exit the function to prevent further processing
+    var selectedValue = $("select").val();
+    var totalChecked = $("input:checkbox.row-checkbox:checked").length;
+    updateSendServeButton();  
+    if (totalChecked > 104 && $(this).is(":checked")) {
+      $(this).prop("checked", false); // Uncheck if limit is exceeded
+      alert("Maximum 104 items can be selected."); // Inform the user
+      return; // Exit early
     }
+    // if ($("input:checkbox.row-checkbox:checked").length === 0) {
+    //     alert("Please select at least one item before clicking Lock & GO.");
+    //     $("#send_serve").hide();
+
+    //     return false; // Prevent form submission (if applicable)
+    // }else {
+    //   $("#send_serve").show();
+    // }
 
     updateCheckAllCheckbox();
-    handleCheckboxSelection(selectedValue); // Apply limit after checkbox status changes
-});
+    handleCheckboxSelection(selectedValue);
+  });
 
 // Function to handle checkbox selection based on dropdown selection
 function handleCheckboxSelection(selection) {
@@ -561,9 +574,10 @@ function handleCheckboxSelection(selection) {
         checkLimitedCheckboxes(50);
     } else if (selection === "Option 4") { // First 100
         checkLimitedCheckboxes(100);
-    } else if (selection === "Option 5") { // First 150
-        checkLimitedCheckboxes(150);
-    }
+    } 
+    // else if (selection === "Option 5") { // First 150
+    //     checkLimitedCheckboxes(150);
+    // }
 
     // Update check_all checkbox based on checked checkboxes
     updateCheckAllCheckbox();
@@ -631,7 +645,34 @@ function storeCheckedValues() {
         await sendDataToServer(clientUrlSet);
     });
 }
+  // Function to check if any checkboxes are selected
+  function hasCheckedItems() {
+    return $("input:checkbox.row-checkbox:checked").length > 0;
+  }
 
+  // Dropdown change event handler
+  $(document).on("change", "select", function() {
+    updateSendServeButton();
+  });
+
+  // Checkbox change event handler
+  $(document).on("change", "input:checkbox.row-checkbox", function() {
+    updateSendServeButton();
+  });
+
+  // Update button visibility based on current state
+  function updateSendServeButton() {
+    const isChecked = hasCheckedItems();
+    if (isChecked) {
+      $("#send_serve").show();
+    } else {
+      $("#send_serve").hide();
+    }
+  }
+
+  // Initial check on page load (optional)
+  updateSendServeButton();
+  
 let progressInterval;
 
 // Function to send data to the server
@@ -864,24 +905,24 @@ function displayProcessedData(responseData, responseFile) {
 
     let downloadAllowed = true; // Add a flag to track download permission
 
-    $('#downloadButton').click(async function() {
+    $('#downloadButton').on('click', async function() {
         try {
             if (downloadAllowed) { // Check if download is allowed
                 if (confirm("Do you want to download the processed data?")) {
                     const csvUrl = `/download/${csvFilename}`;
-                    const link = document.createElement('a');
-                    link.href = csvUrl;
-                    link.download = csvFilename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    const link = $('<a>', {
+                        href: csvUrl,
+                        download: csvFilename
+                    }).appendTo('body');
+                    link[0].click();
+                    link.remove();
                     alert('CSV file download started.');
                     
                     // Disable further downloads until user clicks again
                     downloadAllowed = false;
     
                     await new Promise(resolve => {
-                        link.addEventListener('click', () => {
+                        link.on('click', () => {
                             resolve();
                         });
                     });
