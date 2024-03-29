@@ -1083,69 +1083,65 @@ async function populateColumnDropdown(columnNames, selectedSheet) {
     }
 }
 
-// Handle file change event
-$(document).on('change', '#file', function () {
-    // Clear previous selections and hide elements
-    $('#valid_list').empty();
-    $('#invalid_list').empty();
-    $('#sheet-name').empty().hide();
-    $('#column-name').empty().hide();
-    $('#url-container').hide();
-    $('#tbl-section').hide();
-    $('#processedTable').hide();
-    $('#tableDiv').hide();
-    $('caption').empty().hide();
-    $('#totalProcessingTime').empty().hide();
-    $('#downloadButtonContainer').hide();
-    urlFlag = false;
-
-    var fileInput = $(this)[0].files[0]; // Get the selected file
-
-    var formData = new FormData(); // Initialize FormData object
-    if (fileInput) {
-        formData.append('file', fileInput); // Include the file data
-        $('#sheet-name').show();     
-        $('#column-name').show();
-        fetchSheetAndColumnNames(formData); // Fetch sheet and column names
-    } else {
-        console.error('No file selected.');
-    }
-});
-
-// Handle sheet dropdown change event
-$(document).on('change', '#sheet-name', function () {
-    var selectedSheet = $(this).val(); // Get the selected sheet
-    var formData = new FormData(); // Initialize FormData object
-    var fileInput = $('#file')[0].files[0]; // Get the selected file
-
-    if (selectedSheet && fileInput) {
-        formData.append('file', fileInput); // Include the file data
-        formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
-        fetchColumnURLs(formData); // Fetch column URLs based on selected sheet
-    } else {
-        console.error('No valid sheet selected or file uploaded.');
-    }
-});
-
 // Handle column dropdown change event
 $(document).on('change', '#column-name', function () {
     var selectedColumn = $(this).val(); // Get the selected column
-    var selectedSheet = $('#sheet-name').val(); // Get the selected sheet
-    var fileInput = $('#file')[0].files[0]; // Get the selected file
-
     if (selectedColumn && selectedSheet && fileInput) {
+        selectedSheet= $('#sheet-name').val();
         var formData = new FormData(); // Initialize FormData object
-        formData.append('file', fileInput); // Include the file data
+        formData.append('file', $('#file')[0].files[0]); // Include the file data
         formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
         formData.append('selected_column', selectedColumn); // Pass the selected column
-        fetchColumnURLs(formData); // Fetch column URLs based on selected column
+        fetchColumnURLs(formData); // Pass the FormData object to fetch column Data
+
         $('#totalProcessingTime').empty().hide();
         $("#processedTable").hide();
         $("#tableDiv").hide();
         $('#downloadButtonContainer').hide();
         urlFlag = false;
     } else {
-        console.error('No valid column selected or file uploaded.');
+        console.log('No valid column selected.');
+    }
+});
+
+// Function to handle sheet dropdown change event
+$(document).on('change', '#sheet-name', function () {
+    selectedSheet = $(this).val(); // Update the selected sheet value
+    var formData = new FormData(); // Construct FormData object with selected sheet value
+    formData.append('file', $('#file')[0].files[0]); // Include the file data
+    formData.append('selected_sheet', selectedSheet); // Use the first sheet if selectedSheet is null
+    fetchSheetAndColumnNames(formData); // Pass the FormData object to fetch sheet and column names
+    $('totalProcessingTime').empty().hide();
+    $("#processedTable").hide();
+    $("#tableDiv").hide();
+    $('#downloadButtonContainer').hide();
+    urlFlag = false;
+
+});
+
+// Function to handle file change event
+$(document).on('change', '#file', function () {
+    $('#valid_list').empty(); // Clear the valid_list div
+    var fileInput = $(this)[0].files[0]; // Get the selected file
+    var formData = new FormData(); // Initialize FormData object
+    $("#processedTable").hide();
+    $("#tableDiv").hide();
+    $('caption').empty().hide();
+    $('#totalProcessingTime').empty().hide();
+    $('#downloadButtonContainer').hide();
+
+    $('#url-container').hide();
+    urlFlag = false;
+
+
+    if (fileInput) {
+        formData.append('file', fileInput); // Include the file data
+        fetchSheetAndColumnNames(formData); // Pass the FormData object to fetch sheet and column names
+    } else {
+        console.error('No file selected.');
+        $('#tbl-section').hide();
+        $('#sheet-name').empty();
+        $('#column-name').empty();
     }
 });
 });
