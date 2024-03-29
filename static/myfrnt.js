@@ -1131,11 +1131,11 @@ $(document).on('change', '#sheet-name', function () {
 $(document).on('change', '#column-name', function () {
     var selectedColumn = $(this).val(); // Get the selected column
     var selectedSheet = $('#sheet-name').val(); // Get the selected sheet
-    var formData = new FormData(); // Initialize FormData object
     var fileInput = $('#file')[0].files[0]; // Get the selected file
 
-    if (selectedColumn) {
-        formData.append('file', $('#file')[0].files[0]); // Include the file data
+    if (selectedColumn && selectedSheet && fileInput) {
+        var formData = new FormData(); // Initialize FormData object
+        formData.append('file', fileInput); // Include the file data
         formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
         formData.append('selected_column', selectedColumn); // Pass the selected column
         fetchColumnURLs(formData); // Fetch column URLs based on selected column
