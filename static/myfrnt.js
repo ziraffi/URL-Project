@@ -1134,7 +1134,7 @@ $(document).on('change', '#column-name', function () {
     var formData = new FormData(); // Initialize FormData object
     var fileInput = $('#file')[0].files[0]; // Get the selected file
 
-    if (selectedColumn && selectedSheet) {
+    if (selectedColumn) {
         formData.append('file', fileInput); // Include the file data
         formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
         formData.append('selected_column', selectedColumn); // Pass the selected column
