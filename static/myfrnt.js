@@ -50,7 +50,7 @@ $(document).ready(function () {
 
         // Animation for footer
         if ($(window).scrollTop() > lastScrollTop) {
-            if(scrollPosition + $(window).height() >= $(document).height()) {
+            if(scrollPosition + $(window).height() <= $(document).height()) {
                 // Show the footer with fade in animation
                 footer.fadeIn();
             }
@@ -795,7 +795,7 @@ async function fetchProgress() {
             url: '/progress',
             method: 'POST'
         });
-        var assumePercent=response.tryPercent.toFixed()
+        var assumePercent=response.tryPercent;
         var progressData = response.pInfo_obj;
         // Call generateTable with the progress data
         generateTable(progressData,assumePercent);
@@ -827,7 +827,15 @@ async function generateTable(progressData, assumePercent) {
     let keysOrder = ['Sr.No','URL', 'Domain Status', 'Expiration Date', 'For Sale', 'Response Message', 'Response Time', 'Status Code'];
     // Append table headers with the defined order
     keysOrder.forEach((key) => {
-        table += `<th>${key}</th>`;
+        if (key === 'Sr.No') {
+            table += `<th class="sortable" data-key="${key}">${key} <i class="bi bi-sort-numeric-down"></i></th>`; // Add data-key and i attribute for sorting
+        } else if (key === 'Expiration Date') {
+            table += `<th class="sortable" data-key="${key}">${key} <i class="bi bi-sort-numeric-down"></i></th>`; // Add data-key and i attribute for sorting
+        } else if (key === 'Response Time') {
+            table += `<th class="sortable" data-key="${key}">${key} <i class="bi bi-sort-numeric-down-alt"></i></th>`; // Add data-key and i attribute for sorting
+        } else {
+            table += `<th class="sortable" data-key="${key}">${key}</th>`; // Add data-key for sorting
+        }       
     });
     table += '</tr></thead><tbody>';
 
@@ -836,7 +844,7 @@ async function generateTable(progressData, assumePercent) {
         let row = '<tr>';
         // Iterate over keys in the defined order
         keysOrder.forEach((key) => {
-            if (key === 'Expiration Date') { // Use '===' for comparison, not '='
+            if (key === 'Expiration Date') { 
                 row += `<td>${new Date(item[key]).toLocaleString()}</td>`; // Convert to localized string
             } 
             if (key === 'Sr.No') {
@@ -854,8 +862,48 @@ async function generateTable(progressData, assumePercent) {
     
     // Append the table to the tableDiv
     $('#tryTable').append(table);
+
+    // Add event listeners for sorting when headers are clicked
+    $('.sortable').on('click', function() {
+        const key = $(this).data('key'); // Get the data-key attribute value
+        sortTable(key, keysOrder); // Pass keysOrder as a parameter
+    });
 }
 
+// Function to sort the table based on the clicked header
+function sortTable(key, keysOrder) { // Receive keysOrder as a parameter
+    const $table = $('#innerTrytable');
+    const rows = $table.find('tbody > tr').toArray();
+    const isDescending = $(this).hasClass('desc'); // Check if currently descending
+
+    if (key === 'Expiration Date' || key === 'Response Time') { // Check if clicked header is 'Expiration Date' or 'Response Time'
+        rows.sort((a, b) => {
+            let aValue = $(a).find(`td:eq(${keysOrder.indexOf(key)})`).text();
+            let bValue = $(b).find(`td:eq(${keysOrder.indexOf(key)})`).text();
+
+            // Ensure aValue and bValue are strings
+            aValue = String(aValue);
+            bValue = String(bValue);
+
+            return isDescending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+        });
+    } else if (key === 'Sr.No') { // Check if clicked header is 'Sr.No'
+        rows.sort((a, b) => {
+            let aValue = parseInt($(a).find(`td:eq(${keysOrder.indexOf(key)})`).text()); // Parse as integer for 'Sr.No'
+            let bValue = parseInt($(b).find(`td:eq(${keysOrder.indexOf(key)})`).text());
+
+            // Sort in ascending order
+            if (!isDescending) {
+                return aValue - bValue;
+            } else { // Sort in descending order
+                return bValue - aValue;
+            }
+        });
+    }
+
+    $table.find('tbody').html(rows);
+    $(this).toggleClass('desc'); // Toggle descending class for the next click
+}
 
 // Update the function to display processed data in a table
 function displayProcessedData(responseData, responseFile) {

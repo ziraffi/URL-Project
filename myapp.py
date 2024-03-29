@@ -18,9 +18,17 @@ def index():
 @app.route('/login.html')
 def login():
     return render_template('login.html')
+
 @app.route('/guide.html')
 def guide():
     return render_template('guide.html')
+
+@app.route('/disclaimer.html')
+def disclaimer():
+    return render_template('disclaimer.html')
+@app.route('/privacy_policy.html')
+def privacy_policy():
+    return render_template('privacy_policy.html')
 
 @app.route('/registration.html')
 def register():
@@ -233,7 +241,7 @@ def get_progress():
     # print("At the End Point: ", progress_info)
     return jsonify(progress_info)
     
-@app.route('/download/<csvFilename>', methods=['GET'])
+@app.route('/download/<csvFilename>', methods=['POST'])
 def download_csv(csvFilename):
     try:
         csv_path = f'C:\\Users\\HP\\Desktop\\project_Experiment\\{csvFilename}'  # Update with the actual path to your CSV directory
