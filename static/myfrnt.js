@@ -1086,8 +1086,8 @@ var columflag = false;
 // Handle column dropdown change event
 $(document).on('change', '#column-name', function () {
     var selectedColumn = $(this).val(); // Get the selected column
+    columflag = true;
     if (selectedColumn) {
-        columflag = true;
         selectedSheet= $('#sheet-name').val();
         var formData = new FormData(); // Initialize FormData object
         formData.append('file', $('#file')[0].files[0]); // Include the file data
