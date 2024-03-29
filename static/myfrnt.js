@@ -1123,8 +1123,8 @@ $(document).on('change', '#file', function () {
 
     var fileInput = $(this)[0].files[0]; // Get the selected file
 
+    var formData = new FormData(); // Initialize FormData object
     if (fileInput) {
-        var formData = new FormData(); // Initialize FormData object
         formData.append('file', fileInput); // Include the file data
         $('#sheet-name').show();     
         $('#column-name').show();
