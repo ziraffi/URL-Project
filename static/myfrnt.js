@@ -1135,7 +1135,7 @@ $(document).on('change', '#column-name', function () {
     var fileInput = $('#file')[0].files[0]; // Get the selected file
 
     if (selectedColumn) {
-        formData.append('file', fileInput); // Include the file data
+        formData.append('file', $('#file')[0].files[0]); // Include the file data
         formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
         formData.append('selected_column', selectedColumn); // Pass the selected column
         fetchColumnURLs(formData); // Fetch column URLs based on selected column
