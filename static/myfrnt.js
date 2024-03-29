@@ -1086,7 +1086,7 @@ async function populateColumnDropdown(columnNames, selectedSheet) {
 // Handle column dropdown change event
 $(document).on('change', '#column-name', function () {
     var selectedColumn = $(this).val(); // Get the selected column
-    if (selectedColumn && selectedSheet && fileInput) {
+    if (selectedColumn) {
         selectedSheet= $('#sheet-name').val();
         var formData = new FormData(); // Initialize FormData object
         formData.append('file', $('#file')[0].files[0]); // Include the file data
