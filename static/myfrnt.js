@@ -1082,30 +1082,6 @@ async function populateColumnDropdown(columnNames, selectedSheet) {
         fetchColumnURLs(formData); // Pass the FormData object to fetch column Data
     }
 }
-var columflag = false;
-// Handle column dropdown change event
-$(document).on('change', '#column-name', function () {
-    var selectedColumn = $(this).val(); // Get the selected column
-    columflag = true;
-    if (selectedColumn) {
-        selectedSheet= $('#sheet-name').val();
-        var formData = new FormData(); // Initialize FormData object
-        formData.append('file', $('#file')[0].files[0]); // Include the file data
-        formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
-        formData.append('selected_column', selectedColumn); // Pass the selected column
-        fetchColumnURLs(formData); // Pass the FormData object to fetch column Data
-
-        $('#totalProcessingTime').empty().hide();
-        $("#processedTable").hide();
-        $("#tableDiv").hide();
-        $('#downloadButtonContainer').hide();
-        urlFlag = false;
-
-    } else {
-        console.log('No valid column selected.');
-    }
-});
-
 
 // Handle file change event
 $(document).on('change', '#file', function () {
@@ -1128,17 +1104,10 @@ $(document).on('change', '#file', function () {
     var formData = new FormData(); // Initialize FormData object
     if (fileInput) {
         formData.append('file', fileInput); // Include the file data
-        $('#sheet-name').show();
-        if (columflag) {
-            
-            $('#column-name').show();
-        }else{
-            $('#column-name').empty();
-            
-        }     
+        $('#sheet-name').show();     
+        $('#column-name').show();
         fetchSheetAndColumnNames(formData); // Fetch sheet and column names
     } else {
-
         console.error('No file selected.');
     }
 });
@@ -1170,6 +1139,11 @@ $(document).on('change', '#column-name', function () {
         formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
         formData.append('selected_column', selectedColumn); // Pass the selected column
         fetchColumnURLs(formData); // Fetch column URLs based on selected column
+        $('#totalProcessingTime').empty().hide();
+        $("#processedTable").hide();
+        $("#tableDiv").hide();
+        $('#downloadButtonContainer').hide();
+        urlFlag = false;
     } else {
         console.error('No valid column selected or file uploaded.');
     }
