@@ -1073,9 +1073,9 @@ async function populateColumnDropdown(columnNames, selectedSheet) {
     }
     // Get the default selected column
     var selectedColumn = columnDropdown.val();
+    var formData = new FormData(); // Initialize FormData object
     // Fetch column data for the default selected column
     if (selectedColumn) {
-        var formData = new FormData(); // Initialize FormData object
         formData.append('file', $('#file')[0].files[0]); // Include the file data
         formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
         formData.append('selected_column', selectedColumn); // Pass the selected column
