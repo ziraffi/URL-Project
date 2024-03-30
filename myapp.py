@@ -244,7 +244,7 @@ def get_progress():
 @app.route('/download/<csvFilename>', methods=['POST'])
 def download_csv(csvFilename):
     try:
-        csv_path = f'\\{csvFilename}'  # Update with the actual path to your CSV directory
+        csv_path = f'.\\{csvFilename}'  # Update with the actual path to your CSV directory
         
         # Check if the file exists
         if os.path.exists(csv_path):
@@ -264,6 +264,8 @@ def download_csv(csvFilename):
     except Exception as e:
         return jsonify({'error': str(e)})
 
+home_path = os.path.expanduser('~')
+print("Home path:", home_path)
 def submit_form():
     file_type = request.form.get('file')
     batch = request.form.get('batch')
