@@ -677,13 +677,12 @@ let progressInterval;
 
 // Function to send data to the server
 async function sendDataToServer(clientUrlSet) {
+    $('#downloadButtonContainer').hide();
+
     try {
      
         // Record start time
         startTime = new Date().getTime();
-
-        // Display loading indicator
-        $('#loadingIndicator').show();
 
         // Make sure dataSet is not empty
         if (!clientUrlSet || !clientUrlSet.url_list || clientUrlSet.url_list.length === 0) {
@@ -731,7 +730,13 @@ async function sendDataToServer(clientUrlSet) {
                 console.error("Error from server:", response.error);
                 // Handle the specific error message here
             } else {
-
+                // Call fetchProgress after an initial delay of 800 milliseconds
+                await fetchProgress();                
+                // Display loading indicator
+                $('#loadingIndicator').show();
+                // Call updateProgressPercentage with the progress percentage
+                await updateProgressPercentage(assumePercent);      
+                          
                 console.log("Data sent successfully:", response);
                 $("#processedTable").show();
 
@@ -747,8 +752,7 @@ async function sendDataToServer(clientUrlSet) {
                     // Hide the download button if no downloadable data
                     $('#downloadButtonContainer').hide();
                 }
-            // Call fetchProgress after an initial delay of 800 milliseconds
-            await fetchProgress();
+
             }
 
             // Check if the response is empty or not
@@ -815,8 +819,7 @@ async function generateTable(progressData, assumePercent) {
         console.error('Progress data is empty or undefined.');
         return;
     }
-    // Call updateProgressPercentage with the progress percentage
-    await updateProgressPercentage(assumePercent);
+
     
     // Define the table variable with the specified format
     var table = '<table id="innerTrytable" class="data-table" border="1">';
