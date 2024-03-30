@@ -738,7 +738,7 @@ async function sendDataToServer(clientUrlSet) {
                 if (response.has_downloadable_data) {
                     // Display the processed data in a table
                     displayProcessedData(response.data, response.csv_filename);
-                    
+                    console.log("response.csv_filename: ",response.csv_filename);
                     // Display a button to download the CSV file
                     $('#downloadButtonContainer').show();
 
