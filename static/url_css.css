@@ -129,7 +129,7 @@ nav ul li:hover::after {
   width: 100%;
 }
 
-@media only screen and (max-width: 392px) {
+@media (max-width: 392px) {
   /* Adjusting the close icon styles */
   .navigation.active .bi.bi-layout-sidebar-inset-reverse.close-icon {
     display: none;
