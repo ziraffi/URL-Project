@@ -97,7 +97,7 @@ $(document).ready(function () {
         
     });
 
-    const openNavButton = $('.fa-bars');
+    const openNavButton = $('.bi-layout-sidebar-inset');
     const closeNavIcon = $('.close-icon');
     const navigation = $('.navigation');
 
