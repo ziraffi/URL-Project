@@ -244,7 +244,7 @@ def get_progress():
 @app.route('/download/<csvFilename>', methods=['POST'])
 def download_csv(csvFilename):
     try:
-        csv_path = f'\\opt\\render\\project\\{csvFilename}'  # Update with the actual path to your CSV directory
+        csv_path = f'\\opt\\render\\project\\src\\{csvFilename}'  # Update with the actual path to your CSV directory
         
         # Check if the file exists
         if os.path.exists(csv_path):
