@@ -249,7 +249,7 @@ def download_csv(csvFilename):
         # Check if the file exists
         if os.path.exists(csv_path):
             # Open the file in binary mode
-            with open(csv_path, 'rk') as file:
+            with open(csv_path, 'rb') as file:
                 # Create a Flask response object
                 response = make_response(file.read())
                 
