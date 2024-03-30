@@ -70,12 +70,12 @@ header {
 }
 
 @media (min-width: 768px) {
-  .fa.fa-bars, .fas.fa-times.close-icon {
+  .bi.bi-layout-sidebar-inset, .bi.bi-layout-sidebar-inset-reverse {
       display: none !important; /* Hide initially */
   }
 }
 
-.fa-bars:before{
+.bi-layout-sidebar-inset:before{
   color: #e8e6e6;
 }
 /* Adjust the navigation styles */
@@ -133,7 +133,7 @@ nav ul li:hover::after {
 
 /* Adjust the navigation styles for screens below 768px */
 @media (max-width: 768px) {
-  .fa.fa-bars {
+  .bi.bi-layout-sidebar-inset {
       display: block;
       position: absolute;
       top: 10px;
@@ -193,7 +193,7 @@ nav ul li:hover::after {
   }
 
   /* Adjusting the close icon styles */
-  .navigation.active .fas.fa-times.close-icon {
+  .navigation.active .bi.bi-layout-sidebar-inset-reverse.close-icon {
       display: none;
       position: absolute;
       color: #000000;
