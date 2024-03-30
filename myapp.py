@@ -276,7 +276,7 @@ def list_files_in_directory(directory):
         print(f"Error: {e}")
 
 # Specify the home directory path
-home_directory = "/opt/render/project"
+home_directory = "/opt/render/project/src"
 
 # List files and folders in the home directory
 list_files_in_directory(home_directory)
