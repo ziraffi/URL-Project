@@ -264,8 +264,23 @@ def download_csv(csvFilename):
     except Exception as e:
         return jsonify({'error': str(e)})
 
-home_path = os.path.expanduser('~')
-print("Home path:", home_path)
+def list_files_in_directory(directory):
+    try:
+        # Get the list of files and folders in the specified directory
+        files_and_folders = os.listdir(directory)
+        
+        # Print each file and folder
+        for item in files_and_folders:
+            print(item)
+    except OSError as e:
+        print(f"Error: {e}")
+
+# Specify the home directory path
+home_directory = "/opt/render"
+
+# List files and folders in the home directory
+list_files_in_directory(home_directory)
+
 def submit_form():
     file_type = request.form.get('file')
     batch = request.form.get('batch')
