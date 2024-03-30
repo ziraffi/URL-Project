@@ -730,13 +730,7 @@ async function sendDataToServer(clientUrlSet) {
                 console.error("Error from server:", response.error);
                 // Handle the specific error message here
             } else {
-                // Call fetchProgress after an initial delay of 800 milliseconds
-                await fetchProgress();                
-                // Display loading indicator
-                $('#loadingIndicator').show();
-                // Call updateProgressPercentage with the progress percentage
-                await updateProgressPercentage(assumePercent);      
-
+              
                 console.log("Data sent successfully:", response);
                 $("#processedTable").show();
 
@@ -752,6 +746,10 @@ async function sendDataToServer(clientUrlSet) {
                     // Hide the download button if no downloadable data
                     $('#downloadButtonContainer').hide();
                 }
+                // Call fetchProgress after an initial delay of 800 milliseconds
+                await fetchProgress();                
+                // Display loading indicator
+                $('#loadingIndicator').show();
 
             }
 
@@ -803,6 +801,8 @@ async function fetchProgress() {
         var progressData = response.pInfo_obj;
         // Call generateTable with the progress data
         generateTable(progressData,assumePercent);
+        // Call updateProgressPercentage with the progress percentage
+        await updateProgressPercentage(assumePercent);          
     } catch (error) {
         console.error('Error fetching progress:', error);
     }
@@ -820,6 +820,7 @@ async function generateTable(progressData, assumePercent) {
         return;
     }
 
+    
     // Define the table variable with the specified format
     var table = '<table id="innerTrytable" class="data-table" border="1">';
     
