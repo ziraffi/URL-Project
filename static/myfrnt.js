@@ -801,8 +801,7 @@ async function fetchProgress() {
         var progressData = response.pInfo_obj;
         // Call generateTable with the progress data
         generateTable(progressData,assumePercent);
-        // Call updateProgressPercentage with the progress percentage
-        await updateProgressPercentage(assumePercent);          
+      
     } catch (error) {
         console.error('Error fetching progress:', error);
     }
@@ -812,6 +811,7 @@ async function generateTable(progressData, assumePercent) {
     // Clear existing table content
     $('#tryTable').empty();
     $('#tableDiv').show();
+    
     console.log('ProgressData for Object: ', progressData);
 
     // Check if progressData is empty or undefined
@@ -820,7 +820,8 @@ async function generateTable(progressData, assumePercent) {
         return;
     }
 
-    
+    // Call updateProgressPercentage with the progress percentage
+    await updateProgressPercentage(assumePercent);        
     // Define the table variable with the specified format
     var table = '<table id="innerTrytable" class="data-table" border="1">';
     
