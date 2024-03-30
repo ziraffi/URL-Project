@@ -736,7 +736,7 @@ async function sendDataToServer(clientUrlSet) {
                 $('#loadingIndicator').show();
                 // Call updateProgressPercentage with the progress percentage
                 await updateProgressPercentage(assumePercent);      
-                          
+
                 console.log("Data sent successfully:", response);
                 $("#processedTable").show();
 
@@ -820,7 +820,6 @@ async function generateTable(progressData, assumePercent) {
         return;
     }
 
-    
     // Define the table variable with the specified format
     var table = '<table id="innerTrytable" class="data-table" border="1">';
     
