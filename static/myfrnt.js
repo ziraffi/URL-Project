@@ -678,20 +678,18 @@ let progressInterval;
 // Function to send data to the server
 async function sendDataToServer(clientUrlSet) {
     $('#downloadButtonContainer').hide();
-    // Set interval to call fetchProgress every 2000 milliseconds (2 seconds)
-    progressInterval = setInterval(fetchProgress, 2000); 
     try {
-     
+        
         // Record start time
         startTime = new Date().getTime();
-
+        
         // Make sure dataSet is not empty
         if (!clientUrlSet || !clientUrlSet.url_list || clientUrlSet.url_list.length === 0) {
             console.error("Error: DataSet is undefined or empty");
             return;
         } else {
-
- 
+            // Set interval to call fetchProgress every 2000 milliseconds (2 seconds)
+            progressInterval = setInterval(fetchProgress, 2000); 
 
             console.log("Sending data to server:", clientUrlSet);
             console.log("Stringified Data:", JSON.stringify(clientUrlSet)); // Log the stringified data
