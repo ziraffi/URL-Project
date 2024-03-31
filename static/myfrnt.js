@@ -783,9 +783,7 @@ async function fetchProgress() {
         });
         var progressData = response.pInfo_obj;
         var progressPercentage = response.tryPercent.toFixed(2);
-        // Call updateProgressPercentage with the progress percentage
-        await updateProgressPercentage(progressPercentage); // Use await to ensure the function completes before moving forward         
-        console.log("progressPercentage Test: ", progressPercentage); // Check if the progress percentage is received correctly   
+   
         // Call generateTable with the progress data
         generateTable(progressData,progressPercentage);
 
@@ -815,7 +813,7 @@ async function updateProgressPercentage(progressPercentage) {
 
 
 // Function to dynamically generate table
-async function generateTable(progressData) {
+async function generateTable(progressData,progressPercentage) {
     // Clear existing table content
     $('#tryTable').empty();
     $('#tableDiv').show();
@@ -826,7 +824,9 @@ async function generateTable(progressData) {
     if (!progressData || progressData.length === 0) {
         return;
     }
-      
+        // Call updateProgressPercentage with the progress percentage
+        await updateProgressPercentage(progressPercentage); // Use await to ensure the function completes before moving forward         
+        console.log("progressPercentage Test: ", progressPercentage); // Check if the progress percentage is received correctly        
         // Define the table variable with the specified format
         var table = '<table id="innerTrytable" class="data-table" border="1">';
         
