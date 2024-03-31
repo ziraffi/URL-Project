@@ -956,12 +956,11 @@ function displayProcessedData(responseData, responseFile) {
 
     $('#downloadButton').on('click', async function() {
         try {
-            const csvFilename = 'your_filename.csv'; // Replace with the actual filename
             const formData = new FormData();
-            formData.append('filename', csvFilename);
+            formData.append('filename', csvFilename); // Append the filename to the form data
             
-            const response = await fetch('/download/${csvFilename}', {
-                method: 'POST',
+            const response = await fetch(`/download/${csvFilename}`, { // Use csvFilename in the fetch URL
+                method: 'POST', // Change the method to POST
                 body: formData
             });
     
@@ -989,9 +988,7 @@ function displayProcessedData(responseData, responseFile) {
             console.error('Error downloading CSV:', error);
             alert('Error downloading CSV: Please try again.');
         }
-    });
-    
-    
+    });    
 }
 
 // *************************************************************************************************************************
