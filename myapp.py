@@ -241,7 +241,7 @@ def get_progress():
     # print("At the End Point: ", progress_info)
     return jsonify(progress_info)
     
-@app.route('/download/<csvFilename>', methods=['GET'])
+@app.route('/download/<csvFilename>', methods=['POST'])
 def download_csv(csvFilename):
     try:
         csv_path = f'/opt/render/project/src/{csvFilename}'  # Update with the actual path to your CSV directory
