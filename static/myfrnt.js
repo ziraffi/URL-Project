@@ -677,7 +677,9 @@ let progressInterval;
 
 // Function to send data to the server
 async function sendDataToServer(clientUrlSet) {
-
+    $('#downloadButtonContainer').hide();
+    // Set interval to call fetchProgress every 2000 milliseconds (2 seconds)
+    progressInterval = setInterval(fetchProgress, 2000); 
     try {
      
         // Record start time
@@ -688,8 +690,9 @@ async function sendDataToServer(clientUrlSet) {
             console.error("Error: DataSet is undefined or empty");
             return;
         } else {
-            // Set interval to call fetchProgress every 2000 milliseconds (2 seconds)
-            progressInterval = setInterval(fetchProgress, 2000);   
+
+ 
+
             console.log("Sending data to server:", clientUrlSet);
             console.log("Stringified Data:", JSON.stringify(clientUrlSet)); // Log the stringified data
 
@@ -729,8 +732,7 @@ async function sendDataToServer(clientUrlSet) {
                 console.error("Error from server:", response.error);
                 // Handle the specific error message here
             } else {
-              
-                console.log("Data sent successfully:", response);
+                // Display loading indicator
                 $("#processedTable").show();
 
                 // Check if the server has downloadable data
@@ -745,10 +747,11 @@ async function sendDataToServer(clientUrlSet) {
                     // Hide the download button if no downloadable data
                     $('#downloadButtonContainer').hide();
                 }
+
+
                 // Call fetchProgress after an initial delay of 800 milliseconds
-                await fetchProgress();                
-                // Display loading indicator
-                $('#loadingIndicator').show();
+                await fetchProgress();      
+                console.log("Data sent successfully:", response);
 
             }
 
@@ -765,8 +768,29 @@ async function sendDataToServer(clientUrlSet) {
     } finally {
         // Hide loading indicator after request completes
         $('#loadingIndicator').hide();
-
         clearInterval(progressInterval); // Clear interval after processing
+    }
+}
+
+async function fetchProgress() {
+    $('#loadingIndicator').show();              
+
+    $('#progressPercentage').show();
+    $("#tableDiv").show();
+
+    try {
+        const response = await $.ajax({
+            url: '/progress',
+            method: 'POST'
+        });
+        var progressData = response.pInfo_obj;
+        var progressPercentage = response.tryPercent.toFixed(2);
+   
+        // Call generateTable with the progress data
+        generateTable(progressData,progressPercentage);
+
+    } catch (error) {
+        console.error('Error fetching progress:', error);
     }
 }
 
@@ -775,38 +799,23 @@ async function updateProgressPercentage(progressPercentage) {
     try {
         // Check if progress data is received
         if (progressPercentage !== undefined) {
-            $('#progressPercentage span').text(progressPercentage + '%');
-            $('#progressBlock').css('--value', progressPercentage);
-            $('#progressPercentage').show();
-            console.log('Progress percentage updated:', progressPercentage + '%');
+            // Convert progressPercentage to integer
+            const progressInt = parseInt(progressPercentage);
+            $('#progressPercentage span').text(progressInt + '%');
+            $('#progressBlock').css('--value', progressInt);
+            console.log('Progress percentage updated:', progressInt + '%');
         } else {
             console.error('Progress percentage is undefined');
+            return
         }
     } catch (error) {
         console.error('Error updating progress percentage:', error);
     }
 }
 
-// Function to fetch progress information from the server
-async function fetchProgress() {
-    $("#tableDiv").show();
 
-    try {
-        const response = await $.ajax({
-            url: '/progress',
-            method: 'POST'
-        });
-        var assumePercent=response.tryPercent;
-        var progressData = response.pInfo_obj;
-        // Call generateTable with the progress data
-        generateTable(progressData,assumePercent);
-      
-    } catch (error) {
-        console.error('Error fetching progress:', error);
-    }
-}
 // Function to dynamically generate table
-async function generateTable(progressData, assumePercent) {
+async function generateTable(progressData,progressPercentage) {
     // Clear existing table content
     $('#tryTable').empty();
     $('#tableDiv').show();
@@ -815,62 +824,62 @@ async function generateTable(progressData, assumePercent) {
 
     // Check if progressData is empty or undefined
     if (!progressData || progressData.length === 0) {
-        console.error('Progress data is empty or undefined.');
         return;
-    }
-
-    // Call updateProgressPercentage with the progress percentage
-    await updateProgressPercentage(assumePercent);        
-    // Define the table variable with the specified format
-    var table = '<table id="innerTrytable" class="data-table" border="1">';
-    
-    // Create table header
-    table += '<thead><tr>';
-    // Define the order of keys, with 'URL' being the first one
-    let keysOrder = ['Sr.No','URL', 'Domain Status', 'Expiration Date', 'For Sale', 'Response Message', 'Response Time', 'Status Code'];
-    // Append table headers with the defined order
-    keysOrder.forEach((key) => {
-        if (key === 'Sr.No') {
-            table += `<th class="sortable" data-key="${key}">${key} <i class="bi bi-sort-numeric-down"></i></th>`; // Add data-key and i attribute for sorting
-        } else if (key === 'Expiration Date') {
-            table += `<th class="sortable" data-key="${key}">${key} <i class="bi bi-sort-numeric-down"></i></th>`; // Add data-key and i attribute for sorting
-        } else if (key === 'Response Time') {
-            table += `<th class="sortable" data-key="${key}">${key} <i class="bi bi-sort-numeric-down-alt"></i></th>`; // Add data-key and i attribute for sorting
-        } else {
-            table += `<th class="sortable" data-key="${key}">${key}</th>`; // Add data-key for sorting
-        }       
-    });
-    table += '</tr></thead><tbody>';
-
-    // Iterate over each object in progressData and create table rows
-    progressData.forEach((item, index) => {
-        let row = '<tr>';
-        // Iterate over keys in the defined order
+    }else{
+        // Call updateProgressPercentage with the progress percentage
+        await updateProgressPercentage(progressPercentage); // Use await to ensure the function completes before moving forward         
+        console.log("progressPercentage Test: ", progressPercentage); // Check if the progress percentage is received correctly      
+        // Define the table variable with the specified format
+        var table = '<table id="innerTrytable" class="data-table" border="1">';
+        
+        // Create table header
+        table += '<thead><tr>';
+        // Define the order of keys, with 'URL' being the first one
+        let keysOrder = ['Sr.No','URL', 'Domain Status', 'Expiration Date', 'For Sale', 'Response Message', 'Response Time', 'Status Code'];
+        // Append table headers with the defined order
         keysOrder.forEach((key) => {
-            if (key === 'Expiration Date') { 
-                row += `<td>${new Date(item[key]).toLocaleString()}</td>`; // Convert to localized string
-            } 
             if (key === 'Sr.No') {
-                row += `<td>${(index + 1)}</td>`; // Add 1 to index to make it 1-based
-            } else if (key !== 'Expiration Date') { // Exclude the second occurrence of 'Expiration Date'
-                row += `<td>${item[key]}</td>`;
-            }
+                table += `<th class="sortable" data-key="${key}">${key} <i class="bi bi-sort-numeric-down"></i></th>`; // Add data-key and i attribute for sorting
+            } else if (key === 'Expiration Date') {
+                table += `<th class="sortable" data-key="${key}">${key} <i class="bi bi-sort-numeric-down"></i></th>`; // Add data-key and i attribute for sorting
+            } else if (key === 'Response Time') {
+                table += `<th class="sortable" data-key="${key}">${key} <i class="bi bi-sort-numeric-down-alt"></i></th>`; // Add data-key and i attribute for sorting
+            } else {
+                table += `<th class="sortable" data-key="${key}">${key}</th>`; // Add data-key for sorting
+            }       
         });
-        row += '</tr>';
-        table += row; // Append row to the table
-    });
+        table += '</tr></thead><tbody>';
 
-    // Close table tag
-    table += '</tbody></table>';
-    
-    // Append the table to the tableDiv
-    $('#tryTable').append(table);
+        // Iterate over each object in progressData and create table rows
+        progressData.forEach((item, index) => {
+            let row = '<tr>';
+            // Iterate over keys in the defined order
+            keysOrder.forEach((key) => {
+                if (key === 'Expiration Date') { 
+                    row += `<td>${new Date(item[key]).toLocaleString()}</td>`; // Convert to localized string
+                } 
+                if (key === 'Sr.No') {
+                    row += `<td>${(index + 1)}</td>`; // Add 1 to index to make it 1-based
+                } else if (key !== 'Expiration Date') { // Exclude the second occurrence of 'Expiration Date'
+                    row += `<td>${item[key]}</td>`;
+                }
+            });
+            row += '</tr>';
+            table += row; // Append row to the table
+        });
 
-    // Add event listeners for sorting when headers are clicked
-    $('.sortable').on('click', function() {
-        const key = $(this).data('key'); // Get the data-key attribute value
-        sortTable(key, keysOrder); // Pass keysOrder as a parameter
-    });
+        // Close table tag
+        table += '</tbody></table>';
+
+        // Append the table to the tableDiv
+        $('#tryTable').append(table);
+
+        // Add event listeners for sorting when headers are clicked
+        $('.sortable').on('click', function() {
+            const key = $(this).data('key'); // Get the data-key attribute value
+            sortTable(key, keysOrder); // Pass keysOrder as a parameter
+        });
+    }
 }
 
 // Function to sort the table based on the clicked header
