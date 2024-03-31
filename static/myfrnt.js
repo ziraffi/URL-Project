@@ -954,42 +954,43 @@ function displayProcessedData(responseData, responseFile) {
         console.error("Error parsing JSON:", error);
     }
 
-    let downloadAllowed = true; // Add a flag to track download permission
-
     $('#downloadButton').on('click', async function() {
         try {
-            if (downloadAllowed) { // Check if download is allowed
-                if (confirm("Do you want to download the processed data?")) {
-                    const csvUrl = `/download/${csvFilename}`;
-                    const link = $('<a>', {
-                        href: csvUrl,
-                        download: csvFilename
-                    }).appendTo('body');
-                    link[0].click();
-                    link.remove();
-                    alert('CSV file download started.');
-                    
-                    // Disable further downloads until user clicks again
-                    downloadAllowed = false;
+            const csvFilename = 'your_filename.csv'; // Replace with the actual filename
+            const formData = new FormData();
+            formData.append('filename', csvFilename);
+            
+            const response = await fetch('/download/${csvFilename}', {
+                method: 'POST',
+                body: formData
+            });
     
-                    await new Promise(resolve => {
-                        link.on('click', () => {
-                            resolve();
-                        });
-                    });
-    
-                    console.log('User confirmed CSV file download.');
-                    
-                    // Enable download again after confirmation
-                    downloadAllowed = true;
-                }
+            if (!response.ok) {
+                throw new Error('Failed to download CSV file');
             }
+    
+            // Create a blob from the response
+            const blob = await response.blob();
+    
+            // Create a temporary link element
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = csvFilename;
+    
+            // Trigger a click event to start the download
+            link.click();
+    
+            // Clean up
+            window.URL.revokeObjectURL(link.href);
+            link.remove();
+    
+            console.log('CSV file download successful.');
         } catch (error) {
             console.error('Error downloading CSV:', error);
             alert('Error downloading CSV: Please try again.');
-            downloadAllowed = true; // Reset download permission on error
         }
     });
+    
     
 }
 
