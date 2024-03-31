@@ -697,7 +697,7 @@ async function sendDataToServer(clientUrlSet) {
             // Perform an asynchronous AJAX POST request to the server endpoint
             const response = await $.ajax({
                 url: "/process_url_data",
-                type: "GET",
+                type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(clientUrlSet)
             });
