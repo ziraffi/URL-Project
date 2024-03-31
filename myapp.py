@@ -244,7 +244,7 @@ def get_progress():
 @app.route('/download/<csvFilename>', methods=['GET'])
 def download_csv(csvFilename):
     try:
-        csv_path = f'/project/src/{csvFilename}'  # Update with the actual path to your CSV directory
+        csv_path = f'opt\\render\\project\\src{csvFilename}'  # Update with the actual path to your CSV directory
         
         # Check if the file exists
         if os.path.exists(csv_path):
@@ -276,8 +276,9 @@ def list_files_in_directory(directory):
         print(f"Error: {e}")
 
 # Specify the home directory path
-home_directory = "/opt/render/project/src"
-
+home_directory = os.path.expanduser('~')
+current_directory = os.getcwd()
+print("Current directory:", current_directory)
 # List files and folders in the home directory
 list_files_in_directory(home_directory)
 
@@ -292,4 +293,3 @@ def submit_form():
 
     print(f"File type: {file_type}, Batch: {batch}, URL column: {url_column}, Selected Sheet: {selected_sheet}, Selected Column: {selected_column}, Required data: {required_data}, Output file type: {output_file_type}")
     return 'Form submitted successfully'
-

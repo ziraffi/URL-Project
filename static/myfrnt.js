@@ -677,7 +677,6 @@ let progressInterval;
 
 // Function to send data to the server
 async function sendDataToServer(clientUrlSet) {
-    $('#downloadButtonContainer').hide();
 
     try {
      
