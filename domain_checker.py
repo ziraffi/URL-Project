@@ -12,7 +12,7 @@ from typing import List, AsyncGenerator, Dict, Any
 
 # Logging setup with enhanced logging of successful and failed requests
 logging.basicConfig(level=logging.INFO, filename='domain_info_checker.log')
-async def fetch_url_status(url, session, semaphore, max_retries=2):
+async def fetch_url_status(url, session, semaphore, max_retries=1):
     # Ensure URL has a protocol (http:// or https://)
     if not url.startswith("http://") and not url.startswith("https://"):
         # Assuming HTTP as default protocol
@@ -43,12 +43,14 @@ async def fetch_url_status(url, session, semaphore, max_retries=2):
             retry_count += 1
         except Exception as e:
             logging.error(f"Error fetching URL status for {url}: {e}")
+            retry_count += 1  # Increment retry count to retry on internal errors
 
         await asyncio.sleep(2)  # Add a delay before retrying
         logging.info("Retrying...")
     
     logging.warning(f"Exceeded maximum retries for URL: {url}")
     return [None], ["Exceeded maximum retries"]
+
 
 async def get_domain_info_async(url, session, semaphore):
     try:
