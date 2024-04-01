@@ -674,7 +674,30 @@ function storeCheckedValues() {
   updateSendServeButton();
   
 let progressInterval;
+async function fetchProgress() {
+    $('#loadingIndicator').show();              
 
+    $('#progressPercentage').show();
+    $("#tableDiv").show();
+
+    try {
+        const response = await $.ajax({
+            url: '/progress',
+            method: 'POST'
+        });
+        var progressData = response.pInfo_obj;
+        var progressPercentage = response.tryPercent.toFixed(2);
+
+        // Call updateProgressPercentage with the progress percentage
+        updateProgressPercentage(progressPercentage); // Use await to ensure the function completes before moving forward 
+
+        // Call generateTable with the progress data
+        generateTable(progressData);
+
+    } catch (error) {
+        console.error('Error fetching progress:', error);
+    }
+}
 // Function to send data to the server
 async function sendDataToServer(clientUrlSet) {
     $('#downloadButtonContainer').hide();
@@ -807,30 +830,6 @@ function downloadCSv(csvFilename){
         }
     });
     }
-async function fetchProgress() {
-    $('#loadingIndicator').show();              
-
-    $('#progressPercentage').show();
-    $("#tableDiv").show();
-
-    try {
-        const response = await $.ajax({
-            url: '/progress',
-            method: 'POST'
-        });
-        var progressData = response.pInfo_obj;
-        var progressPercentage = response.tryPercent.toFixed(2);
-
-        // Call updateProgressPercentage with the progress percentage
-        updateProgressPercentage(progressPercentage); // Use await to ensure the function completes before moving forward 
-
-        // Call generateTable with the progress data
-        generateTable(progressData);
-
-    } catch (error) {
-        console.error('Error fetching progress:', error);
-    }
-}
 
 // Function to update progress percentage section
 async function updateProgressPercentage(progressPercentage) {

@@ -8,6 +8,7 @@ import logging
 import asyncio
 import pandas as pd
 import os
+import uuid
 from domain_checker import process_urls_async, progress_info
 app = Flask(__name__)
 
@@ -166,19 +167,23 @@ async def process_dataSet_urls(urlSet, semaphore):
         logging.error(f"Error processing URLs: {e}")
         yield jsonify({'error': str(e)})
 
-def generate_unique_filename(base_filename):
-    directory = os.path.dirname(base_filename)
-    filename = os.path.basename(base_filename)
+# def generate_unique_filename(base_filename):
+#     directory = os.path.dirname(base_filename)
+#     filename = os.path.basename(base_filename)
     
-    if not os.path.exists(base_filename):
-        return base_filename  # If the file doesn't exist, use the base filename
+#     if not os.path.exists(base_filename):
+#         return base_filename  # If the file doesn't exist, use the base filename
 
-    # If the file exists, generate a unique filename
-    alphabet_hex = ''.join(random.choice(string.hexdigits) for _ in range(8))  # Generate a random hexadecimal code
-    unique_filename = f"rk-{alphabet_hex}-{filename}"
-    return os.path.join(directory, unique_filename)
+#     # If the file exists, generate a unique filename
+#     alphabet_hex = ''.join(random.choice(string.hexdigits) for _ in range(8))  # Generate a random hexadecimal code
+#     unique_filename = f"rk-{alphabet_hex}-{filename}"
+#     return os.path.join(directory, unique_filename)
+# Function to generate unique filename
+def generate_unique_filename(filename):
+    unique_id = str(uuid.uuid4())[:8]  # Generate unique ID
+    return f"{filename}_{unique_id}.csv"  # Append unique ID to filename
 
-@app.route('/process_url_data', methods=['POST', 'GET'])
+@app.route('/process_url_data', methods=['POST'])
 async def process_clienturl_data():
     try:
         # Ensure request contains JSON data
@@ -206,10 +211,6 @@ async def process_clienturl_data():
             result_df = pd.DataFrame(data)
             domain_info_df = result_df['domain_info'].apply(pd.Series)
 
-            # Convert Expiration Date to datetime objects and make them timezone-aware (if needed)
-            if 'Expiration Date' in domain_info_df.columns:
-                domain_info_df['Expiration Date'] = pd.to_datetime(domain_info_df['Expiration Date'], unit='ms').dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
-
             # Save domain information as CSV (if data exists)
             if not domain_info_df.empty:
                 csv_filename = 'rk.csv'
@@ -223,7 +224,6 @@ async def process_clienturl_data():
                     'has_downloadable_data': True,
                     'data': result_df.to_json(orient='records'),
                     'csv_filename': unique_csv_filename,  # Send the filename to the client
-                    
                 })
             else:
                 return jsonify({'error': 'No domain information available to download'})
@@ -235,6 +235,64 @@ async def process_clienturl_data():
     except Exception as e:
         logging.error(f"Error processing URL data: {e}")
         return jsonify({'error': str(e)})
+
+# @app.route('/process_url_data', methods=['POST'])
+# async def process_clienturl_data():
+#     try:
+#         # Ensure request contains JSON data
+#         if not request.is_json:
+#             return jsonify({'error': 'Request content must be in JSON format'})
+
+#         url_set = request.json
+
+#         app.logger.info(f"Received dataSet: {url_set} (type: {type(url_set)})")
+
+#         # Run asynchronous tasks to process URLs
+#         semaphore = asyncio.Semaphore(8)  # Adjust the semaphore value as needed
+#         logging.info("Starting URL processing")
+
+#         data = []
+#         async for result in process_urls_async(url_set['url_list'], semaphore):
+#             if 'domain_info' in result:
+#                 data.append(result)
+
+#         logging.info("URL processing completed")
+
+#         # Convert data to DataFrame (if needed)
+#         if data:
+#             print("Server Returning Data", data)
+#             result_df = pd.DataFrame(data)
+#             domain_info_df = result_df['domain_info'].apply(pd.Series)
+
+#             # Convert Expiration Date to datetime objects and make them timezone-aware (if needed)
+#             if 'Expiration Date' in domain_info_df.columns:
+#                 domain_info_df['Expiration Date'] = pd.to_datetime(domain_info_df['Expiration Date'], unit='ms').dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+
+#             # Save domain information as CSV (if data exists)
+#             if not domain_info_df.empty:
+#                 csv_filename = 'rk.csv'
+#                 unique_csv_filename = generate_unique_filename(csv_filename)
+
+#                 # Save DataFrame as CSV using the unique filename
+#                 domain_info_df.to_csv(unique_csv_filename, index=False)
+
+#                 return jsonify({
+#                     'message': 'URL data processed successfully',
+#                     'has_downloadable_data': True,
+#                     'data': result_df.to_json(orient='records'),
+#                     'csv_filename': unique_csv_filename,  # Send the filename to the client
+                    
+#                 })
+#             else:
+#                 return jsonify({'error': 'No domain information available to download'})
+
+#         else:
+#             logging.error("No data retrieved")
+#             return jsonify({'error': 'No data retrieved'})
+
+#     except Exception as e:
+#         logging.error(f"Error processing URL data: {e}")
+#         return jsonify({'error': str(e)})
     
 @app.route('/progress', methods=['POST'])
 def get_progress():
@@ -244,7 +302,7 @@ def get_progress():
 @app.route('/download/<csvFilename>', methods=['POST'])
 def download_csv(csvFilename):
     try:
-        csv_path = f'/{csvFilename}'  # Update with the actual path to your CSV directory
+        csv_path = f'/opt/render/project/src/{csvFilename}'  # Update with the actual path to your CSV directory
         
         # Check if the file exists
         if os.path.exists(csv_path):
