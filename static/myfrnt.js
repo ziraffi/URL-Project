@@ -735,8 +735,9 @@ async function sendDataToServer(clientUrlSet) {
 
                 // Check if the server has downloadable data
                 if (response.has_downloadable_data) {
-                    // Display the processed data in a table
-                    displayProcessedData(response.data, response.csv_filename);
+                    // // Display the processed data in a table
+                    // displayProcessedData(response.data, response.csv_filename);
+                    downloadCSv(response.csv_filename);
                     console.log("response.csv_filename: ",response.csv_filename);
                     // Display a button to download the CSV file
                     $('#downloadButtonContainer').show();
@@ -769,7 +770,43 @@ async function sendDataToServer(clientUrlSet) {
         clearInterval(progressInterval); // Clear interval after processing
     }
 }
-
+function downloadCSv(csvFilename){
+    $('#downloadButton').on('click', async function() {
+        try {
+            const formData = new FormData();
+            formData.append('filename', csvFilename); // Append the filename to the form data
+            
+            const response = await fetch(`/download/${csvFilename}`, { // Use csvFilename in the fetch URL
+                method: 'POST', // Change the method to POST
+                body: formData
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to download CSV file');
+            }
+    
+            // Create a blob from the response
+            const blob = await response.blob();
+    
+            // Create a temporary link element
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = csvFilename;
+    
+            // Trigger a click event to start the download
+            link.click();
+    
+            // Clean up
+            window.URL.revokeObjectURL(link.href);
+            link.remove();
+    
+            console.log('CSV file download successful.');
+        } catch (error) {
+            console.error('Error downloading CSV:', error);
+            alert('Error downloading CSV: Please try again.');
+        }
+    });
+    }
 async function fetchProgress() {
     $('#loadingIndicator').show();              
 
@@ -783,9 +820,12 @@ async function fetchProgress() {
         });
         var progressData = response.pInfo_obj;
         var progressPercentage = response.tryPercent.toFixed(2);
-   
+
+        // Call updateProgressPercentage with the progress percentage
+        updateProgressPercentage(progressPercentage); // Use await to ensure the function completes before moving forward 
+
         // Call generateTable with the progress data
-        generateTable(progressData,progressPercentage);
+        generateTable(progressData);
 
     } catch (error) {
         console.error('Error fetching progress:', error);
@@ -813,7 +853,7 @@ async function updateProgressPercentage(progressPercentage) {
 
 
 // Function to dynamically generate table
-async function generateTable(progressData,progressPercentage) {
+async function generateTable(progressData) {
     // Clear existing table content
     $('#tryTable').empty();
     $('#tableDiv').show();
@@ -824,9 +864,7 @@ async function generateTable(progressData,progressPercentage) {
     if (!progressData || progressData.length === 0) {
         return;
     }
-        // Call updateProgressPercentage with the progress percentage
-        await updateProgressPercentage(progressPercentage); // Use await to ensure the function completes before moving forward         
-        console.log("progressPercentage Test: ", progressPercentage); // Check if the progress percentage is received correctly        
+        
         // Define the table variable with the specified format
         var table = '<table id="innerTrytable" class="data-table" border="1">';
         
@@ -914,88 +952,88 @@ function sortTable(key, keysOrder) { // Receive keysOrder as a parameter
     $(this).toggleClass('desc'); // Toggle descending class for the next click
 }
 
-// Update the function to display processed data in a table
-function displayProcessedData(responseData, responseFile) {
-    var data = JSON.parse(responseData);
-    var csvFilename = responseFile;
+// // Update the function to display processed data in a table
+// function displayProcessedData(responseData, responseFile) {
+//     var data = JSON.parse(responseData);
+//     var csvFilename = responseFile;
 
-    try {
-        var table = '<table id="dataTable" class="data-table" border="1">' +
-            '<thead>' +
-            '<tr>' +
-            '<th>Sr.No</th>' +
-            '<th>URL</th>' +
-            '<th>Status Code</th>' +
-            '<th>Response Message</th>' +
-            '<th>Domain Status</th>' +
-            '<th>Expiration Date</th>' +
-            '<th>For Sale</th>' +
-            '<th>Response Time</th>' +
-            '</tr>' +
-            '</thead>' +
-            '<tbody>';
+//     try {
+//         var table = '<table id="dataTable" class="data-table" border="1">' +
+//             '<thead>' +
+//             '<tr>' +
+//             '<th>Sr.No</th>' +
+//             '<th>URL</th>' +
+//             '<th>Status Code</th>' +
+//             '<th>Response Message</th>' +
+//             '<th>Domain Status</th>' +
+//             '<th>Expiration Date</th>' +
+//             '<th>For Sale</th>' +
+//             '<th>Response Time</th>' +
+//             '</tr>' +
+//             '</thead>' +
+//             '<tbody>';
 
-            data.forEach(function(item, index) {
-                var domainInfo = item.domain_info;
-                var expirationDate = new Date(domainInfo['Expiration Date']);
-                var formattedExpirationDate = expirationDate.toLocaleString(); 
-                var row = '<tr>' +
-                    '<td>' + (index + 1) + '</td>' +
-                    '<td>' + domainInfo.URL + '</td>' +
-                    '<td>' + domainInfo['Status Code'] + '</td>' +
-                    '<td>' + domainInfo['Response Message'] + '</td>' +
-                    '<td>' + domainInfo['Domain Status'] + '</td>' +
-                    '<td>' + formattedExpirationDate + '</td>' + // Use the formatted expiration date
-                    '<td>' + domainInfo['For Sale'] + '</td>' +
-                    '<td>' + domainInfo['Response Time'] + '</td>' +
-                    '</tr>';
+//             data.forEach(function(item, index) {
+//                 var domainInfo = item.domain_info;
+//                 var expirationDate = new Date(domainInfo['Expiration Date']);
+//                 var formattedExpirationDate = expirationDate.toLocaleString(); 
+//                 var row = '<tr>' +
+//                     '<td>' + (index + 1) + '</td>' +
+//                     '<td>' + domainInfo.URL + '</td>' +
+//                     '<td>' + domainInfo['Status Code'] + '</td>' +
+//                     '<td>' + domainInfo['Response Message'] + '</td>' +
+//                     '<td>' + domainInfo['Domain Status'] + '</td>' +
+//                     '<td>' + formattedExpirationDate + '</td>' + // Use the formatted expiration date
+//                     '<td>' + domainInfo['For Sale'] + '</td>' +
+//                     '<td>' + domainInfo['Response Time'] + '</td>' +
+//                     '</tr>';
 
-            table += row;
-        });
+//             table += row;
+//         });
 
-        table += '</tbody></table>';
-        $('#dataTableContainer').html(table);
+//         table += '</tbody></table>';
+//         $('#dataTableContainer').html(table);
 
-    } catch (error) {
-        console.error("Error parsing JSON:", error);
-    }
+//     } catch (error) {
+//         console.error("Error parsing JSON:", error);
+//     }
 
-    $('#downloadButton').on('click', async function() {
-        try {
-            const formData = new FormData();
-            formData.append('filename', csvFilename); // Append the filename to the form data
+//     $('#downloadButton').on('click', async function() {
+//         try {
+//             const formData = new FormData();
+//             formData.append('filename', csvFilename); // Append the filename to the form data
             
-            const response = await fetch(`/download/${csvFilename}`, { // Use csvFilename in the fetch URL
-                method: 'POST', // Change the method to POST
-                body: formData
-            });
+//             const response = await fetch(`/download/${csvFilename}`, { // Use csvFilename in the fetch URL
+//                 method: 'POST', // Change the method to POST
+//                 body: formData
+//             });
     
-            if (!response.ok) {
-                throw new Error('Failed to download CSV file');
-            }
+//             if (!response.ok) {
+//                 throw new Error('Failed to download CSV file');
+//             }
     
-            // Create a blob from the response
-            const blob = await response.blob();
+//             // Create a blob from the response
+//             const blob = await response.blob();
     
-            // Create a temporary link element
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = csvFilename;
+//             // Create a temporary link element
+//             const link = document.createElement('a');
+//             link.href = window.URL.createObjectURL(blob);
+//             link.download = csvFilename;
     
-            // Trigger a click event to start the download
-            link.click();
+//             // Trigger a click event to start the download
+//             link.click();
     
-            // Clean up
-            window.URL.revokeObjectURL(link.href);
-            link.remove();
+//             // Clean up
+//             window.URL.revokeObjectURL(link.href);
+//             link.remove();
     
-            console.log('CSV file download successful.');
-        } catch (error) {
-            console.error('Error downloading CSV:', error);
-            alert('Error downloading CSV: Please try again.');
-        }
-    });    
-}
+//             console.log('CSV file download successful.');
+//         } catch (error) {
+//             console.error('Error downloading CSV:', error);
+//             alert('Error downloading CSV: Please try again.');
+//         }
+//     });    
+// }
 
 // *************************************************************************************************************************
 // ************************************   Dropdown Based dataSet preperation Ended  *********************************************
