@@ -12,7 +12,7 @@ from typing import List, AsyncGenerator, Dict, Any
 
 # Logging setup with enhanced logging of successful and failed requests
 logging.basicConfig(level=logging.INFO, filename='domain_info_checker.log')
-async def fetch_url_status(url, session, semaphore, max_redirects=15, max_retries=3):
+async def fetch_url_status(url, session, semaphore, max_retries=2):
     # Ensure URL has a protocol (http:// or https://)
     if not url.startswith("http://") and not url.startswith("https://"):
         # Assuming HTTP as default protocol
@@ -24,7 +24,7 @@ async def fetch_url_status(url, session, semaphore, max_redirects=15, max_retrie
     retry_count = 0
     while retry_count < max_retries:
         try:
-            async with semaphore, session.get(url, timeout=10, allow_redirects=True) as response:
+            async with semaphore, session.get(url, timeout=8, allow_redirects=True) as response:
                 status_codes = [response.status]
                 status_messages = [response.reason]
 

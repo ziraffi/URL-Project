@@ -190,7 +190,7 @@ async def process_clienturl_data():
         app.logger.info(f"Received dataSet: {url_set} (type: {type(url_set)})")
 
         # Run asynchronous tasks to process URLs
-        semaphore = asyncio.Semaphore(10)  # Adjust the semaphore value as needed
+        semaphore = asyncio.Semaphore(8)  # Adjust the semaphore value as needed
         logging.info("Starting URL processing")
 
         data = []
@@ -244,7 +244,7 @@ def get_progress():
 @app.route('/download/<csvFilename>', methods=['POST'])
 def download_csv(csvFilename):
     try:
-        csv_path = f'home/site/wwwroot/{csvFilename}'  # Update with the actual path to your CSV directory
+        csv_path = f'/{csvFilename}'  # Update with the actual path to your CSV directory
         
         # Check if the file exists
         if os.path.exists(csv_path):
@@ -280,7 +280,7 @@ home_directory = os.path.expanduser('~')
 current_directory = os.getcwd()
 print("Current directory:", current_directory)
 # List files and folders in the home directory
-list_files_in_directory(home_directory)
+list_files_in_directory(current_directory)
 
 def submit_form():
     file_type = request.form.get('file')
