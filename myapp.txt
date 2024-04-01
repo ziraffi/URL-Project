@@ -1,1 +1,1 @@
-gunicorn --bind=0.0.0.0 --worker-class=gevent --worker-connections=300 --threads=5 myapp:app
+gunicorn --bind=0.0.0.0 --worker-class=gthread --worker-connections=500 --threads=6 myapp:app
