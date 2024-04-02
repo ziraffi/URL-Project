@@ -238,7 +238,7 @@ def get_progress():
 @app.route('/download/<csvFilename>', methods=['POST'])
 def download_csv(csvFilename):
     try:
-        csv_path = f'C:\\Users\\HP\\Desktop\\project_Experiment\\{csvFilename}'  # Update with the actual path to your CSV directory
+        csv_path = f'/opt/render/project/src/{csvFilename}'  # Update with the actual path to your CSV directory
         
         # Check if the file exists
         if os.path.exists(csv_path):
@@ -288,5 +288,3 @@ def submit_form():
     print(f"File type: {file_type}, Batch: {batch}, URL column: {url_column}, Selected Sheet: {selected_sheet}, Selected Column: {selected_column}, Required data: {required_data}, Output file type: {output_file_type}")
     return 'Form submitted successfully'
 
-if __name__ == '__main__':
-    app.run(debug=True)
