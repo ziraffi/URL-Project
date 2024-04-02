@@ -665,7 +665,7 @@ button {
 div#file-tbl,div#mnl-tbl{
   padding: 0 21%;
 }
-div.url-wrapper h3,div#file-tbl h3{
+div.url-wrapper h3,div#file-tbl h3, div#mnl-tbl h3{
   color: #000000;
   text-decoration: underline;
   text-underline-position: under;
