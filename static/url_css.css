@@ -662,6 +662,9 @@ button {
   display: none;
   padding: 5% 16%;
 }
+div#file-tbl,div#mnl-tbl{
+  padding: 0 21%;
+}
 div.url-wrapper h3,div#file-tbl h3{
   color: #000000;
   text-decoration: underline;
@@ -764,13 +767,11 @@ input[type=submit]:not(:disabled):hover,button:not(:disabled):hover{
   text-align: left;
 }
 div#file-data-table.table{
-  padding: 0 21%;
   min-height: 6rem;
   max-height: 27rem;
   overflow-x: hidden;
 }
 div#dataTableContainer.table, div#tryTable.table{
-  padding: 0 10%;
   min-height: 6rem;
   max-height: 27rem;
   overflow-x: hidden;
@@ -825,6 +826,9 @@ button#buttonDownload:hover{
   color: #000000;
   padding: 0 10%; 
   text-align: left;
+}
+#tableDiv{
+  padding: 0 10%;
 }
 /* Footer Section start from here  */
 footer {

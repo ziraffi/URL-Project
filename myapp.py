@@ -151,21 +151,6 @@ def process_file(uploaded_file, selected_sheet, selected_column):
 # Set up logging configuration
 logging.basicConfig(level=logging.DEBUG)  # Set the logging level to DEBUG
 
-# Define function to process dataSet containing URLs asynchronously
-async def process_dataSet_urls(urlSet, semaphore):
-    try:
-        if not urlSet or 'url_list' not in urlSet:
-            logging.error("Empty or missing 'url_list' key in urlSet")
-            yield jsonify({'error': 'Missing data in request'})
-        else:
-            urls = urlSet['url_list']
-            logging.info(f"Processing {len(urls)} URLs asynchronously")
-            async for stats in process_urls_async(urls, semaphore):
-                yield stats
-    except Exception as e:
-        logging.error(f"Error processing URLs: {e}")
-        yield jsonify({'error': str(e)})
-
 def generate_unique_filename(base_filename):
     directory = os.path.dirname(base_filename)
     filename = os.path.basename(base_filename)
@@ -206,6 +191,12 @@ async def process_clienturl_data():
             result_df = pd.DataFrame(data)
             domain_info_df = result_df['domain_info'].apply(pd.Series)
 
+            # Convert 'Status Code' and 'Response Message' columns from arrays to strings
+            if 'Status Code' in domain_info_df.columns:
+                domain_info_df['Status Code'] = domain_info_df['Status Code'].apply(array_to_string)
+            if 'Response Message' in domain_info_df.columns:
+                domain_info_df['Response Message'] = domain_info_df['Response Message'].apply(array_to_string)
+                
             # Convert Expiration Date to datetime objects and make them timezone-aware (if needed)
             if 'Expiration Date' in domain_info_df.columns:
                 domain_info_df['Expiration Date'] = pd.to_datetime(domain_info_df['Expiration Date'], unit='ms').dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
@@ -235,6 +226,9 @@ async def process_clienturl_data():
     except Exception as e:
         logging.error(f"Error processing URL data: {e}")
         return jsonify({'error': str(e)})
+# Define function to convert arrays to strings
+def array_to_string(arr):
+    return ', '.join(map(str, arr))
     
 @app.route('/progress', methods=['POST'])
 def get_progress():
@@ -244,7 +238,7 @@ def get_progress():
 @app.route('/download/<csvFilename>', methods=['POST'])
 def download_csv(csvFilename):
     try:
-        csv_path = f'/tmp/8dc522bc3937e15/{csvFilename}'  # Update with the actual path to your CSV directory
+        csv_path = f'C:\\Users\\HP\\Desktop\\project_Experiment\\{csvFilename}'  # Update with the actual path to your CSV directory
         
         # Check if the file exists
         if os.path.exists(csv_path):
@@ -294,3 +288,5 @@ def submit_form():
     print(f"File type: {file_type}, Batch: {batch}, URL column: {url_column}, Selected Sheet: {selected_sheet}, Selected Column: {selected_column}, Required data: {required_data}, Output file type: {output_file_type}")
     return 'Form submitted successfully'
 
+if __name__ == '__main__':
+    app.run(debug=True)

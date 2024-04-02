@@ -1,1 +1,1 @@
-gunicorn --bind=0.0.0.0 --worker-class=gthread --worker-connections=1000 --threads=8 myapp:app
+gunicorn --bind=0.0.0.0 --worker-class=gthread --threads=4 myapp:app

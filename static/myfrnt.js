@@ -124,31 +124,36 @@ $(document).ready(function () {
     closeNavIcon.on('click', function () {
         closeNav();
     });
-    function loadFormSection(sectionName) {
+    async function loadFormSection(sectionName) {
         console.log('Loading form section:', sectionName);
-
+    
         // Check if the file section has already been loaded
         if (sectionName === 'file_section' && fileSectionLoaded) {
             return;
         }
-
-        $.ajax({
-            url: '/templates/' + sectionName + '.html',
-            type: 'GET',
-            success: function (response) {
-                $('#form-container').html(response).show();
-                console.log('Form section loaded:', sectionName);
-                // Set the flag to true when the file section is loaded
-                if (sectionName === 'file_section') {
-                    fileSectionLoaded = true;
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('Error loading form section:', error);
-                $('#form-container').html('<p>Error loading form.</p>');
+    
+        try {
+            // Fetch the HTML template for the specified section
+            const response = await fetch('/templates/' + sectionName + '.html');
+            if (!response.ok) {
+                throw new Error('Failed to load form section');
             }
-        });
+            const html = await response.text();
+            
+            // Update the form container with the loaded HTML
+            $('#form-container').html(html).show();
+            console.log('Form section loaded:', sectionName);
+            
+            // Set the flag to true when the file section is loaded
+            if (sectionName === 'file_section') {
+                fileSectionLoaded = true;
+            }
+        } catch (error) {
+            console.error('Error loading form section:', error);
+            $('#form-container').html('<p>Error loading form.</p>');
+        }
     }
+    
     var formSections = ['file_section', 'batch_section', 'dropdown_section', 'output_file_selection'];
     var currentSectionIndex = 0;
     loadFormSection(formSections[currentSectionIndex]);
@@ -171,42 +176,46 @@ $(document).ready(function () {
 // ***********************************************************************
     $(document).on('click', '#manual-form-submit', handleManualFormSubmit);
 
-    // Function to handle manual form submission
-    function handleManualFormSubmit(event) {
-        event.preventDefault();
-        const manualData = $('#manual-data').val();
-        const selectedSheet = $('#sheet-name').val();
-        const selectedColumn = $('#column-name').val();
-        // Send manual data to server
-        $.ajax({
-            url: '/process_manual_input',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
+// Function to handle manual form submission
+async function handleManualFormSubmit(event) {
+    event.preventDefault();
+    const manualData = $('#manual-data').val();
+    const selectedSheet = $('#sheet-name').val();
+    const selectedColumn = $('#column-name').val();
+    try {
+        // Send manual data to server using Fetch API
+        const response = await fetch('/process_manual_input', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
                 manual_data: manualData,
                 selected_sheet: selectedSheet,
                 selected_column: selectedColumn
-            }),
-            success: function (data) {
-                $('#valid_list').empty();
-                $('#invalid_list').empty(); // Clear invalid list
-                // $('#url-container').show();
-                // Handle server response
-                if (data.error_message) {
-                    $('#error-message').text(data.error_message);
-                } else {
-                    // Clear previous data
-                    $('#valid_list').empty();
-                    $('#invalid_list').empty();
-                    // Append column data to URL container
-                    appendColumnDataToUrlContainer(data.column_data);
-                }
-            },
-            error: function (error) {
-                console.error('Error:', error);
-            }
+            })
         });
+        if (!response.ok) {
+            throw new Error('Failed to submit manual data');
+        }
+        const data = await response.json();
+        $('#valid_list').empty();
+        $('#invalid_list').empty(); // Clear invalid list
+        // Handle server response
+        if (data.error_message) {
+            $('#error-message').text(data.error_message);
+        } else {
+            // Clear previous data
+            $('#valid_list').empty();
+            $('#invalid_list').empty();
+            // Append column data to URL container
+            appendColumnDataToUrlContainer(data.column_data);
+        }
+    } catch (error) {
+        console.error('Error:', error);
     }
+}
+
 
 // Function to append column data to URL container
 function appendColumnDataToUrlContainer(columnData) {
@@ -673,127 +682,135 @@ function storeCheckedValues() {
   // Initial check on page load (optional)
   updateSendServeButton();
   
-let progressInterval;
-async function fetchProgress() {
+  async function fetchProgress() {
     $('#loadingIndicator').show();              
 
     $('#progressPercentage').show();
     $("#tableDiv").show();
 
     try {
-        const response = await $.ajax({
-            url: '/progress',
+        const response = await fetch('/progress', {
+            async: 'true',
             method: 'POST'
         });
-        var progressData = response.pInfo_obj;
-        var progressPercentage = response.tryPercent.toFixed(2);
+        var { pInfo_obj, tryPercent } = await response.json();
+        var progressData = pInfo_obj;
+        var progressPercentage = tryPercent.toFixed(2);
 
         // Call updateProgressPercentage with the progress percentage
-        updateProgressPercentage(progressPercentage); // Use await to ensure the function completes before moving forward 
+        await updateProgressPercentage(progressPercentage); // Use await to ensure the function completes before moving forward 
 
         // Call generateTable with the progress data
-        generateTable(progressData);
+        await generateTable(progressData);
 
     } catch (error) {
         console.error('Error fetching progress:', error);
     }
 }
-// Function to send data to the server
+
 async function sendDataToServer(clientUrlSet) {
-    $('#downloadButtonContainer').hide();
     try {
+        // Hide download button container initially
+        $('#downloadButtonContainer').hide();
         
         // Record start time
-        startTime = new Date().getTime();
+        const startTime = new Date().getTime();
         
-        // Make sure dataSet is not empty
+        // Ensure clientUrlSet is not empty
         if (!clientUrlSet || !clientUrlSet.url_list || clientUrlSet.url_list.length === 0) {
-            console.error("Error: DataSet is undefined or empty");
-            return;
+            throw new Error("Error: DataSet is undefined or empty");
+        } 
+        
+        // Set interval to call fetchProgress every 2 seconds
+        var progressInterval = setInterval(fetchProgress, 2000);
+
+        console.log("Sending data to server:", clientUrlSet);
+        console.log("Stringified Data:", JSON.stringify(clientUrlSet)); // Log the stringified data
+
+        // Perform an asynchronous fetch POST request to the server endpoint
+        var response = await fetch("/process_url_data", {
+            method: "POST",
+            async: "true",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(clientUrlSet)
+        });
+
+        // Parse JSON response
+        const responseData = await response.json();
+
+        // Record end time
+        const endTime = new Date().getTime();
+
+        // Calculate total processing time
+        const totalProcessTime = Math.floor((endTime - startTime) / 1000);
+
+        // Format total processing time
+        const formattedTotalTime = formatProcessingTime(totalProcessTime);
+
+        // Update UI with total processing time
+        $('#totalProcessingTime').empty().append("<p>Total Processing Time: " + formattedTotalTime + " </p>");
+        $('#totalProcessingTime').show(); // Show the container if hidden
+
+        // Display processed data and handle errors
+        if (responseData.error) {
+            throw new Error("Error from server: " + responseData.error);
         } else {
-            // Set interval to call fetchProgress every 2000 milliseconds (2 seconds)
-            progressInterval = setInterval(fetchProgress, 2000); 
+            // Display loading indicator
+            $("#processedTable").show();
 
-            console.log("Sending data to server:", clientUrlSet);
-            console.log("Stringified Data:", JSON.stringify(clientUrlSet)); // Log the stringified data
-
-            // Perform an asynchronous AJAX POST request to the server endpoint
-            const response = await $.ajax({
-                url: "/process_url_data",
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(clientUrlSet)
-            });
-
-            // Record end time
-            endTime = new Date().getTime();
-
-            // Calculate total processing time
-            totalProcessTime = Math.floor((endTime - startTime) / 1000);
-            // Format total processing time
-            var formattedTotalTime;
-            if (totalProcessTime < 60) {
-                formattedTotalTime = totalProcessTime + " seconds";
-            } else if (totalProcessTime < 3600) {
-                var minutes = Math.floor(totalProcessTime / 60);
-                var seconds = (totalProcessTime % 60).toFixed(2);
-                formattedTotalTime = minutes + " minutes " + seconds + " seconds";
+            // Check if the server has downloadable data
+            if (responseData.has_downloadable_data) {
+                downloadCSV(responseData.csv_filename);
+                console.log("response.csv_filename: ", responseData.csv_filename);
+                // Display a button to download the CSV file
+                $('#downloadButtonContainer').show();
             } else {
-                var hours = Math.floor(totalProcessTime / 3600);
-                var remainingSeconds = totalProcessTime % 3600;
-                var minutes = Math.floor(remainingSeconds / 60);
-                formattedTotalTime = hours + " hours " + minutes + " minutes " + seconds + " seconds";
-            }
-            // Update UI with total processing time
-            $('#totalProcessingTime').empty().append("<p>Total Processing Time: " + formattedTotalTime + " </p>");
-            $('#totalProcessingTime').show(); // Show the container if hidden
-
-            // Display processed data and handle errors
-            if (response.error) {
-                console.error("Error from server:", response.error);
-                // Handle the specific error message here
-            } else {
-                // Display loading indicator
-                $("#processedTable").show();
-
-                // Check if the server has downloadable data
-                if (response.has_downloadable_data) {
-                    // // Display the processed data in a table
-                    // displayProcessedData(response.data, response.csv_filename);
-                    downloadCSv(response.csv_filename);
-                    console.log("response.csv_filename: ",response.csv_filename);
-                    // Display a button to download the CSV file
-                    $('#downloadButtonContainer').show();
-
-                } else {
-                    // Hide the download button if no downloadable data
-                    $('#downloadButtonContainer').hide();
-                }
-
-
-                // Call fetchProgress after an initial delay of 800 milliseconds
-                await fetchProgress();      
-                console.log("Data sent successfully:", response);
-
+                // Hide the download button if no downloadable data
+                $('#downloadButtonContainer').hide();
             }
 
-            // Check if the response is empty or not
-            if (!response || !response.pInfo_obj) {
-                // Perform necessary action here, such as returning or emptying the response
-                return; // For example, returning from the function
-            }            
+            // Call fetchProgress after an initial delay of 800 milliseconds
+            await fetchProgress();
+            console.log("Data sent successfully:", responseData);
+        }
+
+        // Check if the response is empty or not
+        if (!responseData || !responseData.pInfo_obj) {
+            return; // For example, returning from the function
         }
 
     } catch (error) {
         console.error("Error sending data to server:", error);
         // Handle the error here if needed
     } finally {
+        clearInterval(progressInterval); // Clear interval after processing
         // Hide loading indicator after request completes
         $('#loadingIndicator').hide();
-        clearInterval(progressInterval); // Clear interval after processing
     }
 }
-function downloadCSv(csvFilename){
+
+// Function to format processing time
+function formatProcessingTime(totalProcessTime) {
+    let formattedTotalTime;
+    if (totalProcessTime < 60) {
+        formattedTotalTime = totalProcessTime + " seconds";
+    } else if (totalProcessTime < 3600) {
+        const minutes = Math.floor(totalProcessTime / 60);
+        const seconds = (totalProcessTime % 60).toFixed(2);
+        formattedTotalTime = minutes + " minutes " + seconds + " seconds";
+    } else {
+        const hours = Math.floor(totalProcessTime / 3600);
+        const remainingSeconds = totalProcessTime % 3600;
+        const minutes = Math.floor(remainingSeconds / 60);
+        formattedTotalTime = hours + " hours " + minutes + " minutes " + seconds + " seconds";
+    }
+    return formattedTotalTime;
+}
+
+// Function to download CSV using Fetch API
+async function downloadCSV(csvFilename) {
     $('#downloadButton').on('click', async function() {
         try {
             const formData = new FormData();
@@ -829,7 +846,8 @@ function downloadCSv(csvFilename){
             alert('Error downloading CSV: Please try again.');
         }
     });
-    }
+}
+
 
 // Function to update progress percentage section
 async function updateProgressPercentage(progressPercentage) {
@@ -857,7 +875,7 @@ async function generateTable(progressData) {
     $('#tryTable').empty();
     $('#tableDiv').show();
     
-    console.log('ProgressData for Object: ', progressData);
+    // console.log('ProgressData for Object: ', progressData);
 
     // Check if progressData is empty or undefined
     if (!progressData || progressData.length === 0) {
@@ -1176,8 +1194,6 @@ $(document).on('change', '#file', function () {
 
     $('#url-container').hide();
     urlFlag = false;
-
-
     if (fileInput) {
         formData.append('file', fileInput); // Include the file data
         fetchSheetAndColumnNames(formData); // Pass the FormData object to fetch sheet and column names

@@ -2,7 +2,6 @@
 import asyncio
 import datetime
 import logging
-from flask import jsonify
 import whois
 import aiohttp
 from tqdm import tqdm
@@ -12,11 +11,15 @@ from typing import List, AsyncGenerator, Dict, Any
 
 # Logging setup with enhanced logging of successful and failed requests
 logging.basicConfig(level=logging.INFO, filename='domain_info_checker.log')
-async def fetch_url_status(url, session, semaphore, max_retries=1):
+async def fetch_url_status(url, session, semaphore, max_retries=2):
+    statushttp = False
+    statushttpS = False
+    
     # Ensure URL has a protocol (http:// or https://)
     if not url.startswith("http://") and not url.startswith("https://"):
         # Assuming HTTP as default protocol
-        url = "http://" + url
+        url = "https://" + url
+        statushttp = True
 
     # Log the received dataSet
     logging.info(f"Received dataSet: {url}")  # Review the current dataSet which is going to be processed
@@ -34,16 +37,39 @@ async def fetch_url_status(url, session, semaphore, max_retries=1):
                     status_codes.append(response.status)
                     status_messages.append(response.reason)
 
+                # Print the successful prototype
+                if statushttp:
+                    print("HTTP prototype was successful.")
+                elif statushttpS:
+                    print("HTTPS prototype was successful.")
+
                 return status_codes, status_messages
 
         except aiohttp.ClientError as ce:
-            logging.error(f"Client error fetching URL status for {url}: {ce}")        
+            logging.error(f"Client error fetching URL status for {url}: {ce}")   
+            if "Server disconnected" in str(ce):  # Check if the error is "Server disconnected"
+                retry_count += 1
+                continue  # Retry without delay
+            elif "Cannot connect to host" in str(ce):  # Check if the error is "Cannot connect to host"
+                retry_count += 1
+                continue  # Retry without delay
+            else:
+                # Handle other client errors
+                retry_count += 1
+                continue  # Retry without delay
+
         except asyncio.TimeoutError:
             logging.error(f"Timeout error fetching URL status for {url}. Retrying...")
             retry_count += 1
         except Exception as e:
             logging.error(f"Error fetching URL status for {url}: {e}")
             retry_count += 1  # Increment retry count to retry on internal errors
+
+        if retry_count == 1 and url.startswith("https://"):
+            # Retry with HTTPS if first attempt was HTTP
+            url = url.replace("https://", "http://")
+            statushttpS = True            
+            continue  # Retry without delay
 
         await asyncio.sleep(2)  # Add a delay before retrying
         logging.info("Retrying...")
@@ -162,7 +188,6 @@ async def process_urls_async(urls: List[str], semaphore) -> AsyncGenerator[Dict[
                 yield {
                     'current_iteration': idx,
                     'domain_info': domain_info,
-                    
                 }
 
     except Exception as e:
