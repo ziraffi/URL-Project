@@ -174,7 +174,10 @@ async def process_clienturl_data():
         cliData = request.json
         url_set = cliData.get('clientUrlSet')
         cancelFlag = cliData.get('cancelFlag')  # Retrieve cancelFlag from the request data
-
+        # processFlag = request.
+        print("testing received flag or not: ",cliData)
+        app.logger.info(f"Received dataSet: {url_set} (type: {type(url_set)})")
+        app.logger.info(f"Received Boolean: {cancelFlag} (type: {type(cancelFlag)})")
         # Check if the processing should be canceled based on cancelFlag
         if cancelFlag:
             # Return a response indicating that the process was canceled
@@ -217,16 +220,12 @@ async def process_clienturl_data():
 
                 # Save DataFrame as CSV using the unique filename
                 domain_info_df.to_csv(unique_csv_filename, index=False)
-                
-                # Get the full path of the saved CSV file
-                full_path = os.path.join(os.getcwd(), unique_csv_filename)
 
                 return jsonify({
                     'message': 'URL data processed successfully',
                     'has_downloadable_data': True,
                     'data': result_df.to_json(orient='records'),
                     'csv_filename': unique_csv_filename,  # Send the filename to the client
-                    'csv_file_path': full_path  # Send the full path to the client
                 })
             else:
                 return jsonify({'error': 'No domain information available to download'})
@@ -238,7 +237,6 @@ async def process_clienturl_data():
     except Exception as e:
         logging.error(f"Error processing URL data: {e}")
         return jsonify({'error': str(e)})
-    
 # Define function to convert arrays to strings
 def array_to_string(arr):
     return ', '.join(map(str, arr))
@@ -258,7 +256,7 @@ async def get_progress():
 @app.route('/download/<csvFilename>', methods=['POST'])
 def download_csv(csvFilename):
     try:
-        csv_path = f'/opt/kudu/tmp/8dc53c1053de9c9/{csvFilename}'  # Update with the actual path to your CSV directory
+        csv_path = f'/tmp/8dc53c1053de9c9/{csvFilename}'  # Update with the actual path to your CSV directory
         
         # Check if the file exists
         if os.path.exists(csv_path):
