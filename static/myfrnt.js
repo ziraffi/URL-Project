@@ -798,6 +798,8 @@ async function sendDataToServer(clientUrlSet, cancelFlag) {
         // Record end time
         const endTime = new Date().getTime();
 
+        console.log("Response Data from Server: ",responseData);
+
         // Calculate total processing time
         const totalProcessTime = Math.floor((endTime - startTime) / 1000);
 
@@ -817,7 +819,7 @@ async function sendDataToServer(clientUrlSet, cancelFlag) {
 
             // Check if the server has downloadable data
             if (responseData.has_downloadable_data) {
-                downloadCSV(responseData.csv_filename);
+                downloadCSV(responseData.csv_filename,responseData.current_directory);
                 console.log("response.csv_filename: ", responseData.csv_filename);
                 // Display a button to download the CSV file
                 $('#downloadButtonContainer').show();
@@ -863,37 +865,37 @@ function formatProcessingTime(totalProcessTime) {
 }
 
 // Function to download CSV using Fetch API
-async function downloadCSV(csvFilename) {
-   
+async function downloadCSV(csvFilename, filePath) {
     $('#downloadButton').on('click', async function() {
         try {
             const formData = new FormData();
             formData.append('filename', csvFilename); // Append the filename to the form data
-            
+            formData.append('filePath', filePath); // Append the file path to the form data
+
             const response = await fetch(`/download/${csvFilename}`, { // Use csvFilename in the fetch URL
                 method: 'POST', // Change the method to POST
                 body: formData
             });
-    
+
             if (!response.ok) {
                 throw new Error('Failed to download CSV file');
             }
-    
+
             // Create a blob from the response
             const blob = await response.blob();
-    
+
             // Create a temporary link element
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             link.download = csvFilename;
-    
+
             // Trigger a click event to start the download
             link.click();
-    
+
             // Clean up
             window.URL.revokeObjectURL(link.href);
             link.remove();
-    
+
             console.log('CSV file download successful.');
         } catch (error) {
             console.error('Error downloading CSV:', error);
@@ -901,6 +903,7 @@ async function downloadCSV(csvFilename) {
         }
     });
 }
+
 
 
 // Function to update progress percentage section

@@ -164,6 +164,9 @@ def generate_unique_filename(base_filename):
     unique_filename = f"rk-{alphabet_hex}-{filename}"
     return os.path.join(directory, unique_filename)
 
+import os
+from flask import request, jsonify
+
 @app.route('/process_url_data', methods=['POST'])
 async def process_clienturl_data():
     try:
@@ -174,10 +177,7 @@ async def process_clienturl_data():
         cliData = request.json
         url_set = cliData.get('clientUrlSet')
         cancelFlag = cliData.get('cancelFlag')  # Retrieve cancelFlag from the request data
-        # processFlag = request.
-        print("testing received flag or not: ",cliData)
-        app.logger.info(f"Received dataSet: {url_set} (type: {type(url_set)})")
-        app.logger.info(f"Received Boolean: {cancelFlag} (type: {type(cancelFlag)})")
+
         # Check if the processing should be canceled based on cancelFlag
         if cancelFlag:
             # Return a response indicating that the process was canceled
@@ -220,12 +220,16 @@ async def process_clienturl_data():
 
                 # Save DataFrame as CSV using the unique filename
                 domain_info_df.to_csv(unique_csv_filename, index=False)
+                
+                # Get the full path of the saved CSV file
+                current_directory = os.path.join(os.getcwd())
 
                 return jsonify({
                     'message': 'URL data processed successfully',
                     'has_downloadable_data': True,
                     'data': result_df.to_json(orient='records'),
                     'csv_filename': unique_csv_filename,  # Send the filename to the client
+                    'current_directory': current_directory  # Send the full path to the client
                 })
             else:
                 return jsonify({'error': 'No domain information available to download'})
@@ -237,6 +241,7 @@ async def process_clienturl_data():
     except Exception as e:
         logging.error(f"Error processing URL data: {e}")
         return jsonify({'error': str(e)})
+
 # Define function to convert arrays to strings
 def array_to_string(arr):
     return ', '.join(map(str, arr))
@@ -247,7 +252,7 @@ async def get_progress():
     if cancelFlag:
         print("cancelFlag At Progress Endpoint: ", cancelFlag)
         # Call the process_urls_async function with only the cancelFlag
-        async for data in process_urls_async(index, Semaphore, cancelFlag):
+        async for data in process_urls_async({}, {}, cancelFlag):
             pass  # Process the data if needed, or you can simply iterate through it
         return jsonify(progress_info)
     # If cancelFlag is not set, return the progress_info as it is
@@ -256,31 +261,40 @@ async def get_progress():
 @app.route('/download/<csvFilename>', methods=['POST'])
 def download_csv(csvFilename):
     try:
-        csv_path = f'/tmp/8dc53c1053de9c9/{csvFilename}'  # Update with the actual path to your CSV directory
-        
+        # Get the filePath from the request
+        filePath = request.form.get('filePath')
+
+        # Construct the full path to the CSV file
+        csv_path = os.path.join(filePath, csvFilename)
+        print("File Path with File name: ", csv_path)
+        app.logger.info(f"File Path with File name: {csv_path}")  # Fixed the syntax error here
+
         # Check if the file exists
         if os.path.exists(csv_path):
             # Open the file in binary mode
             with open(csv_path, 'rb') as file:
                 # Create a Flask response object
                 response = make_response(file.read())
-                
+
             # Set the appropriate content type for CSV files
             response.headers.set('Content-Type', 'text/csv')
             # Set the Content-Disposition header to specify the filename
             response.headers.set('Content-Disposition', f'attachment; filename={csvFilename}')
-            
+
             return response
         else:
             return jsonify({'error': 'File not found'})
     except Exception as e:
         return jsonify({'error': str(e)})
 
-def list_files_in_directory(directory):
+
+
+def list_files_in_directory(current_directory,home_directory):
     try:
         # Get the list of files and folders in the specified directory
-        files_and_folders = os.listdir(directory)
-        
+        files_and_folders = os.listdir(current_directory)
+        print("Current directory:", current_directory)
+        print("Home directory:", home_directory)
         # Print each file and folder
         for item in files_and_folders:
             print(item)
@@ -290,9 +304,9 @@ def list_files_in_directory(directory):
 # Specify the home directory path
 home_directory = os.path.expanduser('~')
 current_directory = os.getcwd()
-print("Current directory:", current_directory)
+
 # List files and folders in the home directory
-list_files_in_directory(current_directory)
+list_files_in_directory(current_directory,home_directory)
 
 def submit_form():
     file_type = request.form.get('file')
