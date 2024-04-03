@@ -13,7 +13,6 @@ $(document).ready(function () {
     var footer = $("footer");
     var header = $("header");
     var lastScrollTop = 0; // Variable to store the last scroll position
-
     // Button click event handler to toggle the visibility of the url-container
     $("#toggleButton").click(function() {
         $("#url-container").toggle(); // Toggle the visibility of the url-container
@@ -71,6 +70,10 @@ $(document).ready(function () {
         $('#manual-data-table').empty();
         $('#mnl-tbl').hide();
         urlFlag = false;
+        cancelFlag = true;
+
+        // Call sendDataToServer with the cancelFlag
+        sendDataToServer({}, cancelFlag); // Pass an empty object as clientUrlSet since it's not used here
 
         $('#tableDiv').hide();
         $('#tbl-section').hide();
@@ -89,6 +92,10 @@ $(document).ready(function () {
         $('#file-data-table').empty();
         $('#file-tbl').hide();
         urlFlag = false;
+        cancelFlag = true;
+
+        // Call sendDataToServer with the cancelFlag
+        sendDataToServer({}, cancelFlag); // Pass an empty object as clientUrlSet since it's not used here
 
         $('#tableDiv').hide();
         $('#tbl-section').hide();
@@ -621,6 +628,7 @@ function updateCheckAllCheckbox() {
     // If all checkboxes are checked, check the check_all checkbox
     $("#check_all").prop("checked", total_check_boxes === total_checked_boxes);
 }
+var cancelFlag = false
 
 // Function to store checked checkbox values in the dataset
 function storeCheckedValues() {
@@ -644,15 +652,15 @@ function storeCheckedValues() {
     });
     // Push the caption value to the choosen array once
     clientUrlSet.choosen.push(captionText);
-
     // Bind click event to send data to server
     $("#send_serve").off("click").on("click", async function() {
         $("#processedTable").hide();
         $("#tableDiv").hide();
         $('#totalProcessingTime').empty().hide();
-
-        await sendDataToServer(clientUrlSet);
+        cancelFlag = false
+        await sendDataToServer(clientUrlSet, cancelFlag);
     });
+
 }
   // Function to check if any checkboxes are selected
   function hasCheckedItems() {
@@ -681,17 +689,49 @@ function storeCheckedValues() {
 
   // Initial check on page load (optional)
   updateSendServeButton();
-  
-  async function fetchProgress() {
-    $('#loadingIndicator').show();              
 
+  $('#cancelButton').off("click").on("click", async function() {
+    // Set a flag indicating that the process should be canceled
+    cancelFlag = true;
+
+    // Call sendDataToServer with the cancelFlag
+    await sendDataToServer({}, cancelFlag); // Pass an empty object as clientUrlSet since it's not used here
+}); 
+// Define a global variable to store the cancelFlag value
+var globalCancelFlag = false;
+// Modify fetchProgress to use the globalCancelFlag variable directly
+async function fetchProgress() {
+    $('#loadingIndicator').show();              
     $('#progressPercentage').show();
     $("#tableDiv").show();
+    // Check if processing is canceled
+    if (globalCancelFlag === true) {
+        console.log('Processing canceled.');
+        // Create another Fetch POST request to pass the flag to /progress endpoint
+        try {
+            const response = await fetch('/progress', {
+                async: 'true',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ cancelFlag: globalCancelFlag })
+            });
+            // You may handle the response here if needed
+        } catch (error) {
+            console.error('Error sending cancel flag to progress endpoint:', error);
+        }
+        return;
+    }   
 
     try {
         const response = await fetch('/progress', {
             async: 'true',
-            method: 'POST'
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ cancelFlag: globalCancelFlag })
         });
         var { pInfo_obj, tryPercent } = await response.json();
         var progressData = pInfo_obj;
@@ -708,7 +748,17 @@ function storeCheckedValues() {
     }
 }
 
-async function sendDataToServer(clientUrlSet) {
+
+
+async function sendDataToServer(clientUrlSet, cancelFlag) {
+    // Update the globalCancelFlag with the provided cancelFlag value
+    globalCancelFlag = cancelFlag;
+
+    // Check if processing is canceled
+    if (globalCancelFlag === true) {
+        console.log('Processing canceled at SendtoServer');
+        return;
+    }   
     try {
         // Hide download button container initially
         $('#downloadButtonContainer').hide();
@@ -719,8 +769,10 @@ async function sendDataToServer(clientUrlSet) {
         // Ensure clientUrlSet is not empty
         if (!clientUrlSet || !clientUrlSet.url_list || clientUrlSet.url_list.length === 0) {
             throw new Error("Error: DataSet is undefined or empty");
+
         } 
         
+        $("#cancelButton").show();
         // Set interval to call fetchProgress every 2 seconds
         var progressInterval = setInterval(fetchProgress, 2000);
 
@@ -734,7 +786,10 @@ async function sendDataToServer(clientUrlSet) {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(clientUrlSet)
+            body: JSON.stringify({
+                clientUrlSet: clientUrlSet,
+                cancelFlag: globalCancelFlag
+            })        
         });
 
         // Parse JSON response
@@ -771,9 +826,7 @@ async function sendDataToServer(clientUrlSet) {
                 $('#downloadButtonContainer').hide();
             }
 
-            // Call fetchProgress after an initial delay of 800 milliseconds
-            await fetchProgress();
-            console.log("Data sent successfully:", responseData);
+            await fetchProgress(cancelFlag);
         }
 
         // Check if the response is empty or not
@@ -811,6 +864,7 @@ function formatProcessingTime(totalProcessTime) {
 
 // Function to download CSV using Fetch API
 async function downloadCSV(csvFilename) {
+   
     $('#downloadButton').on('click', async function() {
         try {
             const formData = new FormData();
@@ -851,6 +905,7 @@ async function downloadCSV(csvFilename) {
 
 // Function to update progress percentage section
 async function updateProgressPercentage(progressPercentage) {
+
     try {
         // Check if progress data is received
         if (progressPercentage !== undefined) {
@@ -871,6 +926,7 @@ async function updateProgressPercentage(progressPercentage) {
 
 // Function to dynamically generate table
 async function generateTable(progressData) {
+   
     // Clear existing table content
     $('#tryTable').empty();
     $('#tableDiv').show();

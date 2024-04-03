@@ -1,3 +1,4 @@
+from multiprocessing.synchronize import Semaphore
 from flask import Flask, render_template, request, jsonify, make_response
 from io import StringIO,BytesIO
 import random
@@ -170,24 +171,35 @@ async def process_clienturl_data():
         if not request.is_json:
             return jsonify({'error': 'Request content must be in JSON format'})
 
-        url_set = request.json
-
+        cliData = request.json
+        url_set = cliData.get('clientUrlSet')
+        cancelFlag = cliData.get('cancelFlag')  # Retrieve cancelFlag from the request data
+        # processFlag = request.
+        print("testing received flag or not: ",cliData)
         app.logger.info(f"Received dataSet: {url_set} (type: {type(url_set)})")
+        app.logger.info(f"Received Boolean: {cancelFlag} (type: {type(cancelFlag)})")
+        # Check if the processing should be canceled based on cancelFlag
+        if cancelFlag:
+            # Return a response indicating that the process was canceled
+            return jsonify({'message': 'URL processing canceled'})
 
         # Run asynchronous tasks to process URLs
         semaphore = asyncio.Semaphore(8)  # Adjust the semaphore value as needed
         logging.info("Starting URL processing")
 
         data = []
-        async for result in process_urls_async(url_set['url_list'], semaphore):
+        async for result in process_urls_async(url_set['url_list'], semaphore, cancelFlag):
             if 'domain_info' in result:
                 data.append(result)
+
+            # Check if processing is canceled after each iteration
+            if cancelFlag:
+                break  # Break the loop if processing is canceled
 
         logging.info("URL processing completed")
 
         # Convert data to DataFrame (if needed)
         if data:
-            print("Server Returning Data", data)
             result_df = pd.DataFrame(data)
             domain_info_df = result_df['domain_info'].apply(pd.Series)
 
@@ -214,7 +226,6 @@ async def process_clienturl_data():
                     'has_downloadable_data': True,
                     'data': result_df.to_json(orient='records'),
                     'csv_filename': unique_csv_filename,  # Send the filename to the client
-                    
                 })
             else:
                 return jsonify({'error': 'No domain information available to download'})
@@ -231,14 +242,21 @@ def array_to_string(arr):
     return ', '.join(map(str, arr))
     
 @app.route('/progress', methods=['POST'])
-def get_progress():
-    # print("At the End Point: ", progress_info)
+async def get_progress():
+    cancelFlag = request.json.get('cancelFlag')
+    if cancelFlag:
+        print("cancelFlag At Progress Endpoint: ", cancelFlag)
+        # Call the process_urls_async function with only the cancelFlag
+        async for data in process_urls_async(index, Semaphore, cancelFlag):
+            pass  # Process the data if needed, or you can simply iterate through it
+        return jsonify(progress_info)
+    # If cancelFlag is not set, return the progress_info as it is
     return jsonify(progress_info)
-    
+
 @app.route('/download/<csvFilename>', methods=['POST'])
 def download_csv(csvFilename):
     try:
-        csv_path = f'/opt/render/project/src/{csvFilename}'  # Update with the actual path to your CSV directory
+        csv_path = f'C:\\Users\\HP\\Desktop\\project_Experiment\\{csvFilename}'  # Update with the actual path to your CSV directory
         
         # Check if the file exists
         if os.path.exists(csv_path):
@@ -288,3 +306,5 @@ def submit_form():
     print(f"File type: {file_type}, Batch: {batch}, URL column: {url_column}, Selected Sheet: {selected_sheet}, Selected Column: {selected_column}, Required data: {required_data}, Output file type: {output_file_type}")
     return 'Form submitted successfully'
 
+if __name__ == '__main__':
+    app.run(debug=True)

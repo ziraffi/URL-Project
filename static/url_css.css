@@ -631,7 +631,17 @@ button {
   font-size: 1.3rem;
   cursor: pointer;
 }
-
+.process_container{
+  display: inline-flex;
+  justify-content: space-evenly;
+  padding: 0 25%;
+}
+.inner_process_container{
+  min-width: 12.5rem;
+}
+button#cancelButton,button#send_serve{
+  min-width: 6.25rem;
+}
 /* *****************  URL Container Start from Here  *********************** */
 #floatContainer {
   position: fixed;
