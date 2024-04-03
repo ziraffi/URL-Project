@@ -256,7 +256,7 @@ async def get_progress():
 @app.route('/download/<csvFilename>', methods=['POST'])
 def download_csv(csvFilename):
     try:
-        csv_path = f'files/downloads/{csvFilename}'  # Update with the actual path to your CSV directory
+        csv_path = f'/tmp/{csvFilename}'  # Update with the actual path to your CSV directory
         
         # Check if the file exists
         if os.path.exists(csv_path):
