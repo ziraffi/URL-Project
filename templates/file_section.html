@@ -1,166 +1,108 @@
-<!-- file-section.html -->
-<div id="file-section">
-  <div class="formInput-container">
-    <div class="form-wrapper mb-2">
-      <div class="col-2">
-        <button class="btn btn-secondary py-1" id="toggle_file"><span class="fa-solid fa-angles-left"></span><span class="d-none d-md-inline">Upload</span></button>
-      </div>
-<!-- ******************************************************************* -->
-      <!-- File Form Section Start From Here -->
-<!-- ******************************************************************* -->
-      <div class="wrapper-inner my-3 col-8">
-      <div class="frmOnly">
-      <div id="fileForm-section">
-        <section id="input_section">
-        <form id="file_form" enctype="multipart/form-data">
-          <fieldset>
-            <!-- Form elements for uploading file -->
-            <label for="file" class="formTitle">Choose your file</label><br>
-            <div class="file-input-field">
-            <input
-              type="file"
-              id="file"
-              name="file"
-              accept=".csv,.xlsx"
-              required
-            />
-          </div>
-            <p class="file-help-message">Supported file formats: CSV, XLSX</p>
-                        <!-- Additional form elements -->
 
-            <div class="dropdown-fields">
-                          <!-- Options for sheet names -->
-            <div class="sht-dropdown">
-            <label for="sheet-name">Choose your sheet</label>
-            <select id="sheet-name" name="sheet-name" required>
-            </select>
-            </div>
-                          <!-- Options for column names -->
-            <div class="clm-dropdown">
-            <label for="column-name">Choose your column</label>
-            <select id="column-name" name="column-name" required>
-            </select>
-            </div>
-          </div>
-        </fieldset>
-        </form>
-      </section>
-      </div>
-<!-- ******************************************************************* -->
-      <!-- MAnual Form Section Start From Here -->
-<!-- ******************************************************************* -->
-      <div id="mnlForm-section">
-        <section id="input_section">
-        <!-- Manual entry form -->
-        <form class="form-group" id="manual_form" style="display: none">
-          <fieldset>
-            <!-- Form elements for manual entry -->
-            <div class="formTitle">
-            <label for="manual-data">Enter URLs <span> (one per line)</span></label><br>
-            </div>
-            <textarea
-              id="manual-data"
-              name="manual-data"
-              rows="9"
-              cols="100"
-              placeholder="Please Enter URLs"
-            ></textarea
-            ><br>
-            <input class="btn btn-primary py-1 " type="submit" id="manual-form-submit" value="Submit" />
-        </fieldset>
-        </form>
-      </section>
-      </div>
-    </div>
+<div id=file-section>
+  <div class=formInput-container>
+  <div class="form-wrapper mb-2">
+  <div class=col-2>
+  <button class="btn btn-secondary py-1" id=toggle_file><span class="fa-solid fa-angles-left"></span><span class="d-none d-md-inline">Upload</span></button>
   </div>
-<!-- ******************************************************************* -->
-      <!-- File Form Section End From Here -->
-<!-- ******************************************************************* -->
-      <div class="col-2">
-        <button class="btn btn-secondary" id="toggle_manual"><span class="d-none d-md-inline">Manual</span><span class="fa-solid fa-angles-right"></span></button>
-      </div>
+  <div class="wrapper-inner my-3 col-8">
+  <div class=frmOnly>
+  <div id=fileForm-section>
+  <section id=input_section>
+  <form id=file_form enctype=multipart/form-data>
+  <fieldset>
+  <label for=file class=formTitle>Choose your file</label><br>
+  <div class=file-input-field>
+  <input type=file id=file name=file accept=.csv,.xlsx required>
   </div>
-</div>
-<!-- ******************************************************************* -->
-      <!-- URL container Start From Here -->
-<!-- ******************************************************************* -->
-<div class="formInput-container" id="floatContainer">
-  <button class="floaterIcon" id="toggleButton">
-      <!-- Your exclamation icon or content goes here -->
-      <i class="bi bi-binoculars"></i>
+  <p class=file-help-message>Supported file formats: CSV, XLSX</p>
+  <div class=dropdown-fields>
+  <div class=sht-dropdown>
+  <label for=sheet-name>Choose your sheet</label>
+  <select id=sheet-name name=sheet-name required>
+  </select>
+  </div>
+  <div class=clm-dropdown>
+  <label for=column-name>Choose your column</label>
+  <select id=column-name name=column-name required>
+  </select>
+  </div>
+  </div>
+  </fieldset>
+  </form>
+  </section>
+  </div>
+  <div id=mnlForm-section>
+  <section id=input_section>
+  <form class=form-group id=manual_form style=display:none>
+  <fieldset>
+  <div class=formTitle>
+  <label for=manual-data>Enter URLs <span> (one per line)</span></label><br>
+  </div>
+  <textarea id=manual-data name=manual-data rows=9 cols=100 placeholder="Please Enter URLs"></textarea><br>
+  <input class="btn btn-primary py-1" type=submit id=manual-form-submit value=Submit>
+  </fieldset>
+  </form>
+  </section>
+  </div>
+  </div>
+  </div>
+  <div class=col-2>
+  <button class="btn btn-secondary" id=toggle_manual><span class="d-none d-md-inline">Manual</span><span class="fa-solid fa-angles-right"></span></button>
+  </div>
+  </div>
+  </div>
+  <div class=formInput-container id=floatContainer>
+  <button class=floaterIcon id=toggleButton>
+  <i class="bi bi-binoculars"></i>
   </button>
-</div>    
-  <section class="url-container" id="url-container" style="display: none;">
-      <div class="url-wrapper">
-        <div id="valid_list">
-          <!-- URLs will be displayed here -->
-        </div>
-        <div id="invalid_list">
-          <!-- Invalid URLs will be displayed here -->
-        </div>
-      </div>
-    </section>
-    <section id="tbl-section">
-      <div id="file-tbl">
-        <h3>File Data</h3><br>
-        <div class="table" id="file-data-table"></div>
-    </div>
-
-    <div id="mnl-tbl">
-        <h3>Manual Data</h3><br>
-        <div class="table" id="manual-data-table"></div>
-    </div>
-    <div class="process_btn">
-      <div class="inner_process_container">
-    <button id="cancelButton" class="btn-secondary " style="display: none;">Stop It</button>
-    <button id="send_serve" class="btn-secondary " type="submit" style="display: none;">Lock & GO</button>
+  </div>
+  <section class=url-container id=url-container style=display:none>
+  <div class=url-wrapper>
+  <div id=valid_list>
+  </div>
+  <div id=invalid_list>
   </div>
   </div>
   </section>
-
-    <div id="loadingIndicator" style="display: none;">
-      <!-- Add your loading indicator design here -->
-
-      <div id="progressPercentage" class="formInput-container">
-        <!-- Processing time will be displayed here -->
-        <p id="progressText">Progress: <span></span></p>
-        <div id= "progressBlock" role="progressbar" aria-valuenow=" 0 " aria-valuemin="0" aria-valuemax="100" style="--value: "></div>
-      </div>
-
+  <section id=tbl-section>
+  <div id=file-tbl>
+  <h3>File Data</h3><br>
+  <div class=table id=file-data-table></div>
   </div>
-  <div id="totalProcessingTime">
-    <p></p>
-  </div>  
-  <div id="tableDiv" style="display: none">
-    <div class="table" id="tryTable">
-      <!-- Data table will be dynamically generated here -->
-    </div>
+  <div id=mnl-tbl>
+  <h3>Manual Data</h3><br>
+  <div class=table id=manual-data-table></div>
   </div>
-
-
-<!-- ******************************************************************* -->
-      <!--******************************** DO NOT DELET THIS BLOCK  *************************************-->
-<!-- ******************************************************************* -->
-<!-- <div id="processedTable" style="display: none">
-<div class="table" id="dataTableContainer">
-  Data table will be dynamically generated here 
-
-</div> -->
-
-<!-- ******************************************************************* -->
-      <!-- Dynamic Load next Sections Button -->
-<!-- ******************************************************************* -->
-  <div  id="downloadButtonContainer" style="display: none;">
-    <button type="button" id="downloadButton">Download CSV</button>
+  <div class=process_btn>
+  <div class=inner_process_container>
+  <button id=cancelButton class=btn-secondary style=display:none>Stop It</button>
+  <button id=send_serve class=btn-secondary type=submit style=display:none>Lock & GO</button>
   </div>
-</div>
+  </div>
+  </section>
+  <div id=loadingIndicator style=display:none>
+  <div id=progressPercentage class=formInput-container>
+  <p id=progressText>Progress: <span></span></p>
+  <div id=progressBlock role=progressbar aria-valuenow=" 0 " aria-valuemin=0 aria-valuemax=100 style="--value: "></div>
+  </div>
+  </div>
+  <div id=totalProcessingTime>
+  <p></p>
+  </div>
+  <div id=tableDiv style=display:none>
+  <div class=table id=tryTable>
+  </div>
+  </div>
+  <div id=downloadButtonContainer style=display:none>
+  <button type=button id=downloadButton>Download CSV</button>
+  </div>
+  </div>
   <div class="container-btm d-none">
-    <button id="load-next-section-button">Continue</button>
-    <!-- Continue button and error message -->
-    <div id="error-message" style="color: red"></div>
+  <button id=load-next-section-button>Continue</button>
+  <div id=error-message style=color:red></div>
   </div>
-</div>
-<br>
-<div class="file-section"></div>
-
-<script src="../static/myfrnt.js"></script>
+  
+  <br>
+  <div class=file-section></div>
+  <script src=../static/myfrnt.js></script>
