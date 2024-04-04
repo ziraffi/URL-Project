@@ -26,12 +26,14 @@ def index():
 # @app.route('/registration.html')
 # def register():
 #     return render_template('register.html')
-@app.route('/<temp_name>.html')
-def some_template(temp_name):
-    if temp_name == 'disclaimer':
-        return render_template('disclaimer.html')
-    elif temp_name == 'privacyPolicy':
-        return render_template('privacyPolicy.html')
+
+@app.route('/disclaimer.html')
+def disclaimer():
+    return render_template('disclaimer.html')
+
+@app.route('/privacyPolicy.html')
+def privacy_policy():
+    return render_template('privacyPolicy.html')
 
 @app.route('/templates/sitemap.xml')
 def sitemapxml():
