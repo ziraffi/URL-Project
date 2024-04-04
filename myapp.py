@@ -318,6 +318,3 @@ def submit_form():
 
     print(f"File type: {file_type}, Batch: {batch}, URL column: {url_column}, Selected Sheet: {selected_sheet}, Selected Column: {selected_column}, Required data: {required_data}, Output file type: {output_file_type}")
     return 'Form submitted successfully'
-
-if __name__ == '__main__':
-    app.run(debug=True)
