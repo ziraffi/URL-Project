@@ -23,19 +23,17 @@ def index():
 # def guide():
 #     return render_template('guide.html')
 
-@app.route('/disclaimer.html')
-def disclaimer():
-    return render_template('disclaimer.html')
-
-@app.route('/privacyPolicy.html')
-def privacy_policy():
-    return render_template('privacyPolicy.html')
-
 # @app.route('/registration.html')
 # def register():
 #     return render_template('register.html')
+@app.route('/<temp_name>.html')
+def some_template(temp_name):
+    if temp_name == 'disclaimer':
+        return render_template('disclaimer.html')
+    elif temp_name == 'privacyPolicy':
+        return render_template('privacyPolicy.html')
 
-@app.route('/sitemap.xml')
+@app.route('/templates/sitemap.xml')
 def sitemapxml():
     return render_template('sitemap.xml')
 
@@ -323,3 +321,6 @@ def submit_form():
 
     print(f"File type: {file_type}, Batch: {batch}, URL column: {url_column}, Selected Sheet: {selected_sheet}, Selected Column: {selected_column}, Required data: {required_data}, Output file type: {output_file_type}")
     return 'Form submitted successfully'
+
+if __name__ == '__main__':
+    app.run(debug=True)
