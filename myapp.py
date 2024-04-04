@@ -15,24 +15,29 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('url_Project.html')
-@app.route('/login.html')
-def login():
-    return render_template('login.html')
+# @app.route('/login.html')
+# def login():
+#     return render_template('login.html')
 
-@app.route('/guide.html')
-def guide():
-    return render_template('guide.html')
+# @app.route('/guide.html')
+# def guide():
+#     return render_template('guide.html')
 
 @app.route('/disclaimer.html')
 def disclaimer():
     return render_template('disclaimer.html')
-@app.route('/privacy_policy.html')
-def privacy_policy():
-    return render_template('privacy_policy.html')
 
-@app.route('/registration.html')
-def register():
-    return render_template('register.html')
+@app.route('/privacyPolicy.html')
+def privacy_policy():
+    return render_template('privacyPolicy.html')
+
+# @app.route('/registration.html')
+# def register():
+#     return render_template('register.html')
+
+@app.route('/sitemap.xml')
+def sitemapxml():
+    return render_template('sitemap.xml')
 
 @app.route('/templates/<section_name>.html')
 def serve_template(section_name):
