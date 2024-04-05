@@ -15,6 +15,7 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('url_Project.html')
+
 # @app.route('/login.html')
 # def login():
 #     return render_template('login.html')
@@ -49,7 +50,7 @@ def file_section():
     selected_sheet = request.form.get('selected_sheet')  # Retrieve selected sheet from form data
     selected_column = request.form.get('selected_column')  # Retrieve selected column from form data
     
-        # Pass selected sheet and column to process_file
+    # Pass selected sheet and column to process_file
     response_data = process_file(uploaded_file, selected_sheet, selected_column)
 
     if response_data:
@@ -222,8 +223,10 @@ async def process_clienturl_data():
                 csv_filename = 'rk.csv'
                 unique_csv_filename = generate_unique_filename(csv_filename)
 
-                # Save DataFrame as CSV using the unique filename
-                domain_info_df.to_csv(unique_csv_filename, index=False)
+                # Save DataFrame as CSV to the temporary volume (--tmpfs)
+                tmpfs_path = '/app/tmpf'  # Path to the temporary volume
+                tmp_csv_path = os.path.join(tmpfs_path, unique_csv_filename)
+                domain_info_df.to_csv(tmp_csv_path, index=False)
                 
                 # Get the full path of the saved CSV file
                 current_directory = os.path.join(os.getcwd())
@@ -266,7 +269,7 @@ async def get_progress():
 def download_csv(csvFilename):
     try:
         # Get the filePath from the request
-        filePath = request.form.get('filePath')
+        filePath = '/app/tmpf'
 
         # Construct the full path to the CSV file
         csv_path = os.path.join(filePath, csvFilename)
