@@ -1,325 +1,225 @@
-from flask import Flask, render_template, request, jsonify, make_response
-from io import StringIO,BytesIO
-import random
-import string
-import pandas as pd
-import openpyxl
-import logging
-import asyncio
-import pandas as pd
-import os
-from domain_checker import process_urls_async, progress_info
-app = Flask(__name__)
-
-
-@app.route('/')
-def index():
-    return render_template('url_Project.html')
-# @app.route('/login.html')
-# def login():
-#     return render_template('login.html')
-
-# @app.route('/guide.html')
-# def guide():
-#     return render_template('guide.html')
-
-# @app.route('/registration.html')
-# def register():
-#     return render_template('register.html')
-
-@app.route('/disclaimer.html')
-def disclaimer():
-    return render_template('disclaimer.html')
-
-@app.route('/privacyPolicy.html')
-def privacy_policy():
-    return render_template('privacyPolicy.html')
-
-@app.route('/templates/sitemap.xml')
-def sitemapxml():
-    return render_template('sitemap.xml')
-
-@app.route('/templates/<section_name>.html')
-def serve_template(section_name):
-    return render_template(f'{section_name}.html'),200
-
-@app.route('/input_section', methods=['POST'])
-def file_section():
-    uploaded_file = request.files.get('file')
-    selected_sheet = request.form.get('selected_sheet')  # Retrieve selected sheet from form data
-    selected_column = request.form.get('selected_column')  # Retrieve selected column from form data
-    
-        # Pass selected sheet and column to process_file
-    response_data = process_file(uploaded_file, selected_sheet, selected_column)
-
-    if response_data:
-        return jsonify(response_data)
-    else:
-        return jsonify({'error_message': "No file uploaded"})
-@app.route('/process_manual_input', methods=['POST'])
-def process_manual_input():
-    try:
-        # Extract data from the request
-        data = request.get_json()
-        manual_data = data['manual_data']
-        selected_sheet = data['selected_sheet']
-        selected_column = data['selected_column']
-        
-        # Split manual data by newline and remove empty lines
-        manual_lines = manual_data.strip().split('\n')
-        manual_lines = [line.strip() for line in manual_lines if line.strip()]
-        
-        # Convert manual data to CSV format
-        manual_csv = '\n'.join([f'"{line.replace(",", "")}"' for line in manual_lines])
-        
-        # Create DataFrame from manual CSV data
-        df = pd.read_csv(StringIO(manual_csv), header=None, names=[selected_column])
-        
-        # Extract column data with additional information
-        column_data = [{'data': val, 'sheet_number': 1, 'row_number': idx + 2, 'column_number': 1} for idx, val in enumerate(df[selected_column].tolist()) if pd.notna(val)]
-        
-        return jsonify({
-            'column_data': column_data,
-            'is_manual': True
-        })
-    except Exception as e:
-        return jsonify({'error_message': f"Error processing manual input: {str(e)}"}), 500
-
-def process_file(uploaded_file, selected_sheet, selected_column):
-    if not uploaded_file:
-        return {'error_message': "No file uploaded"}
-
-    try:
-        file_contents = uploaded_file.read()
-        if uploaded_file.filename.endswith(".csv"):
-            # For CSV files, use the file name as the sheet name
-            filename = uploaded_file.filename.split('.')[0]
-            # Extract column names directly from CSV file
-            df = pd.read_csv(BytesIO(file_contents))
-            columns = list(df.columns)
-            selected_column = selected_column or columns[0]  # Use the first column by default
-            # Get URLs for the selected column
-            column_data = [{'data': val, 'sheet_number': 1, 'row_number': idx + 2, 'column_number': 1} for idx, val in enumerate(df[selected_column].tolist()) if pd.notna(val)]
-            print("Current File name for CSV Test: ",filename)                   
-            return {'sheet_columns': columns, 'column_data': column_data, 'selected_sheet': filename, 'selected_file': filename, 'is_csv': True}    
-        elif uploaded_file.filename.endswith(".xlsx"):
-            # For Excel files, extract sheet names and column names
-            wb = openpyxl.load_workbook(filename=BytesIO(file_contents), data_only=True)
-            sheet_names = wb.sheetnames
-            sheet_columns = {}
-            column_data = []
-            selected_file= uploaded_file.filename.split('.')[0]            
-            # Set a default value for selected sheet and column if not provided
-            selected_sheet = selected_sheet or sheet_names[0]
-            for sheet_number, sheet_name in enumerate(sheet_names, start=1):
-                sheet = wb[sheet_name]
-                max_row = sheet.max_row
-                max_col = sheet.max_column
-                column_titles = []
-                # Find the selected column
-                if sheet_name == selected_sheet:
-                    for column_number in range(1, max_col + 1):  # Loop through the columns
-                        cell_obj = sheet.cell(row=1, column=column_number)  # Access the first row for column names
-                        column_title = cell_obj.value
-                        if column_title is None:
-                            column_title = f"Column_{column_number}"  # Assign a default title for None values
-                        column_titles.append(column_title)
-
-                    if selected_column is None:
-                        selected_column = column_titles[0]  # Use the first column by default
-
-                    # Check if the selected column exists
-                    if selected_column not in column_titles:
-                        return {'error_message': f"Selected column '{selected_column}' not found in sheet '{selected_sheet}'."}
-
-                    # Retrieve data for the selected column along with row numbers
-                    column_index = column_titles.index(selected_column) + 1
-
-                    column_data = [{'data':sheet.cell(row=j, column=column_index).value,
-                                    'sheet_number': sheet_number,
-                                    'row_number': j,
-                                    'column_number': column_index}
-                                    for j in range(2, max_row + 1)if sheet.cell(row=j, column=column_index).value]
-                    # Update selected_column if it matches the current column title
-                    selected_column = column_titles[column_index - 1]
-
-                sheet_columns[sheet_name] = column_titles
-            
-            # Return the processed data
-            return { 'selected_file': selected_file,'sheet_names': sheet_names, 'sheet_columns': sheet_columns, 'column_data': column_data, 'column_titles': column_titles, 'selected_sheet': selected_sheet, 'selected_column': selected_column, 'is_csv': False}
-        else:
-            return {'error_message': "Unsupported file format"}
-
-    except Exception as e:
-        return {'error_message': f"Error processing file: {str(e)}"}
-
-# Set up logging configuration
-logging.basicConfig(level=logging.DEBUG)  # Set the logging level to DEBUG
-
-def generate_unique_filename(base_filename):
-    directory = os.path.dirname(base_filename)
-    filename = os.path.basename(base_filename)
-    
-    if not os.path.exists(base_filename):
-        return base_filename  # If the file doesn't exist, use the base filename
-
-    # If the file exists, generate a unique filename
-    alphabet_hex = ''.join(random.choice(string.hexdigits) for _ in range(8))  # Generate a random hexadecimal code
-    unique_filename = f"rk-{alphabet_hex}-{filename}"
-    return os.path.join(directory, unique_filename)
-
-import os
-from flask import request, jsonify
-
-@app.route('/process_url_data', methods=['POST'])
-async def process_clienturl_data():
-    try:
-        # Ensure request contains JSON data
-        if not request.is_json:
-            return jsonify({'error': 'Request content must be in JSON format'})
-
-        cliData = request.json
-        url_set = cliData.get('clientUrlSet')
-        cancelFlag = cliData.get('cancelFlag')  # Retrieve cancelFlag from the request data
-
-        # Check if the processing should be canceled based on cancelFlag
-        if cancelFlag:
-            # Return a response indicating that the process was canceled
-            return jsonify({'message': 'URL processing canceled'})
-
-        # Run asynchronous tasks to process URLs
-        semaphore = asyncio.Semaphore(8)  # Adjust the semaphore value as needed
-        logging.info("Starting URL processing")
-
-        data = []
-        async for result in process_urls_async(url_set['url_list'], semaphore, cancelFlag):
-            if 'domain_info' in result:
-                data.append(result)
-
-            # Check if processing is canceled after each iteration
-            if cancelFlag:
-                break  # Break the loop if processing is canceled
-
-        logging.info("URL processing completed")
-
-        # Convert data to DataFrame (if needed)
-        if data:
-            result_df = pd.DataFrame(data)
-            domain_info_df = result_df['domain_info'].apply(pd.Series)
-
-            # Convert 'Status Code' and 'Response Message' columns from arrays to strings
-            if 'Status Code' in domain_info_df.columns:
-                domain_info_df['Status Code'] = domain_info_df['Status Code'].apply(array_to_string)
-            if 'Response Message' in domain_info_df.columns:
-                domain_info_df['Response Message'] = domain_info_df['Response Message'].apply(array_to_string)
-                
-            # Convert Expiration Date to datetime objects and make them timezone-aware (if needed)
-            if 'Expiration Date' in domain_info_df.columns:
-                domain_info_df['Expiration Date'] = pd.to_datetime(domain_info_df['Expiration Date'], unit='ms').dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
-
-            # Save domain information as CSV (if data exists)
-            if not domain_info_df.empty:
-                csv_filename = 'rk.csv'
-                unique_csv_filename = generate_unique_filename(csv_filename)
-
-                # Save DataFrame as CSV using the unique filename
-                domain_info_df.to_csv(unique_csv_filename, index=False)
-                
-                # Get the full path of the saved CSV file
-                current_directory = os.path.join(os.getcwd())
-
-                return jsonify({
-                    'message': 'URL data processed successfully',
-                    'has_downloadable_data': True,
-                    'data': result_df.to_json(orient='records'),
-                    'csv_filename': unique_csv_filename,  # Send the filename to the client
-                    'current_directory': current_directory  # Send the full path to the client
-                })
-            else:
-                return jsonify({'error': 'No domain information available to download'})
-
-        else:
-            logging.error("No data retrieved")
-            return jsonify({'error': 'No data retrieved'})
-
-    except Exception as e:
-        logging.error(f"Error processing URL data: {e}")
-        return jsonify({'error': str(e)})
-
-# Define function to convert arrays to strings
-def array_to_string(arr):
-    return ', '.join(map(str, arr))
-    
-@app.route('/progress', methods=['POST'])
-async def get_progress():
-    cancelFlag = request.json.get('cancelFlag')
-    if cancelFlag:
-        print("cancelFlag At Progress Endpoint: ", cancelFlag)
-        # Call the process_urls_async function with only the cancelFlag
-        async for data in process_urls_async({}, {}, cancelFlag):
-            pass  # Process the data if needed, or you can simply iterate through it
-        return jsonify(progress_info)
-    # If cancelFlag is not set, return the progress_info as it is
-    return jsonify(progress_info)
-
-@app.route('/download/<csvFilename>', methods=['POST'])
-def download_csv(csvFilename):
-    try:
-        # Get the filePath from the request
-        filePath = request.form.get('filePath')
-
-        # Construct the full path to the CSV file
-        csv_path = os.path.join(filePath, csvFilename)
-        print("File Path with File name: ", csv_path)
-        app.logger.info(f"File Path with File name: {csv_path}")  # Fixed the syntax error here
-
-        # Check if the file exists
-        if os.path.exists(csv_path):
-            # Open the file in binary mode
-            with open(csv_path, 'rb') as file:
-                # Create a Flask response object
-                response = make_response(file.read())
-
-            # Set the appropriate content type for CSV files
-            response.headers.set('Content-Type', 'text/csv')
-            # Set the Content-Disposition header to specify the filename
-            response.headers.set('Content-Disposition', f'attachment; filename={csvFilename}')
-
-            return response
-        else:
-            return jsonify({'error': 'File not found'})
-    except Exception as e:
-        return jsonify({'error': str(e)})
-
-
-
-def list_files_in_directory(current_directory,home_directory):
-    try:
-        # Get the list of files and folders in the specified directory
-        files_and_folders = os.listdir(current_directory)
-        print("Current directory:", current_directory)
-        print("Home directory:", home_directory)
-        # Print each file and folder
-        for item in files_and_folders:
-            print(item)
-    except OSError as e:
-        print(f"Error: {e}")
-
-# Specify the home directory path
-home_directory = os.path.expanduser('~')
-current_directory = os.getcwd()
-
-# List files and folders in the home directory
-list_files_in_directory(current_directory,home_directory)
-
-def submit_form():
-    file_type = request.form.get('file')
-    batch = request.form.get('batch')
-    url_column = request.form.get('url-column')
-    selected_sheet = request.form.get('sheet-name')
-    selected_column = request.form.get('column-name')
-    required_data = request.form.get('required-data')
-    output_file_type = request.form.get('output-file-type')
-
-    print(f"File type: {file_type}, Batch: {batch}, URL column: {url_column}, Selected Sheet: {selected_sheet}, Selected Column: {selected_column}, Required data: {required_data}, Output file type: {output_file_type}")
-    return 'Form submitted successfully'
+A5='remaining_iterations'
+A4='processed_urls'
+A3='Processing'
+A2='status'
+A1='total_urls'
+A0='tryPercent'
+z='/app/tmpf'
+y='No file uploaded'
+x='file'
+w='application/xml'
+p='iteration_times'
+o='URL'
+n='domain_info'
+m='cancelFlag'
+l='column_data'
+k='column_number'
+j='row_number'
+i='sheet_number'
+h='selected_column'
+g=isinstance
+f=range
+e=open
+c='pInfo_obj'
+b='data'
+a='selected_sheet'
+Z=len
+Y=enumerate
+W='Expiration Date'
+V='Response Message'
+U='Status Code'
+T=False
+S='error_message'
+R='POST'
+N=Exception
+M='error'
+L=True
+J=str
+I=None
+H=print
+from flask import Flask,render_template as O,request as C,jsonify as D,make_response as q,Response as r,send_from_directory as A6
+import json as X
+from io import StringIO as A7,BytesIO as s
+import random,string,pandas as K,openpyxl as A8,logging as A,asyncio as P,pandas as K,os as E,uuid
+from domain_checker import process_urls_async as d,progress_info as F
+B=Flask(__name__)
+A9={}
+@B.route('/')
+def AH():return O('url_Project.html')
+@B.route('/robots.txt')
+def AI():return A6('static','robots.txt')
+@B.route('/set-cookie',methods=[R])
+def AJ():
+	K='user_id';H='cookie_consent';B=J(uuid.uuid4());A9[B]=L;I={K:B,H:C.cookies.get(H)};M='/app/storage';D=E.path.join(M,'cookie_data.json')
+	if not E.path.exists(D):
+		with e(D,'w')as A:X.dump([I],A,indent=4)
+	else:
+		with e(D,'r+')as A:
+			try:F=X.load(A)
+			except X.decoder.JSONDecodeError:F=[]
+			F.append(I);A.seek(0);X.dump(F,A,indent=4)
+	G=q();G.set_cookie(K,B,max_age=365*24*60*60);G.set_cookie(H,'true',max_age=365*24*60*60);return G
+@B.route('/guide.html')
+def AK():return O('guide.html')
+@B.route('/favicon.ico')
+def AL():return'dummy',200
+@B.route('/disclaimer.html')
+def AM():return O('disclaimer.html')
+@B.route('/privacyPolicy.html')
+def AN():return O('privacyPolicy.html')
+@B.route('/templates/sitemap.xml')
+def AO():A='<?xml version="1.0" encoding="UTF-8"?>\n    <urlset\n      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9\n            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">\n    \n    <url>\n      <loc>https://urlproject.azurewebsites.net/</loc>\n      <lastmod>2024-04-05T15:09:03+00:00</lastmod>\n      <priority>1.00</priority>\n    </url>\n    <url>\n      <loc>https://urlproject.azurewebsites.net/templates/disclaimer.html</loc>\n      <lastmod>2024-04-05T15:09:03+00:00</lastmod>\n      <priority>0.80</priority>\n    </url>\n    <url>\n      <loc>https://urlproject.azurewebsites.net/templates/privacyPolicy.html</loc>\n      <lastmod>2024-04-05T15:09:03+00:00</lastmod>\n      <priority>0.80</priority>\n    </url>\n    \n    </urlset>\n    ';return r(A,mimetype=w)
+@B.route('/templates/ror.xml')
+def AP():A='<?xml version="1.0" encoding="UTF-8"?>\n    <rss version="2.0" xmlns:ror="http://rorweb.com/0.1/" >\n    <channel>\n      <title>ROR Sitemap for https://urlproject.azurewebsites.net/</title>\n      <link>https://urlproject.azurewebsites.net/</link>\n    \n    <item>\n         <link>https://urlproject.azurewebsites.net/</link>\n         <title>Home Page</title>\n         <description>Home Page</description>\n         <ror:updatePeriod></ror:updatePeriod>\n         <ror:sortOrder>0</ror:sortOrder>\n         <ror:resourceOf>sitemap</ror:resourceOf>\n    </item>\n    <item>\n         <link>https://urlproject.azurewebsites.net/templates/disclaimer.html</link>\n         <title>Terms &amp; conditions</title>\n         <description>Terms &amp; conditions</description>\n         <ror:updatePeriod></ror:updatePeriod>\n         <ror:sortOrder>1</ror:sortOrder>\n         <ror:resourceOf>sitemap</ror:resourceOf>\n    </item>\n    <item>\n         <link>https://urlproject.azurewebsites.net/templates/privacyPolicy.html</link>\n         <title>Privacy Policy</title>\n         <description>Privacy Policy</description>\n         <ror:updatePeriod></ror:updatePeriod>\n         <ror:sortOrder>1</ror:sortOrder>\n         <ror:resourceOf>sitemap</ror:resourceOf>\n    </item>\n    </channel>\n    </rss>\n    ';return r(A,mimetype=w)
+@B.route('/templates/sitemap.html')
+def AQ():return O('sitemap.html')
+@B.route('/templates/<section_name>.html')
+def AR(section_name):return O(f"{section_name}.html"),200
+@B.route('/input_section',methods=[R])
+def AS():
+	B=C.files.get(x);E=C.form.get(a);F=C.form.get(h);A=AA(B,E,F)
+	if A:return D(A)
+	else:return D({S:y})
+@B.route('/process_manual_input',methods=[R])
+def AT():
+	try:A=C.get_json();F=A['manual_data'];P=A[a];E=A[h];B=F.strip().split('\n');B=[A.strip()for A in B if A.strip()];G='\n'.join([f'"{A.replace(",","")}"'for A in B]);H=K.read_csv(A7(G),header=I,names=[E]);M=[{b:A,i:1,j:B+2,k:1}for(B,A)in Y(H[E].tolist())if K.notna(A)];return D({l:M,'is_manual':L})
+	except N as O:return D({S:f"Error processing manual input: {J(O)}"}),500
+def AA(uploaded_file,selected_sheet,selected_column):
+	e='is_csv';d='selected_file';c='sheet_columns';D=selected_sheet;C=uploaded_file;A=selected_column
+	if not C:return{S:y}
+	try:
+		R=C.read()
+		if C.filename.endswith('.csv'):M=C.filename.split('.')[0];U=K.read_csv(s(R));V=list(U.columns);A=A or V[0];F=[{b:A,i:1,j:B+2,k:1}for(B,A)in Y(U[A].tolist())if K.notna(A)];H('Current File name for CSV Test: ',M);return{c:V,l:F,a:M,d:M,e:L}
+		elif C.filename.endswith('.xlsx'):
+			W=A8.load_workbook(filename=s(R),data_only=L);O=W.sheetnames;X={};F=[];g=C.filename.split('.')[0];D=D or O[0]
+			for(m,P)in Y(O,start=1):
+				E=W[P];n=E.max_row;o=E.max_column;B=[]
+				if P==D:
+					for Z in f(1,o+1):
+						p=E.cell(row=1,column=Z);Q=p.value
+						if Q is I:Q=f"Column_{Z}"
+						B.append(Q)
+					if A is I:A=B[0]
+					if A not in B:return{S:f"Selected column '{A}' not found in sheet '{D}'."}
+					G=B.index(A)+1;F=[{b:E.cell(row=A,column=G).value,i:m,j:A,k:G}for A in f(2,n+1)if E.cell(row=A,column=G).value];A=B[G-1]
+				X[P]=B
+			return{d:g,'sheet_names':O,c:X,l:F,'column_titles':B,a:D,h:A,e:T}
+		else:return{S:'Unsupported file format'}
+	except N as q:return{S:f"Error processing file: {J(q)}"}
+A.basicConfig(level=A.DEBUG)
+def AB(base_filename):
+	A=base_filename;B=E.path.dirname(A);C=E.path.basename(A)
+	if not E.path.exists(A):return A
+	D=''.join(random.choice(string.hexdigits)for A in f(8));F=f"rk-{D}-{C}";return E.path.join(B,F)
+import os as E
+from flask import request as C,jsonify as D
+@B.route('/process_url_data',methods=[R])
+async def AU():
+	X='No data retrieved';S='message'
+	try:
+		if not C.is_json:return D({M:'Request content must be in JSON format'})
+		H=C.json;Y=H.get('clientUrlSet');F=H.get(m)
+		if F:return D({S:'URL processing canceled'})
+		Z=P.Semaphore(8);A.info('Starting URL processing');G=[]
+		async for I in d(Y['url_list'],Z,F):
+			if n in I:G.append(I)
+			if F:break
+		A.info('URL processing completed')
+		if G:
+			O=K.DataFrame(G);B=O[n].apply(K.Series)
+			if U in B.columns:B[U]=B[U].apply(t)
+			if V in B.columns:B[V]=B[V].apply(t)
+			if W in B.columns:B[W]=K.to_datetime(B[W],unit='ms').dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
+			if not B.empty:a='rk.csv';Q=AB(a);c=z;e=E.path.join(c,Q);B.to_csv(e,index=T);f=E.path.join(E.getcwd());return D({S:'URL data processed successfully','has_downloadable_data':L,b:O.to_json(orient='records'),'csv_filename':Q,'current_directory':f})
+			else:return D({M:'No domain information available to download'})
+		else:A.error(X);return D({M:X})
+	except N as R:A.error(f"Error processing URL data: {R}");return D({M:J(R)})
+def t(arr):return', '.join(map(J,arr))
+@B.route('/progress',methods=[R])
+async def AV():
+	A=C.json.get(m)
+	if A:
+		H('cancelFlag At Progress Endpoint: ',A)
+		async for B in d({},{},A):0
+		return D(F)
+	return D(F)
+@B.route('/download/<csvFilename>',methods=[R])
+def AW(csvFilename):
+	F=csvFilename
+	try:
+		G=z;A=E.path.join(G,F);H('File Path with File name: ',A);B.logger.info(f"File Path with File name: {A}")
+		if E.path.exists(A):
+			with e(A,'rb')as I:C=q(I.read())
+			C.headers.set('Content-Type','text/csv');C.headers.set('Content-Disposition',f"attachment; filename={F}");return C
+		else:return D({M:'File not found'})
+	except N as K:return D({M:J(K)})
+def AC(current_directory,home_directory):
+	A=current_directory
+	try:
+		B=E.listdir(A);H('Current directory:',A);H('Home directory:',home_directory)
+		for C in B:H(C)
+	except OSError as D:H(f"Error: {D}")
+AD=E.path.expanduser('~')
+AE=E.getcwd()
+AC(AE,AD)
+def AX():A=C.form.get(x);B=C.form.get('batch');D=C.form.get('url-column');E=C.form.get('sheet-name');F=C.form.get('column-name');G=C.form.get('required-data');I=C.form.get('output-file-type');H(f"File type: {A}, Batch: {B}, URL column: {D}, Selected Sheet: {E}, Selected Column: {F}, Required data: {G}, Output file type: {I}");return'Form submitted successfully'
+import aiohttp as u,asyncio as P,datetime as Q,logging as A,whois,time as v
+from typing import List,Dict,Any,AsyncGenerator
+from tqdm import tqdm
+G=T
+async def AF(url,session,semaphore,cancelFlag,max_retries=2):
+	R='http://';E='https://';B=url;global G;G=cancelFlag
+	if not B.startswith(R)and not B.startswith(E):B=E+B;K=L
+	M=T;K=T;A.info(f"Received dataSet: {B}");C=0
+	while C<max_retries:
+		if G:break
+		try:
+			async with semaphore,session.get(B,timeout=8,allow_redirects=L)as D:
+				O=[D.status];Q=[D.reason]
+				while D.history:
+					D=D.history[0];O.append(D.status);Q.append(D.reason)
+					if G:break
+				if M:H('HTTP prototype was successful.')
+				elif K:H('HTTPS prototype was successful.')
+				return O,Q
+		except u.ClientError as F:
+			A.error(f"Client error fetching URL status for {B}: {F}")
+			if'Server disconnected'in J(F):C+=1;continue
+			elif'Cannot connect to host'in J(F):C+=1;continue
+			else:C+=1;continue
+		except P.TimeoutError:A.error(f"Timeout error fetching URL status for {B}. Retrying...");C+=1
+		except N as S:A.error(f"Error fetching URL status for {B}: {S}");C+=1
+		if C==1 and B.startswith(E):B=B.replace(E,R);M=L;continue
+		await P.sleep(2);A.info('Retrying...')
+	A.warning(f"Exceeded maximum retries for URL: {B}");return[I],['Exceeded maximum retries']
+async def AG(url,session,semaphore,cancelFlag):
+	X='Response Time';T='Domain Status';S='Fresh';R='Expired';M=cancelFlag;L='Yes';F='For Sale';C=url;global G;G=M
+	try:
+		H(f"Processing URL: {C}");Y=Q.datetime.now();Z=P.create_task(AF(C,session,semaphore,M));E=await P.to_thread(whois.whois,C);a,b=await Z;c=Q.datetime.now();d=(c-Y).total_seconds()
+		if G:return
+		J=[A for A in E.expiration_date if g(A,Q.datetime)]if g(E.expiration_date,list)else[]
+		for e in E.name_servers or[]:
+			if any(A in e.lower()for A in['afternic','sedo','parking']):D=L;break
+		else:D='No'
+		if J:K=R if any(A<Q.datetime.now()for A in J)else F if D==L else S;B=max(J,default=I)
+		else:B=E.expiration_date;K=R if B and(g(B,Q.datetime)and B<Q.datetime.now())else F if D==L else S if B else'NA'
+		H(f"Domain Status: {K}\nExpiration Date: {B}\nFor Sale: {D}");return{o:C,U:a,V:b,T:K,W:B,F:D,X:d}
+	except N as O:A.error(f"Error fetching WHOIS information for {C}: {O}");return{o:C,U:I,V:I,T:f"{O}",W:I,F:I,X:I}
+async def d(urls,semaphore,cancelFlag):
+	L=cancelFlag;C=urls;global G;G=L
+	try:
+		P=[];F[p]=[];F[c]=[]
+		async with u.ClientSession()as Q:
+			R=v.time()
+			for(B,O)in Y(tqdm(C,desc='Processing URLs'),1):
+				if G:H('Processing canceled at iteration:',B);A.info('Process canceled by user.');yield{M:'Process canceled by user'};return
+				D=await AG(O,Q,semaphore,L)
+				if D is not I:P.append(D)
+				S=v.time()-R;E=Z(C)-B
+				if E>0 or(E==0 and B==Z(C))and not G:T=B/Z(C)*100;F[A0]=T;F[A1]=Z(C);F[A2]=A3;F[A4]=B;F[A5]=E;F[p].append(S);F[c].append(D);F[c][-1][o]=O
+				yield{'current_iteration':B,n:D,m:G}
+	except N as K:
+		if G:A.info(f"Process stopped by user: {K}")
+		else:A.error(f"Error processing URLs: {K}")
+		yield{M:J(K)}
+F={A0:0,A4:0,A1:0,A2:A3,p:[],c:[],A5:0}
