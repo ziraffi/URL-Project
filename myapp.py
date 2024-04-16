@@ -53,7 +53,7 @@ def set_cookie():
     }
     
     # Append data to JSON file
-    cookie_store = '/storage'  # Assuming cookie_store is a directory
+    cookie_store = '/opt/render/project/src/storage'  # Assuming cookie_store is a directory
     json_file = os.path.join(cookie_store, 'cookie_data.json')
     
     if not os.path.exists(json_file):
