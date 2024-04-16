@@ -1,7 +1,17 @@
 {% extends "base.html" %}
-<title>{% block title %}Terms & conditions{% endblock %}</title>
+{% block title %}Terms & conditions{% endblock %}
+{% block head %}
+    <!-- Additional meta tags for the Privacy Policy page -->
+    <meta name="robots" content="noindex, nofollow">
+{% endblock %}
 {% block content %}
-<div class="form-container" style="padding: 10rem 2rem 3rem 2rem">
+<head>
+  <meta charset="UTF-8">
+  <title>Terms & conditions</title>
+  <meta name="robots" content="noindex, nofollow">
+</head>
+
+<div class="form-container" style="padding: 4rem 2rem 3rem 2rem">
   <div class="file-section ">
     <div class="text-center">
       <h1>Terms and conditions</h1>

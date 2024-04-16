@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, jsonify, make_response
+from flask import Flask, render_template, request, jsonify, make_response, Response, send_from_directory
+import json
 from io import StringIO,BytesIO
 import random
 import string
@@ -8,26 +9,83 @@ import logging
 import asyncio
 import pandas as pd
 import os
+import uuid
 from domain_checker import process_urls_async, progress_info
 app = Flask(__name__)
-
-
-@app.route('/')
-def index():
-    return render_template('url_Project.html')
-
 # @app.route('/login.html')
 # def login():
 #     return render_template('login.html')
-
-# @app.route('/guide.html')
-# def guide():
-#     return render_template('guide.html')
 
 # @app.route('/registration.html')
 # def register():
 #     return render_template('register.html')
 
+# Dictionary to store user consent status with their unique identifiers
+user_consent_status = {}
+
+@app.route('/')
+def index():
+    return render_template('url_Project.html')
+
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory('static', 'robots.txt')
+
+@app.route('/sitemap.xml')
+def sitemapxml():
+    response= make_response(send_from_directory('static', 'sitemap.xml'))
+    response.headers['Content-Type'] = 'application/xml'
+    return response
+
+@app.route('/sitemap.html')
+def sitemaphtml():
+    return send_from_directory('static', 'sitemap.html')
+
+@app.route('/set-cookie', methods=['POST'])
+def set_cookie():
+    user_id = str(uuid.uuid4())  # Generate a unique identifier for the user
+    user_consent_status[user_id] = True  # Set consent status for the user
+    
+    # Prepare JSON object
+    data = {
+        'user_id': user_id,
+        'cookie_consent': request.cookies.get('cookie_consent')
+    }
+    
+    # Append data to JSON file
+    cookie_store = '/storage'  # Assuming cookie_store is a directory
+    json_file = os.path.join(cookie_store, 'cookie_data.json')
+    
+    if not os.path.exists(json_file):
+        with open(json_file, 'w') as f:
+            json.dump([data], f, indent=4)  # Initialize file with a list containing the first data object
+    else:
+        with open(json_file, 'r+') as f:
+            try:
+                existing_data = json.load(f)
+            except json.decoder.JSONDecodeError:
+                existing_data = []
+                
+            existing_data.append(data)  # Add new data to existing list
+            f.seek(0)  # Move the file pointer to the beginning
+            json.dump(existing_data, f, indent=4)  # Write JSON data with proper formatting
+    
+    response = make_response()
+    response.set_cookie('user_id', user_id, max_age=365*24*60*60)  # Set cookie with the user's identifier
+    response.set_cookie('cookie_consent', 'true', max_age=365*24*60*60)  # Set cookie with consent
+    
+    return response
+
+@app.route('/blog1.html')
+def blogone():
+    return render_template('blog1.html')
+@app.route('/guide.html')
+def guide():
+    return render_template('guide.html')
+
+@app.route('/favicon.ico')
+def favicon():
+    return 'dummy', 200
 @app.route('/disclaimer.html')
 def disclaimer():
     return render_template('disclaimer.html')
@@ -35,10 +93,6 @@ def disclaimer():
 @app.route('/privacyPolicy.html')
 def privacy_policy():
     return render_template('privacyPolicy.html')
-
-@app.route('/templates/sitemap.xml')
-def sitemapxml():
-    return render_template('sitemap.xml')
 
 @app.route('/templates/<section_name>.html')
 def serve_template(section_name):
@@ -50,7 +104,7 @@ def file_section():
     selected_sheet = request.form.get('selected_sheet')  # Retrieve selected sheet from form data
     selected_column = request.form.get('selected_column')  # Retrieve selected column from form data
     
-    # Pass selected sheet and column to process_file
+        # Pass selected sheet and column to process_file
     response_data = process_file(uploaded_file, selected_sheet, selected_column)
 
     if response_data:
@@ -269,7 +323,7 @@ async def get_progress():
 def download_csv(csvFilename):
     try:
         # Get the filePath from the request
-        filePath = '/app/tmpf'
+        filePath = '/opt/render/project/src'
 
         # Construct the full path to the CSV file
         csv_path = os.path.join(filePath, csvFilename)

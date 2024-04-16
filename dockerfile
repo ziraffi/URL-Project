@@ -37,6 +37,11 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Set permissions for /app/tmpf
 RUN mkdir -p /app/tmpf && chmod -R 777 /app/tmpf
 
+RUN apk add --no-cache bash
+
+# Set ownership and permissions for the existing /app/storage directory
+RUN chown -R appuser:appuser /app/storage && chmod -R 700 /app/storage
+
 # Set ownership of the application directory to the non-privileged user
 RUN chown -R appuser:appuser /app
 

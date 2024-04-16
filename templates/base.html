@@ -1,72 +1,172 @@
-<!doctype html>
-<html lang=en>
-<head>
-<!-- Google tag (gtag.js)
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3RWLE0K8LN"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <!-- <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-3RWLE0K8LN"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
 
-  gtag('config', 'G-3RWLE0K8LN');
-</script> -->
-<meta charset=UTF-8>
-<meta name=viewport content="width=device-width,initial-scale=1">
-<title>{% block title %}Default VAlue{% endblock %}</title>
-<link rel="shortcut icon" href="#">
-<link rel=stylesheet href="{{ url_for('static', filename='url_css.css') }}">
-<link rel=preconnect href=https://fonts.gstatic.com crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel=stylesheet>
-<link href=https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css rel=stylesheet integrity=sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH crossorigin=anonymous>
-<link rel=stylesheet href=https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css>
-</head>
-<body>
-<header class=header>
-<div class=container-fluid>
-<div class=logo><p>URL Project</p></div>
-<i class="bi bi-layout-sidebar-inset"></i>
-<nav class=navigation>
-<ul>
-<li><a href=/ >HOME</a></li>
-</ul>
-<i class="bi bi-layout-sidebar-inset-reverse close-icon"></i>
-</nav>
+      gtag("config", "G-3RWLE0K8LN");
+    </script>
+    <script type="text/javascript">
+      (function(c,l,a,r,i,t,y){
+          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "lu8jfm6sjf");
+  </script> -->
+    <meta charset="UTF-8" />
+    <meta property="og:image" content="https://urlproject.azurewebsites.net/static/images/get_ready.webp">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    {% block MetaDescription %} {%endblock%}
+    {% block Keywords %} {%endblock%}
+    <title>{% block title %}Default VAlue{% endblock %}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='url_css.css') }}"
+    />
+    <link rel=preconnect href=https://fonts.gstatic.com crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+    href=https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css
+    rel=stylesheet
+    integrity=sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH
+    crossorigin=anonymous> <link rel=stylesheet
+    href=https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css>
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <header class="header">
+      <div class="container-fluid">
+        <div class="logo"><p>URL Project</p></div>
+        <i class="bi bi-layout-sidebar-inset"></i>
+        <nav class="navigation">
+          <ul>
+            <li><a href="/">HOME</a></li>
+            <li><a href="/templates/guide.html">GUIDE</a></li>
+            <li><a href="/templates/blog1.html">BLOG</a></li>
+          </ul>
+          <i class="bi bi-layout-sidebar-inset-reverse close-icon"></i>
+        </nav>
+      </div>
+    </header>
+    {% block content %}{% endblock %}
+  <div
+    id="coockie-container"
+    class="form-container text-center"
+
+  >
+    <div id="cookie-consent" style="display: none">
+      <p>
+        This website uses cookies to ensure you get the best experience on our
+        website.you can read our
+        <a
+          style="text-decoration: none; color: #0b7adb"
+          href="/templates/privacyPolicy.html"
+          >Privacy Policy</a
+        >
+      </p>
+      <button id="accept-cookies">Accept Cookies</button>
+    </div>
+  </div>
+  <div class="footer_outer">
+  <footer>
+    <div style="min-height: 10%;"
+      class="col-12 px-3"
+      style="background-color: rgba(0, 0, 0, 0.2); color: #f0f8ff"
+    >
+      <div class="row py-2 d-flex justify-content-between align-items-center" id="footer_text">
+        <div class="col-sm-4 text-center">
+          <h6>
+            @All Rights Reserved 2024:<span>
+              <a
+                style="
+                  text-decoration: none;
+                  color: #ffd25d;
+                  font-size: large;
+                  font-weight: 300;
+                "
+                href="/"
+              >
+                URL Project
+              </a>
+            </span>
+          </h6>
+        </div>
+        <div class="col-sm-5 align-items-md-center px-5">
+          <ul
+            class="list-unstyled d-flex flex-wrap justify-content-center pl-5 mb-0 text-center "
+          >
+            <li class="px-2 lead">
+              <a
+                style="text-decoration: none; color: #f0f8ff"
+                href="/templates/disclaimer.html"
+                ><h6>Terms & conditions</h6></a
+              >
+            </li>
+            <li class="px-2 lead">
+              <a
+                style="text-decoration: none; color: #f0f8ff"
+                href="/templates/privacyPolicy.html"
+                ><h6>Privacy Policy</h6></a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div id="sitemaps">
+      <div class="text-end px-3">
+        <div class="tooltip-container">
+          <p
+            style="text-decoration: none; color: #a0cef7"
+            class="mb-0"
+          >
+            Crafted By:
+            <cite
+              class="developer"
+              style="text-decoration: none; color: #d3ed76"
+              title="Source Title"
+              >Rajkiran Mallikanti</cite
+            >
+          </p>
+          <div class="tooltip">
+            <img src="../static/images/developer.webp" alt="Developer Image" />
+          </div>
+        </div>
+
+        <p class="mb-0 font-weight" style="font-size:small">
+          Site Map:
+          <cite title="Source Title"
+            ><a
+              style="text-decoration: none; color: #f0f8ff"
+              href="/sitemap.xml"
+              >xml,</a
+            >
+
+            <a
+              style="text-decoration: none; color: #f0f8ff"
+              href="/sitemap.html"
+              >html</a
+            ></cite
+          >
+        </p>
+      </div>
+    </div>
+  </footer>
 </div>
-</header>
-{% block content %}{% endblock %}
 </body>
-<div class=form-container style="padding:3rem 0"></div>
-<footer class=text-center>
-<div class="px-5 d-flex" style=background-color:rgba(0,0,0,.2);color:#f0f8ff>
-<div class="row py-2 col-12 justify-content-evenly">
-<div class=col-4>
-<h6>
-@All Rights Reserved 2024:<span>
-<a style=text-decoration:none;color:#ffd25d;font-size:large;font-weight:300 href=/ >
-URL Project
-</a>
-</span>
-</h6>
-</div>
-<div class="col-5 align-items-md-start px-5">
-<ul class="list-unstyled d-flex flex-wrap justify-content-evenly pl-5">
-<li class="px-2 lead">
-<a style="text-decoration:none; color:#f0f8ff;" href=/templates/disclaimer.html><h6>Terms & conditions</h6></a>
-</li>
-<li class="px-2 lead">
-<a style="text-decoration:none; color:#f0f8ff;" href=/templates/privacyPolicy.html><h6>Privacy Policy</h6></a>
-</li>
-<li class="d-inline-flex px-2">
-<div id="sitemaps" class="lead">
-    <h6 >Site Map: <a style="text-decoration:none; color:#f0f8ff;" href="/templates/sitemap.xml">xml</a></h6>
-</div>
-</li>
-</ul>
-</div>
-</div>
-</div>
-</footer>
-<script src=https://code.jquery.com/jquery-3.7.1.js></script>
-<script src=https://code.jquery.com/jquery-migrate-3.4.1.min.js></script>
-<script src="{{ url_for('static', filename='myfrnt.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='jquery.js') }}"></script>
+  <script src="{{ url_for('static', filename='myfrnt.js') }}"></script>
 </html>

@@ -1,7 +1,12 @@
 {% extends "base.html" %}
-<title>{% block title %}Privacy Policy{% endblock %}</title>
+{% block title %}Privacy Policy{% endblock %}
+{% block head %}
+    <!-- Additional meta tags for the Privacy Policy page -->
+    <meta name="robots" content="noindex, nofollow">
+{% endblock %}
 {% block content %}
-<div class="form-container" style="padding: 10rem 2rem 3rem 2rem">
+
+<div class="form-container" style="padding: 3rem 2rem 3rem 2rem">
   <div class="file-section">
     <div class="text-center">
       <h1>Privacy Policy</h1>
@@ -17,7 +22,7 @@
       </div>
     </div>
 
-    <ul class="list-unstyled text-left mx-5">
+    <ul class="list-unstyled mx-5">
       <br />
       
       <li>
@@ -27,7 +32,7 @@
           information, including:
         </p>
 
-        <ul>
+        <ul class="list-unstyled">
           <li class="lead">
             <strong>Personal Information:</strong> We may collect your name and
             email address when you voluntarily provide it, such as when
@@ -53,7 +58,7 @@
         <p class="lead">
           We use the information we collect for various purposes, including:
         </p>
-        <ul class="lead">
+        <ul class="lead ">
           <li>Providing and personalizing our services to you.</li>
           <li>Communicating with you and responding to your inquiries.</li>
           <li>
