@@ -278,7 +278,7 @@ async def process_clienturl_data():
                 unique_csv_filename = generate_unique_filename(csv_filename)
 
                 # Save DataFrame as CSV to the temporary volume (--tmpfs)
-                tmpfs_path = '/app/tmpf'  # Path to the temporary volume
+                tmpfs_path = '/opt/render/project/src/storage/downloads'  # Path to the temporary volume
                 tmp_csv_path = os.path.join(tmpfs_path, unique_csv_filename)
                 domain_info_df.to_csv(tmp_csv_path, index=False)
                 
@@ -323,7 +323,7 @@ async def get_progress():
 def download_csv(csvFilename):
     try:
         # Get the filePath from the request
-        filePath = '/opt/render/project/src'
+        filePath = '/opt/render/project/src/storage/downloads'
 
         # Construct the full path to the CSV file
         csv_path = os.path.join(filePath, csvFilename)
