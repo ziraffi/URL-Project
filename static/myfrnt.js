@@ -1,1 +1,1357 @@
-var urlFlag=!1,fileSectionLoaded=!1,sheetNamesFetched=!1;function setCookie(e,t,n){var o="";if(n){var a=new Date;a.setTime(a.getTime()+864e5*n),o="; expires="+a.toUTCString()}document.cookie=e+"="+(t||"")+o+"; path=/"}function getCookie(e){for(var t=e+"=",n=document.cookie.split(";"),o=0;o<n.length;o++){for(var a=n[o];" "==a.charAt(0);)a=a.substring(1,a.length);if(0==a.indexOf(t))return a.substring(t.length,a.length)}return null}$(document).ready(function(){var e=$(window).height(),t=$("footer"),n=$("header"),o=0;$("#toggleButton").click(function(){$("#url-container").toggle()}),$(window).scroll(function(){var a=$(this).scrollTop();a>.6*e||o<a?(n.stop().animate({top:"-100px",opacity:0},200),urlFlag?$("#floatContainer").show().animate({left:"50px"},1500):$("#floatContainer").hide()):($("#floatContainer").stop().animate({left:"-50px"},1500),n.animate({top:"0",opacity:1},0)),$(window).scrollTop()>o?a+$(window).height()<=$(document).height()&&t.fadeIn():t.fadeOut(),o=a}),$("#toggle_file").on("click",function(){$("#manual_form").removeClass("right-side").hide(),$("#file_form").show().addClass("left-side"),$("#manual_form").hide(),$("#url-container").hide(),$("#manual-data").val(""),$("#manual-data-table").empty(),$("#mnl-tbl").hide(),urlFlag=!1,x({},g=!0),$("#tableDiv").hide(),$("#tbl-section").hide(),$("#downloadButtonContainer").hide(),$("#totalProcessingTime").hide()}),$("#toggle_manual").on("click",function(){$("#file_form").removeClass("left-side").hide(),$("#manual_form").show().addClass("right-side"),$("#url-container").hide(),$("#file").val(""),$("#sheet-name").empty(),$("#column-name").empty(),$("#file-data-table").empty(),$("#file-tbl").hide(),urlFlag=!1,x({},g=!0),$("#tableDiv").hide(),$("#tbl-section").hide(),$("#downloadButtonContainer").hide(),$("#totalProcessingTime").hide()});let a=$(".bi-layout-sidebar-inset"),i=$(".close-icon"),l=$(".navigation");async function s(e){if("file_section"!==e||!fileSectionLoaded)try{let t=await fetch("/templates/"+e+".html");if(!t.ok)throw Error("Failed to load form section");let n=await t.text();$("#form-container").html(n).show(),"file_section"===e&&(fileSectionLoaded=!0)}catch(o){console.error("Error loading form section:",o),$("#form-container").html("<p>Error loading form.</p>")}}a.on("click",function(){l.addClass("active"),a.hide(),i.show()}),i.on("click",function(){l.removeClass("active"),a.show(),i.hide()});var r=["file_section","batch_section","dropdown_section","output_file_selection"],c=0;async function d(e){e.preventDefault();let t=$("#manual-data").val(),n=$("#sheet-name").val(),o=$("#column-name").val();try{let a=await fetch("/process_manual_input",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({manual_data:t,selected_sheet:n,selected_column:o})});if(!a.ok)throw Error("Failed to submit manual data");let i=await a.json();$("#valid_list").empty(),$("#invalid_list").empty(),i.error_message?$("#error-message").text(i.error_message):($("#valid_list").empty(),$("#invalid_list").empty(),function e(t){let n=!1,o=!1;$("#valid_list").empty(),$("#invalid_list").empty();let a=[],i=[],l=[],s=[];for(let r=0;r<t.length;r++){let c=t[r].data,d=t[r].column_number,p=t[r].row_number,f=t[r].sheet_number;h(c)?(a.push(c),i.push(d),l.push(p),s.push(f),n=!0,$("#valid_list").append($('<a class="hover-underline-animation linkText"></a>').attr("href",c).text(c)),$("#valid_list").append("<br>")):""!==c.trim()&&(o=!0,$("#invalid_list").append($("<p></p>").text(c)))}let m={data:a,column_number:i,row_number:l,sheet_number:s,choosen:["Entered Data Manually"]};n?($("#valid_list").prepend($("<h3>Fetched URLs:</h3>")),$("#valid_list").show()):$("#valid_list").hide(),o?($("#invalid_list").prepend($("<h3>Junk:</h3>")),$("#invalid_list").show()):$("#invalid_list").hide(),urlFlag=!!n||!!o,m&&m.data&&0!==m.data.length?u(null,m):($("#manual-data-table").empty(),$("#mnl-tbl").hide())}(i.column_data))}catch(l){console.error("Error:",l)}}function h(e){return RegExp("^(https?:\\/\\/)?((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|((\\d{1,3}\\.){3}\\d{1,3}))(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*(\\?[;&a-z\\d%_.~+=-]*)?(\\#[-a-z\\d_]*)?$","i").test(e)}async function p(e){let t={data:[],column_number:[],row_number:[],sheet_number:[],choosen:[]};try{let n=await fetch("/input_section",{method:"POST",body:e});if(!n.ok)throw Error("Failed to fetch column Data");let o=await n.json();$("#valid_list").empty(),$("#invalid_list").empty();var a=o.column_data;let i=o.selected_file;if(a&&a.length>0){let l=!1,s=!1;0===t.choosen.length&&t.choosen.push(i),a.forEach(e=>{let n=e.data,o=e.column_number,a=e.row_number,i=e.sheet_number;if(h(n))t.column_number.push(o),t.row_number.push(a),t.sheet_number.push(i),t.data.push(n),$("#valid_list").append($('<a class="hover-underline-animation linkText"></a>').attr("href",n).text(n)),$("#valid_list").append("<br>"),l=!0;else{if(null===n)return;$("#invalid_list").append($("<p></p>").text(n)),s=!0}}),l?($("#valid_list").prepend($("<h3>Fetched URLs</h3>")),$("#valid_list").show()):$("#valid_list").hide(),s?($("#invalid_list").prepend($("<h3>Junk:</h3>")),$("#invalid_list").show()):$("#invalid_list").hide(),urlFlag=!!l||!!s}else $("#invalid_list").append($("<p>No URLs found for the selected column.</p>")),$("#invalid_list").show(),$("#valid_list").hide()}catch(r){console.error("Error fetching column Data:",r)}t&&t.data&&0!==t.data.length?u(t,null):($("#file-data-table").empty(),$("#file-tbl").hide())}function u(e,t){$("#manual-data-table").empty(),$("#file-tbl").hide(),$("#mnl-tbl").hide(),e&&(f(e,"#file-data-table"),$("#file-tbl").show(),$("#manual-data-table").hide(),$("#file-data-table").show()),t&&(f(t,"#manual-data-table"),$("#mnl-tbl").show(),$("#file-data-table").hide(),$("#manual-data-table").show()),$("#tbl-section").show()}function f(e,t){if(!e||!e.data||0===e.data.length){$(t).empty();return}let n=$("<div>"),o=$("<caption>").text(e.choosen[0]),a=$('<div class="firstCap"><p>Source Of Data: <span class="source">'+o.text()+"</span></p></div>");n.append(a);let i=$("<table>").addClass("data-table"),l=Object.keys(e),s=$("<tr>");s.append(function e(){let t=$("<th>"),n=$("<select>").append($("<option>").text("select"),$("<option>").text("First 5").attr("value","Option 1"),$("<option>").text("First 10").attr("value","Option 2"),$("<option>").text("First 50").attr("value","Option 3"),$("<option>").text("First 100").attr("value","Option 4"),$("<option>").text("First 300").attr("value","Option 5"),$("<option>").text("More").attr("value","Choose").prop("disabled",!0));return t.append(n),t}()),["Valid URLs","Column No.","Row No.","Sheet No."].forEach(e=>{s.append($("<th>").text(e))}),i.append(s);for(let r=0;r<e.data.length;r++){let c=$("<tr>");if(r>=0){let d=$("<td>").append($("<input>").attr("type","checkbox").addClass("row-checkbox"));c.append(d)}l.forEach(t=>{if("choosen"!==t){let n=e[t][r];c.append($("<td>").text(n))}}),i.append(c)}n.append(i),$(t).empty().append(n)}function m(e){var t,n;$("input:checkbox.row-checkbox").prop("disabled",!1),"select"===e&&$("input:checkbox.row-checkbox").prop("checked",!1),"Option 1"===e?b(5):"Option 2"===e?b(10):"Option 3"===e?b(50):"Option 4"===e?b(100):"Option 5"===e&&b(300),v(),t={url_list:[],column_number:[],row_number:[],sheet_number:[],choosen:[]},n=$("caption").text(),$("input:checkbox.row-checkbox:checked").each(function(){var e=$(this).closest("tr");t.url_list.push(e.find("td:nth-child(2)").text()),t.column_number.push(e.find("td:nth-child(3)").text()),t.row_number.push(e.find("td:nth-child(4)").text()),t.sheet_number.push(e.find("td:nth-child(5)").text())}),t.choosen.push(n),$("#send_serve").off("click").on("click",async function(){$("#processedTable").hide(),$("#tableDiv").hide(),$("#totalProcessingTime").empty().hide(),await x(t,g=!1)})}function b(e){var t=$("input:checkbox.row-checkbox");t.prop("checked",!1),t.slice(0,e).prop("checked",!0),t.length>e&&t.slice(e).prop("disabled",!0)}function v(){var e=$("input:checkbox.row-checkbox").length,t=$("input:checkbox.row-checkbox:checked").length;$("#check_all").prop("checked",e===t)}s(r[c]),$(document).on("click","#load-next-section-button",function(){console.log("Button clicked"),++c<r.length?s(r[c]):console.log("All form sections loaded.")}),$(document).on("click","#manual-form-submit",d),$(document).on("change","select",function(){var e=$(this).val();m(e)}),$(document).on("click","#check_all",function(){$(this).prop("checked")?$("input:checkbox.row-checkbox").prop("checked",!0):$("input:checkbox.row-checkbox").prop("checked",!1)}),$(document).on("change","input:checkbox.row-checkbox",function(){var e=$("select").val(),t=$("input:checkbox.row-checkbox:checked").length;if(w(),t>300&&$(this).is(":checked")){$(this).prop("checked",!1),alert("Maximum 300 items can be selected.");return}v(),m(e)}),$("input:checkbox.row-checkbox").on("change",function(){v(),m($("select").val())});var g=!1;function w(){let e=$("input:checkbox.row-checkbox:checked").length>0;e?$("#send_serve").show():$("#send_serve").hide()}$(document).on("change","select",function(){w()}),$(document).on("change","input:checkbox.row-checkbox",function(){w()}),w(),$("#cancelButton").off("click").on("click",async function(){await x({},g=!0)});var y=!1;async function k(){if($("#loadingIndicator").show(),$("#progressPercentage").show(),$("#tableDiv").show(),!0===y){try{await fetch("/progress",{async:"true",method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({cancelFlag:y})})}catch(e){console.error("Error sending cancel flag to progress endpoint:",e)}return}try{let t=await fetch("/progress",{async:"true",method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({cancelFlag:y})});var{pInfo_obj:n,tryPercent:o}=await t.json();await C(o.toFixed(2)),await _(n)}catch(a){console.error("Error fetching progress:",a)}}async function x(e,t){if(!0!==(y=t))try{$("#downloadButtonContainer").hide();let n=new Date().getTime();if(!e||!e.url_list||0===e.url_list.length)throw Error("Error: DataSet is undefined or empty");$("#cancelButton").show();var o=setInterval(k,2e3),a=await fetch("/process_url_data",{method:"POST",async:"true",headers:{"Content-Type":"application/json"},body:JSON.stringify({clientUrlSet:e,cancelFlag:y})});let i=await a.json(),l=new Date().getTime(),s=function e(t){let n;if(t<60)n=t+" seconds";else if(t<3600){let o=(t%60).toFixed(2);n=Math.floor(t/60)+" minutes "+o+" seconds"}else n=Math.floor(t/3600)+" hours "+Math.floor(t%3600/60)+" minutes "+seconds+" seconds";return n}(Math.floor((l-n)/1e3));if($("#totalProcessingTime").empty().append("<p>Total Processing Time: "+s+" </p>"),$("#totalProcessingTime").show(),i.error)throw Error("Error from server: "+i.error);if($("#processedTable").show(),i.has_downloadable_data?(T(i.csv_filename),$("#downloadButtonContainer").show()):$("#downloadButtonContainer").hide(),await k(t),!i||!i.pInfo_obj)return}catch(r){console.error("Error sending data to server:",r)}finally{clearInterval(o),$("#loadingIndicator").hide()}}async function T(e){$("#downloadButton").on("click",async function(){try{let t=new FormData;t.append("filename",e);let n=await fetch(`/download/${e}`,{method:"POST",body:t});if(!n.ok)throw Error("Failed to download CSV file");let o=await n.blob(),a=document.createElement("a");a.href=window.URL.createObjectURL(o),a.download=e,a.click(),window.URL.revokeObjectURL(a.href),a.remove()}catch(i){console.error("Error downloading CSV:",i),alert("Error downloading CSV: Please try again.")}})}async function C(e){try{if(void 0!==e){let t=parseInt(e);$("#progressPercentage span").text(t+"%"),$("#progressBlock").css("--value",t)}else{console.error("Progress percentage is undefined");return}}catch(n){console.error("Error updating progress percentage:",n)}}async function _(e){if($("#tryTable").empty(),$("#tableDiv").show(),!e||0===e.length)return;var t='<table id="innerTrytable" class="data-table" border="1">';t+="<thead><tr>";let n=["Sr.No","URL","Domain Status","Expiration Date","For Sale","Response Message","Response Time","Status Code"];n.forEach(e=>{"Sr.No"===e?t+=`<th class="sortable" data-key="${e}">${e} <i class="bi bi-sort-numeric-down"></i></th>`:"Expiration Date"===e?t+=`<th class="sortable" data-key="${e}">${e} <i class="bi bi-sort-numeric-down"></i></th>`:"Response Time"===e?t+=`<th class="sortable" data-key="${e}">${e} <i class="bi bi-sort-numeric-down-alt"></i></th>`:t+=`<th class="sortable" data-key="${e}">${e}</th>`}),t+="</tr></thead><tbody>",e.forEach((e,o)=>{let a="<tr>";n.forEach(t=>{"Expiration Date"===t&&(a+=`<td>${new Date(e[t]).toLocaleString()}</td>`),"Sr.No"===t?a+=`<td>${o+1}</td>`:"Expiration Date"!==t&&(a+=`<td>${e[t]}</td>`)}),a+="</tr>",t+=a}),t+="</tbody></table>",$("#tryTable").append(t),$(".sortable").on("click",function(){let e=$(this).data("key");(function e(t,n){let o=$("#innerTrytable"),a=o.find("tbody > tr").toArray(),i=$(this).hasClass("desc");"Expiration Date"===t||"Response Time"===t?a.sort((e,o)=>{let a=$(e).find(`td:eq(${n.indexOf(t)})`).text(),l=$(o).find(`td:eq(${n.indexOf(t)})`).text();return a=String(a),l=String(l),i?a.localeCompare(l):l.localeCompare(a)}):"Sr.No"===t&&a.sort((e,o)=>{let a=parseInt($(e).find(`td:eq(${n.indexOf(t)})`).text()),l=parseInt($(o).find(`td:eq(${n.indexOf(t)})`).text());return i?l-a:a-l}),o.find("tbody").html(a),$(this).toggleClass("desc")})(e,n)})}let F;function E(e){try{fetch("/input_section",{method:"POST",body:e}).then(e=>{if(!e.ok)throw Error("Failed to fetch sheet names and column names");return e.json()}).then(e=>{F=e.selected_sheet,e.is_csv?(S(e.sheet_columns,F,e.column_data),$("#sheet-name").empty().hide(),$('label[for="sheet-name"]').hide()):(O(F,e.sheet_names),S(e.sheet_columns[F],F,e.column_data),$("#sheet-name").val(F),$("#sheet-name").show(),$('label[for="sheet-name"]').show());var t=$("#column-name").val();if(t){var n=new FormData;n.append("file",$("#file")[0].files[0]),n.append("selected_sheet",F),n.append("selected_column",t),p(n)}}).catch(e=>{console.error("Error fetching sheet names and column names:",e)})}catch(t){console.error("Error fetching sheet names and column names:",t)}}async function O(e,t){var n=$("#sheet-name");n.empty(),t&&t.length>0?($.each(t,function(e,t){n.append($("<option></option>").val(t).text(t))}),e||(e=t[0])):(console.error("No sheet names available."),n.append($("<option disabled selected>Please choose a sheet</option>")))}async function S(e,t){var n=$("#column-name");n.empty(),e?$.each(e,function(e,t){n.append($("<option></option>").val(t).text(t))}):(console.error("No column names available for the selected sheet:",t),n.append($("<option disabled selected>No columns available</option>")));var o=n.val(),a=new FormData;o&&(a.append("file",$("#file")[0].files[0]),a.append("selected_sheet",t),a.append("selected_column",o),p(a))}$(document).on("change","#column-name",function(){var e=$(this).val(),t=new FormData;e?(F=$("#sheet-name").val(),t.append("file",$("#file")[0].files[0]),t.append("selected_sheet",F),t.append("selected_column",e),p(t),$("#totalProcessingTime").empty().hide(),$("#processedTable").hide(),$("#tableDiv").hide(),$("#downloadButtonContainer").hide(),urlFlag=!1):console.log("No valid column selected.")}),$(document).on("change","#sheet-name",function(){F=$(this).val();var e=new FormData;e.append("file",$("#file")[0].files[0]),e.append("selected_sheet",F),E(e),$("totalProcessingTime").empty().hide(),$("#processedTable").hide(),$("#tableDiv").hide(),$("#downloadButtonContainer").hide(),urlFlag=!1}),$(document).on("change","#file",function(){$("#valid_list").empty();var e=$(this)[0].files[0];if(e&&e.size>1048576)return $("#tbl-section").hide(),$("#sheet-name").empty(),$("#column-name").empty(),$("#toggleButton").hide(),alert("File size exceeds 1 MB. Please choose a smaller file."),!1;var t=new FormData;$("#processedTable").hide(),$("#tableDiv").hide(),$("caption").empty().hide(),$("#totalProcessingTime").empty().hide(),$("#downloadButtonContainer").hide(),$("#url-container").hide(),urlFlag=!1,e?(t.append("file",e),E(t)):(console.error("No file selected."),$("#tbl-section").hide(),$("#sheet-name").empty(),$("#column-name").empty())})}),$(".developer").hover(function(){$(".tooltip").css("visibility","visible").css("opacity","1")},function(){$(".tooltip").css("visibility","hidden").css("opacity","0")}),getCookie("cookie_consent")||$("#cookie-consent").show(),$("#accept-cookies").click(function(){getCookie("cookie_consent")||(setCookie("cookie_consent","true",365),$("#cookie-consent").hide(),$.post("/set-cookie"))}),$(document).ready(function(){$(window).scroll(function(){$(".content").each(function(){var e=$(this).offset().top,t=$(window).scrollTop(),n=$(window).height();e<t+n-100&&$(this).addClass("animate2top")}),$(".contentR").each(function(){var e=$(this).offset().top,t=$(window).scrollTop(),n=$(window).height();e<t+n-100&&$(this).addClass("animate2right")}),$(".contentL").each(function(){var e=$(this).offset().top,t=$(window).scrollTop(),n=$(window).height();e<t+n-100&&$(this).addClass("animate2Left")})})});
+// myfrnt.js
+// Global variable to store the selected sheet
+// var selectedSheet = null;
+var urlFlag = false;
+
+// Flag to track if the file section has been loaded
+var fileSectionLoaded = false;
+// Flag to track if sheet names have been fetched
+
+var sheetNamesFetched = false;
+$(document).ready(function () {
+    var windowHeight = $(window).height(); // Get the window height
+    var footer = $("footer");
+    var header = $("header");
+    var lastScrollTop = 0; // Variable to store the last scroll position
+    // Button click event handler to toggle the visibility of the url-container
+    $("#toggleButton").click(function() {
+        $("#url-container").toggle(); // Toggle the visibility of the url-container
+    });
+    $(window).scroll(function() {
+        var scrollPosition = $(this).scrollTop();
+        var scrollThreshold = windowHeight * 0.60;
+
+        // Animation for header
+        if (scrollPosition > scrollThreshold || lastScrollTop < scrollPosition) {
+            // Hide the header with fade out animation
+            header.stop().animate({
+                top: '-100px', // Move header off-screen
+                opacity: 0
+            }, 200);
+            // if (urlFlag) {
+            //     $("#floatContainer").show().animate({
+            //         left: '50px' // Move to the specified left position
+            //     }, 1500);            
+            // }else{
+            //     $("#floatContainer").hide();
+            // }
+            
+        } else {
+            // $("#floatContainer").stop().animate({
+            //     left: '-50px' // Move to the specified left position
+            // }, 1500);                
+            // Show the header with fade in animation
+            header.animate({
+                top: '100px', // Move header back to its original position
+                opacity: 1                
+            }, 0);
+        }
+
+        // Animation for footer
+        if ($(window).scrollTop() > lastScrollTop) {
+            if(scrollPosition + $(window).height() <= $(document).height()) {
+                // Show the footer with fade in animation
+                footer.fadeIn();
+            }
+        } else {
+            // Hide the footer with fade out animation
+            footer.fadeOut();
+        }
+        lastScrollTop = scrollPosition; // Update the last scroll position
+    });
+ 
+    // Event listener for toggling between file form and manual form
+    $('#toggle_file').on("click", function () {
+        $('#manual_form').removeClass('right-side').hide();
+        $('#file_form').show().addClass('left-side');
+        $('#manual_form').hide();
+        $('#url-container').hide();
+        $('#manual-data').val('');
+        $('#manual-data-table').empty();
+        $('#mnl-tbl').hide();
+        urlFlag = false;
+        cancelFlag = true;
+
+        // Call sendDataToServer with the cancelFlag
+        sendDataToServer({}, cancelFlag); // Pass an empty object as clientUrlSet since it's not used here
+
+        $('#tableDiv').hide();
+        $('#tbl-section').hide();
+        $('#downloadButtonContainer').hide();
+        $('#totalProcessingTime').hide();        
+
+    });
+
+    $('#toggle_manual').on("click", function () {
+        $('#file_form').removeClass('left-side').hide();
+        $('#manual_form').show().addClass('right-side');
+        $('#url-container').hide();
+        $('#file').val('');
+        $('#sheet-name').empty();
+        $('#column-name').empty();
+        $('#file-data-table').empty();
+        $('#file-tbl').hide();
+        urlFlag = false;
+        cancelFlag = true;
+
+        // Call sendDataToServer with the cancelFlag
+        sendDataToServer({}, cancelFlag); // Pass an empty object as clientUrlSet since it's not used here
+
+        $('#tableDiv').hide();
+        $('#tbl-section').hide();
+        $('#downloadButtonContainer').hide();
+        $('#totalProcessingTime').hide();
+        
+    });
+
+    const openNavButton = $('.bi-layout-sidebar-inset');
+    const closeNavIcon = $('.close-icon');
+    const navigation = $('.navigation');
+
+    // Function to open side panel
+    function openNav() {
+        navigation.addClass('active');
+        openNavButton.hide();
+        closeNavIcon.show();
+    }
+
+    // Function to close side panel
+    function closeNav() {
+        navigation.removeClass('active');
+        openNavButton.show();
+        closeNavIcon.hide();
+    }
+
+    // Event listener for opening side panel
+    openNavButton.on('click', function () {
+        openNav();
+    });
+
+    // Event listener for closing side panel
+    closeNavIcon.on('click', function () {
+        closeNav();
+    });
+    async function loadFormSection(sectionName) {
+        console.log('Loading form section:', sectionName);
+    
+        // Check if the file section has already been loaded
+        if (sectionName === 'file_section' && fileSectionLoaded) {
+            return;
+        }
+    
+        try {
+            // Fetch the HTML template for the specified section
+            const response = await fetch('/templates/' + sectionName + '.html');
+            if (!response.ok) {
+                throw new Error('Failed to load form section');
+            }
+            const html = await response.text();
+            
+            // Update the form container with the loaded HTML
+            $('#form-container').html(html).show();
+            console.log('Form section loaded:', sectionName);
+            
+            // Set the flag to true when the file section is loaded
+            if (sectionName === 'file_section') {
+                fileSectionLoaded = true;
+            }
+        } catch (error) {
+            console.error('Error loading form section:', error);
+            $('#form-container').html('<p>Error loading form.</p>');
+        }
+    }
+    
+    var formSections = ['file_section', 'batch_section', 'dropdown_section', 'output_file_selection'];
+    var currentSectionIndex = 0;
+    loadFormSection(formSections[currentSectionIndex]);
+
+    function loadNextFormSection() {
+        currentSectionIndex++;
+        if (currentSectionIndex < formSections.length) {
+            loadFormSection(formSections[currentSectionIndex]);
+        } else {
+            console.log('All form sections loaded.');
+        }
+    }
+
+    $(document).on('click', '#load-next-section-button', function () {
+        console.log('Button clicked');
+        loadNextFormSection();
+    });
+// ***********************************************************************
+            // Manual form Section start from here
+// ***********************************************************************
+    $(document).on('click', '#manual-form-submit', handleManualFormSubmit);
+
+// Function to handle manual form submission
+async function handleManualFormSubmit(event) {
+    event.preventDefault();
+    const manualData = $('#manual-data').val();
+    const selectedSheet = $('#sheet-name').val();
+    const selectedColumn = $('#column-name').val();
+    try {
+        // Send manual data to server using Fetch API
+        const response = await fetch('/process_manual_input', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                manual_data: manualData,
+                selected_sheet: selectedSheet,
+                selected_column: selectedColumn
+            })
+        });
+        if (!response.ok) {
+            throw new Error('Failed to submit manual data');
+        }
+        const data = await response.json();
+        $('#valid_list').empty();
+        $('#invalid_list').empty(); // Clear invalid list
+        // Handle server response
+        if (data.error_message) {
+            $('#error-message').text(data.error_message);
+        } else {
+            // Clear previous data
+            $('#valid_list').empty();
+            $('#invalid_list').empty();
+            // Append column data to URL container
+            appendColumnDataToUrlContainer(data.column_data);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+
+// Function to append column data to URL container
+function appendColumnDataToUrlContainer(columnData) {
+    let validUrlExists = false;
+    let invalidDataExists = false;
+    $('#valid_list').empty();
+    $('#invalid_list').empty();
+    // Arrays to store data for each property
+    let mnl_data = [];
+    let mnl_clmNum = [];
+    let mnl_rwNum = [];
+    let mnl_shtNum = [];
+    const entry_type = ["Entered Data Manually"];
+
+    // Iterate through columnData array
+    for (let i = 0; i < columnData.length; i++) {
+        const data = columnData[i].data;
+        const column_number = columnData[i].column_number;
+        const row_number = columnData[i].row_number;
+        const sheet_number = columnData[i].sheet_number;
+
+        // Append data to respective arrays if it's a valid URL
+        if (testValidURL(data)) {
+            mnl_data.push(data);
+            mnl_clmNum.push(column_number);
+            mnl_rwNum.push(row_number);
+            mnl_shtNum.push(sheet_number);
+            validUrlExists = true;
+            $('#valid_list').append($('<a class="hover-underline-animation linkText"></a>').attr('href', data).text(data));
+            $('#valid_list').append('<br>');
+        } else {
+            // Check if the data is empty
+            if (data.trim() !== '') {
+                invalidDataExists = true;
+                $('#invalid_list').append($('<p></p>').text(data));
+            }
+        }
+    }
+
+    // Construct the manualDataSet object
+    let manualDataSet = {
+        data: mnl_data,
+        column_number: mnl_clmNum,
+        row_number: mnl_rwNum,
+        sheet_number: mnl_shtNum,
+        choosen: entry_type
+    };
+
+    // Show or hide valid_list based on the presence of valid data
+    if (validUrlExists) {
+        console.log("manualDataSet:", manualDataSet);
+        $('#valid_list').prepend($('<h3>Fetched URLs:</h3>'));
+        $('#valid_list').show();
+    } else {
+        $('#valid_list').hide();
+    }
+
+    // Show or hide invalid_list based on the presence of invalid data
+    if (invalidDataExists) {
+        $('#invalid_list').prepend($('<h3>Junk:</h3>'));
+        $('#invalid_list').show();
+    } else {
+        $('#invalid_list').hide();
+    }
+
+    // Show or hide url-container based on the presence of valid or invalid data
+    if (validUrlExists || invalidDataExists) {
+        // $('#url-container').show();
+        urlFlag = true;
+    } else {
+        // $('#url-container').hide();
+        urlFlag = false;
+    }
+    // if (manualDataSet && Object.keys(manualDataSet).length !== 0) {
+    //     displayDataSetsInTable(null,manualDataSet);
+    // }
+    if (manualDataSet && manualDataSet.data && manualDataSet.data.length !== 0) {
+        displayDataSetsInTable(null, manualDataSet);
+    } else{
+        $('#manual-data-table').empty();
+        $('#mnl-tbl').hide();
+    }  
+}
+
+// ***********************************************************************
+            // Manual form Section end from here
+// ***********************************************************************
+// Function to check if a string is a valid URL
+    function testValidURL(list_url) {
+        // Regular expression to validate URLs
+        var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+            '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+            '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+            '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+            '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+            '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
+        return pattern.test(list_url);
+    }
+
+// Function to fetch column Data
+async function fetchColumnURLs(formData) {
+    // Initialize dataSet
+    let fileDataSet = {
+        data: [],
+        column_number: [],
+        row_number: [],
+        sheet_number: [],
+        choosen: [] 
+    };
+
+    try {
+        const response = await fetch('/input_section', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch column Data');
+        }
+
+        const data = await response.json();
+        // Display column Data in the valid_list and invalid_list divs
+        $('#valid_list').empty();
+        $('#invalid_list').empty(); 
+        // $('#url-container').show();
+
+        var raw_data = data.column_data;
+        const file_name = data.selected_file;
+        if (raw_data && raw_data.length > 0) {
+            let validDataExists = false;
+            let invalidDataExists = false;
+
+            // Check if choosen is already set
+            if (fileDataSet.choosen.length === 0) {
+                fileDataSet.choosen.push(file_name);
+            }
+
+            raw_data.forEach(item => {
+                let list_url = item.data;
+                let column_number = item.column_number;
+                let row_number = item.row_number;
+                let sheet_number = item.sheet_number;
+
+                // Check if the data is a valid URL
+                if (testValidURL(list_url)) {
+                    // Add data to dataSet
+                    fileDataSet.column_number.push(column_number);
+                    fileDataSet.row_number.push(row_number);
+                    fileDataSet.sheet_number.push(sheet_number);
+                    fileDataSet.data.push(list_url);
+
+                    // Display valid URLs
+                    $('#valid_list').append($('<a class="hover-underline-animation linkText"></a>').attr('href', list_url).text(list_url));
+                    $('#valid_list').append('<br>');
+                    validDataExists = true;
+                } else {
+                    // Skip null values
+                    if (list_url === null) {
+                        return;
+                    }
+                    $('#invalid_list').append($('<p></p>').text(list_url));
+                    invalidDataExists = true;
+                }
+            });
+            // Show or hide valid_list based on the presence of valid data
+            if (validDataExists) {
+                $('#valid_list').prepend($('<h3>Fetched URLs</h3>'));
+                $('#valid_list').show();
+                console.log("dataSet:", fileDataSet); // Logging the dataSet
+            } else {
+                $('#valid_list').hide();
+            }
+            // Show or hide invalid_list based on the presence of invalid data
+            if (invalidDataExists) {
+                $('#invalid_list').prepend($('<h3>Junk:</h3>'));
+                $('#invalid_list').show();
+            } else {
+                $('#invalid_list').hide();
+            }
+
+            // Show or hide url-container based on the presence of valid or invalid data
+            if (validDataExists || invalidDataExists) {
+                // $('#url-container').show();
+                urlFlag = true;
+            } else {
+                // $('#url-container').hide();
+                urlFlag = false;
+            }
+        } else {
+            $('#invalid_list').append($('<p>No URLs found for the selected column.</p>'));
+            $('#invalid_list').show(); // Hide invalid list if no data
+            $('#valid_list').hide(); // Hide valid list if no data
+            // $('#url-container').show();
+        }
+    } catch (error) {
+        console.error('Error fetching column Data:', error);
+    }
+    if (fileDataSet && fileDataSet.data && fileDataSet.data.length !== 0) {
+        displayDataSetsInTable(fileDataSet, null);
+    } else{
+        $('#file-data-table').empty();
+        $('#file-tbl').hide();
+    }   
+}
+function displayDataSetsInTable(fileDataSet, manualDataSet) {
+    // Clear previous tables if any
+    $('#manual-data-table').empty();
+    $('#file-tbl').hide(); // Hide file table by default
+    $('#mnl-tbl').hide(); // Hide manual table by default
+
+    if (fileDataSet) {
+        displayDataSetInTable(fileDataSet, '#file-data-table');
+        $('#file-tbl').show(); // Show file table
+        // $('#mnl-tbl').empty(); // empty manual table
+        $('#manual-data-table').hide();
+        $('#file-data-table').show();
+
+    } 
+
+    if (manualDataSet) {
+        displayDataSetInTable(manualDataSet, '#manual-data-table');
+        $('#mnl-tbl').show(); // Show manual table
+        // $('#file-tbl').empty(); // empty file table
+        $('#file-data-table').hide();
+        $('#manual-data-table').show();
+    }
+        // Show the table section after updating tables
+        $('#tbl-section').show();    
+}
+
+function displayDataSetInTable(dataSet, tableId) {
+    if (!dataSet || !dataSet.data || dataSet.data.length === 0) {
+        $(tableId).empty(); // Clear the table if data is empty
+        return;
+    }
+    
+    // Create the table container
+    let tableContainer = $('<div>');
+    // Create table caption
+    const tableCaption = $('<caption>').text(dataSet.choosen[0]); // Displaying the value of "choosen" as caption
+    const captionDiv = $('<div class="firstCap">'+ '<p>Source Of Data: '+ '<span class="source">' + tableCaption.text() + '</span>' +'</p>' +'</div>');
+    tableContainer.append(captionDiv);
+
+    // Create the table
+    const table = $('<table>').addClass('data-table');
+
+    // Create table headers
+    const keys = Object.keys(dataSet);
+    const headersRow = $('<tr>');
+
+    // Add Action header to the first cell
+    headersRow.append(createDropdown());
+
+    // Add other headers
+    const headerTexts = ['Valid URLs', 'Column No.', 'Row No.', 'Sheet No.']; // Specific text for each header
+    headerTexts.forEach(headerText => {
+        headersRow.append($('<th>').text(headerText));
+    });
+    table.append(headersRow);
+
+    // Create table rows
+    for (let i = 0; i < dataSet.data.length; i++) {
+        const dataRow = $('<tr>');
+
+        // Add dropdown cell only to the first cell of the first column
+        if (i >= 0) {
+            // For other rows, add checkboxes in the first column
+            const checkboxCell = $('<td>').append(
+                $('<input>').attr('type', 'checkbox').addClass('row-checkbox')
+            );
+            dataRow.append(checkboxCell);
+        }
+
+        // Add cells for other columns
+        keys.forEach(key => {
+            if (key !== 'choosen') {
+                const cellData = dataSet[key][i];
+                dataRow.append($('<td>').text(cellData));
+            }
+        });
+        table.append(dataRow);
+    }
+    
+    // Append the table to the table container
+    tableContainer.append(table);
+    
+    // Append the table container to the specified container
+    $(tableId).empty().append(tableContainer); 
+}
+
+// *************************************************************************************************************************
+// ************************************   Dropdown Based dataSet preperation Start  *********************************************
+// *************************************************************************************************************************
+
+// Function to create the dropdown
+function createDropdown() {
+    const dropdownHeader = $('<th>'); // Create a header cell for the dropdown, Add Followed code for additional Text=>   .text('Action')
+    const dropdown = $('<select>').append(
+        $('<option>').text('select'),
+        $('<option>').text('First 5').attr('value', 'Option 1'),
+        $('<option>').text('First 10').attr('value', 'Option 2'),
+        $('<option>').text('First 50').attr('value', 'Option 3'),
+        $('<option>').text('First 100').attr('value', 'Option 4'),
+        $('<option>').text('First 300').attr('value', 'Option 5'),
+        // $('<option>').text('First 150').attr('value', 'Option 5'),
+        $('<option>').text('More').attr('value', 'Choose').prop('disabled', true)
+    );
+
+    dropdownHeader.append(dropdown); // Append the dropdown to the header cell
+    return dropdownHeader; // Return the dropdown header cell
+}
+    // Dropdown change event handler
+    $(document).on("change", "select", function() {
+        var selection = $(this).val();
+        handleCheckboxSelection(selection);
+    });
+
+    // Check_all checkbox click event handler
+    $(document).on("click", "#check_all", function() {
+        if ($(this).prop("checked")) {
+            $("input:checkbox.row-checkbox").prop("checked", true);
+        } else {
+            $("input:checkbox.row-checkbox").prop("checked", false);
+        }
+    });
+
+// Corrected Checkbox Change Event Handler:
+$(document).on("change", "input:checkbox.row-checkbox", function() {
+    var selectedValue = $("select").val();
+    var totalChecked = $("input:checkbox.row-checkbox:checked").length;
+    updateSendServeButton();  
+    if (totalChecked > 300 && $(this).is(":checked")) {
+      $(this).prop("checked", false); // Uncheck if limit is exceeded
+      alert("Maximum 300 items can be selected."); // Inform the user
+      return; // Exit early
+    }
+    // if ($("input:checkbox.row-checkbox:checked").length === 0) {
+    //     alert("Please select at least one item before clicking Lock & GO.");
+    //     $("#send_serve").hide();
+
+    //     return false; // Prevent form submission (if applicable)
+    // }else {
+    //   $("#send_serve").show();
+    // }
+
+    updateCheckAllCheckbox();
+    handleCheckboxSelection(selectedValue);
+  });
+
+// Function to handle checkbox selection based on dropdown selection
+function handleCheckboxSelection(selection) {
+    // Enable all checkboxes and remove disabled attribute
+    $("input:checkbox.row-checkbox").prop("disabled", false);
+
+    // Uncheck all checkboxes if the first option is selected
+    if (selection === "select") {
+        $("input:checkbox.row-checkbox").prop("checked", false);
+    }
+
+    // Check checkboxes based on selection, limiting to 150 checkboxes
+    if (selection === "Option 1") { // First 5
+        checkLimitedCheckboxes(5);
+    } else if (selection === "Option 2") { // First 10
+        checkLimitedCheckboxes(10);
+    } else if (selection === "Option 3") { // First 50
+        checkLimitedCheckboxes(50);
+    } else if (selection === "Option 4") { // First 100
+        checkLimitedCheckboxes(100);
+    } else if (selection === "Option 5") { // First 100
+        checkLimitedCheckboxes(300);
+    } 
+    // else if (selection === "Option 5") { // First 150
+    //     checkLimitedCheckboxes(150);
+    // }
+
+    // Update check_all checkbox based on checked checkboxes
+    updateCheckAllCheckbox();
+
+    // Store checked checkbox values in the dataset
+    storeCheckedValues();
+}
+
+// Function to check a limited number of checkboxes
+function checkLimitedCheckboxes(limit) {
+    var $checkboxes = $("input:checkbox.row-checkbox");
+    $checkboxes.prop("checked", false); // Uncheck all checkboxes first
+    $checkboxes.slice(0, limit).prop("checked", true); // Check only up to the specified limit
+
+    // Disable remaining checkboxes if the limit is reached
+    if ($checkboxes.length > limit) {
+        $checkboxes.slice(limit).prop("disabled", true);
+    }
+}
+
+// Checkbox change event handler
+$("input:checkbox.row-checkbox").on("change", function() {
+    updateCheckAllCheckbox();
+    handleCheckboxSelection($("select").val()); // Apply limit after checkbox status changes
+});
+
+// Function to update the check_all checkbox based on checked checkboxes
+function updateCheckAllCheckbox() {
+    var total_check_boxes = $("input:checkbox.row-checkbox").length;
+    var total_checked_boxes = $("input:checkbox.row-checkbox:checked").length;
+
+    // If all checkboxes are checked, check the check_all checkbox
+    $("#check_all").prop("checked", total_check_boxes === total_checked_boxes);
+}
+var cancelFlag = false
+
+// Function to store checked checkbox values in the dataset
+function storeCheckedValues() {
+    // Initialize clientUrlSet object
+    var clientUrlSet = {
+        url_list: [],
+        column_number: [],
+        row_number: [],
+        sheet_number: [],
+        choosen: []
+    };
+    // Retrieve the caption value once
+    var captionText = $("caption").text();
+    // Iterate through checked checkboxes and store values
+    $("input:checkbox.row-checkbox:checked").each(function() {
+        var $row = $(this).closest("tr");
+        clientUrlSet.url_list.push($row.find("td:nth-child(2)").text());
+        clientUrlSet.column_number.push($row.find("td:nth-child(3)").text());
+        clientUrlSet.row_number.push($row.find("td:nth-child(4)").text());
+        clientUrlSet.sheet_number.push($row.find("td:nth-child(5)").text());
+    });
+    // Push the caption value to the choosen array once
+    clientUrlSet.choosen.push(captionText);
+    // Bind click event to send data to server
+    $("#send_serve").off("click").on("click", async function() {
+        $("#processedTable").hide();
+        $("#tableDiv").hide();
+        $('#totalProcessingTime').empty().hide();
+        cancelFlag = false
+        await sendDataToServer(clientUrlSet, cancelFlag);
+    });
+
+}
+  // Function to check if any checkboxes are selected
+  function hasCheckedItems() {
+    return $("input:checkbox.row-checkbox:checked").length > 0;
+  }
+
+  // Dropdown change event handler
+  $(document).on("change", "select", function() {
+    updateSendServeButton();
+  });
+
+  // Checkbox change event handler
+  $(document).on("change", "input:checkbox.row-checkbox", function() {
+    updateSendServeButton();
+  });
+
+  // Update button visibility based on current state
+  function updateSendServeButton() {
+    const isChecked = hasCheckedItems();
+    if (isChecked) {
+      $("#send_serve").show();
+    } else {
+      $("#send_serve").hide();
+    }
+  }
+
+  // Initial check on page load (optional)
+  updateSendServeButton();
+
+  $('#cancelButton').off("click").on("click", async function() {
+    // Set a flag indicating that the process should be canceled
+    cancelFlag = true;
+
+    // Call sendDataToServer with the cancelFlag
+    await sendDataToServer({}, cancelFlag); // Pass an empty object as clientUrlSet since it's not used here
+}); 
+// Define a global variable to store the cancelFlag value
+var globalCancelFlag = false;
+// Modify fetchProgress to use the globalCancelFlag variable directly
+async function fetchProgress() {
+    $('#loadingIndicator').show();              
+    $('#progressPercentage').show();
+    $("#tableDiv").show();
+    // Check if processing is canceled
+    if (globalCancelFlag === true) {
+        console.log('Processing canceled.');
+        // Create another Fetch POST request to pass the flag to /progress endpoint
+        try {
+            const response = await fetch('/progress', {
+                async: 'true',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ cancelFlag: globalCancelFlag })
+            });
+            // You may handle the response here if needed
+        } catch (error) {
+            console.error('Error sending cancel flag to progress endpoint:', error);
+        }
+        return;
+    }   
+
+    try {
+        const response = await fetch('/progress', {
+            async: 'true',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ cancelFlag: globalCancelFlag })
+        });
+        var { pInfo_obj, tryPercent } = await response.json();
+        var progressData = pInfo_obj;
+        var progressPercentage = tryPercent.toFixed(2);
+
+        // Call updateProgressPercentage with the progress percentage
+        await updateProgressPercentage(progressPercentage); // Use await to ensure the function completes before moving forward 
+
+        // Call generateTable with the progress data
+        await generateTable(progressData);
+
+    } catch (error) {
+        console.error('Error fetching progress:', error);
+    }
+}
+
+
+
+async function sendDataToServer(clientUrlSet, cancelFlag) {
+    // Update the globalCancelFlag with the provided cancelFlag value
+    globalCancelFlag = cancelFlag;
+
+    // Check if processing is canceled
+    if (globalCancelFlag === true) {
+        console.log('Processing canceled at SendtoServer');
+        return;
+    }   
+    try {
+        // Hide download button container initially
+        $('#downloadButtonContainer').hide();
+        
+        // Record start time
+        const startTime = new Date().getTime();
+        
+        // Ensure clientUrlSet is not empty
+        if (!clientUrlSet || !clientUrlSet.url_list || clientUrlSet.url_list.length === 0) {
+            throw new Error("Error: DataSet is undefined or empty");
+
+        } 
+        
+        $("#cancelButton").show();
+        // Set interval to call fetchProgress every 2 seconds
+        var progressInterval = setInterval(fetchProgress, 2000);
+
+        console.log("Sending data to server:", clientUrlSet);
+        console.log("Stringified Data:", JSON.stringify(clientUrlSet)); // Log the stringified data
+
+        // Perform an asynchronous fetch POST request to the server endpoint
+        var response = await fetch("/process_url_data", {
+            method: "POST",
+            async: "true",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                clientUrlSet: clientUrlSet,
+                cancelFlag: globalCancelFlag
+            })        
+        });
+
+        // Parse JSON response
+        const responseData = await response.json();
+
+        // Record end time
+        const endTime = new Date().getTime();
+
+        // Calculate total processing time
+        const totalProcessTime = Math.floor((endTime - startTime) / 1000);
+
+        // Format total processing time
+        const formattedTotalTime = formatProcessingTime(totalProcessTime);
+
+        // Update UI with total processing time
+        $('#totalProcessingTime').empty().append("<p>Total Processing Time: " + formattedTotalTime + " </p>");
+        $('#totalProcessingTime').show(); // Show the container if hidden
+
+        // Display processed data and handle errors
+        if (responseData.error) {
+            throw new Error("Error from server: " + responseData.error);
+        } else {
+            // Display loading indicator
+            $("#processedTable").show();
+
+            // Check if the server has downloadable data
+            if (responseData.has_downloadable_data) {
+                downloadCSV(responseData.csv_filename);
+                console.log("response.csv_filename: ", responseData.csv_filename);
+                // Display a button to download the CSV file
+                $('#downloadButtonContainer').show();
+            } else {
+                // Hide the download button if no downloadable data
+                $('#downloadButtonContainer').hide();
+            }
+
+            await fetchProgress(cancelFlag);
+        }
+
+        // Check if the response is empty or not
+        if (!responseData || !responseData.pInfo_obj) {
+            return; // For example, returning from the function
+        }
+
+    } catch (error) {
+        console.error("Error sending data to server:", error);
+        // Handle the error here if needed
+    } finally {
+        clearInterval(progressInterval); // Clear interval after processing
+        // Hide loading indicator after request completes
+        $('#loadingIndicator').hide();
+    }
+}
+
+// Function to format processing time
+function formatProcessingTime(totalProcessTime) {
+    let formattedTotalTime;
+    if (totalProcessTime < 60) {
+        formattedTotalTime = totalProcessTime + " seconds";
+    } else if (totalProcessTime < 3600) {
+        const minutes = Math.floor(totalProcessTime / 60);
+        const seconds = (totalProcessTime % 60).toFixed(2);
+        formattedTotalTime = minutes + " minutes " + seconds + " seconds";
+    } else {
+        const hours = Math.floor(totalProcessTime / 3600);
+        const remainingSeconds = totalProcessTime % 3600;
+        const minutes = Math.floor(remainingSeconds / 60);
+        formattedTotalTime = hours + " hours " + minutes + " minutes " + seconds + " seconds";
+    }
+    return formattedTotalTime;
+}
+
+// Function to download CSV using Fetch API
+async function downloadCSV(csvFilename) {
+   
+    $('#downloadButton').on('click', async function() {
+        try {
+            const formData = new FormData();
+            formData.append('filename', csvFilename); // Append the filename to the form data
+            
+            const response = await fetch(`/download/${csvFilename}`, { // Use csvFilename in the fetch URL
+                method: 'POST', // Change the method to POST
+                body: formData
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to download CSV file');
+            }
+    
+            // Create a blob from the response
+            const blob = await response.blob();
+    
+            // Create a temporary link element
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = csvFilename;
+    
+            // Trigger a click event to start the download
+            link.click();
+    
+            // Clean up
+            window.URL.revokeObjectURL(link.href);
+            link.remove();
+    
+            console.log('CSV file download successful.');
+        } catch (error) {
+            console.error('Error downloading CSV:', error);
+            alert('Error downloading CSV: Please try again.');
+        }
+    });
+}
+
+
+// Function to update progress percentage section
+async function updateProgressPercentage(progressPercentage) {
+
+    try {
+        // Check if progress data is received
+        if (progressPercentage !== undefined) {
+            // Convert progressPercentage to integer
+            const progressInt = parseInt(progressPercentage);
+            $('#progressPercentage span').text(progressInt + '%');
+            $('#progressBlock').css('--value', progressInt);
+            console.log('Progress percentage updated:', progressInt + '%');
+        } else {
+            console.error('Progress percentage is undefined');
+            return
+        }
+    } catch (error) {
+        console.error('Error updating progress percentage:', error);
+    }
+}
+
+
+// Function to dynamically generate table
+async function generateTable(progressData) {
+   
+    // Clear existing table content
+    $('#tryTable').empty();
+    $('#tableDiv').show();
+    
+    // console.log('ProgressData for Object: ', progressData);
+
+    // Check if progressData is empty or undefined
+    if (!progressData || progressData.length === 0) {
+        return;
+    }
+        
+        // Define the table variable with the specified format
+        var table = '<table id="innerTrytable" class="data-table" border="1">';
+        
+        // Create table header
+        table += '<thead><tr>';
+        // Define the order of keys, with 'URL' being the first one
+        let keysOrder = ['Sr.No','URL', 'Domain Status', 'Expiration Date', 'For Sale', 'Response Message', 'Response Time', 'Status Code'];
+        // Append table headers with the defined order
+        keysOrder.forEach((key) => {
+            if (key === 'Sr.No') {
+                table += `<th class="sortable" data-key="${key}">${key} <i class="bi bi-sort-numeric-down"></i></th>`; // Add data-key and i attribute for sorting
+            } else if (key === 'Expiration Date') {
+                table += `<th class="sortable" data-key="${key}">${key} <i class="bi bi-sort-numeric-down"></i></th>`; // Add data-key and i attribute for sorting
+            } else if (key === 'Response Time') {
+                table += `<th class="sortable" data-key="${key}">${key} <i class="bi bi-sort-numeric-down-alt"></i></th>`; // Add data-key and i attribute for sorting
+            } else {
+                table += `<th class="sortable" data-key="${key}">${key}</th>`; // Add data-key for sorting
+            }       
+        });
+        table += '</tr></thead><tbody>';
+
+        // Iterate over each object in progressData and create table rows
+        progressData.forEach((item, index) => {
+            let row = '<tr>';
+            // Iterate over keys in the defined order
+            keysOrder.forEach((key) => {
+                if (key === 'Expiration Date') { 
+                    row += `<td>${new Date(item[key]).toLocaleString()}</td>`; // Convert to localized string
+                } 
+                if (key === 'Sr.No') {
+                    row += `<td>${(index + 1)}</td>`; // Add 1 to index to make it 1-based
+                } else if (key !== 'Expiration Date') { // Exclude the second occurrence of 'Expiration Date'
+                    row += `<td>${item[key]}</td>`;
+                }
+            });
+            row += '</tr>';
+            table += row; // Append row to the table
+        });
+
+        // Close table tag
+        table += '</tbody></table>';
+
+        // Append the table to the tableDiv
+        $('#tryTable').append(table);
+
+        // Add event listeners for sorting when headers are clicked
+        $('.sortable').on('click', function() {
+            const key = $(this).data('key'); // Get the data-key attribute value
+            sortTable(key, keysOrder); // Pass keysOrder as a parameter
+        });
+}
+
+// Function to sort the table based on the clicked header
+function sortTable(key, keysOrder) { // Receive keysOrder as a parameter
+    const $table = $('#innerTrytable');
+    const rows = $table.find('tbody > tr').toArray();
+    const isDescending = $(this).hasClass('desc'); // Check if currently descending
+
+    if (key === 'Expiration Date' || key === 'Response Time') { // Check if clicked header is 'Expiration Date' or 'Response Time'
+        rows.sort((a, b) => {
+            let aValue = $(a).find(`td:eq(${keysOrder.indexOf(key)})`).text();
+            let bValue = $(b).find(`td:eq(${keysOrder.indexOf(key)})`).text();
+
+            // Ensure aValue and bValue are strings
+            aValue = String(aValue);
+            bValue = String(bValue);
+
+            return isDescending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+        });
+    } else if (key === 'Sr.No') { // Check if clicked header is 'Sr.No'
+        rows.sort((a, b) => {
+            let aValue = parseInt($(a).find(`td:eq(${keysOrder.indexOf(key)})`).text()); // Parse as integer for 'Sr.No'
+            let bValue = parseInt($(b).find(`td:eq(${keysOrder.indexOf(key)})`).text());
+
+            // Sort in ascending order
+            if (!isDescending) {
+                return aValue - bValue;
+            } else { // Sort in descending order
+                return bValue - aValue;
+            }
+        });
+    }
+
+    $table.find('tbody').html(rows);
+    $(this).toggleClass('desc'); // Toggle descending class for the next click
+}
+
+// // Update the function to display processed data in a table
+// function displayProcessedData(responseData, responseFile) {
+//     var data = JSON.parse(responseData);
+//     var csvFilename = responseFile;
+
+//     try {
+//         var table = '<table id="dataTable" class="data-table" border="1">' +
+//             '<thead>' +
+//             '<tr>' +
+//             '<th>Sr.No</th>' +
+//             '<th>URL</th>' +
+//             '<th>Status Code</th>' +
+//             '<th>Response Message</th>' +
+//             '<th>Domain Status</th>' +
+//             '<th>Expiration Date</th>' +
+//             '<th>For Sale</th>' +
+//             '<th>Response Time</th>' +
+//             '</tr>' +
+//             '</thead>' +
+//             '<tbody>';
+
+//             data.forEach(function(item, index) {
+//                 var domainInfo = item.domain_info;
+//                 var expirationDate = new Date(domainInfo['Expiration Date']);
+//                 var formattedExpirationDate = expirationDate.toLocaleString(); 
+//                 var row = '<tr>' +
+//                     '<td>' + (index + 1) + '</td>' +
+//                     '<td>' + domainInfo.URL + '</td>' +
+//                     '<td>' + domainInfo['Status Code'] + '</td>' +
+//                     '<td>' + domainInfo['Response Message'] + '</td>' +
+//                     '<td>' + domainInfo['Domain Status'] + '</td>' +
+//                     '<td>' + formattedExpirationDate + '</td>' + // Use the formatted expiration date
+//                     '<td>' + domainInfo['For Sale'] + '</td>' +
+//                     '<td>' + domainInfo['Response Time'] + '</td>' +
+//                     '</tr>';
+
+//             table += row;
+//         });
+
+//         table += '</tbody></table>';
+//         $('#dataTableContainer').html(table);
+
+//     } catch (error) {
+//         console.error("Error parsing JSON:", error);
+//     }
+
+//     $('#downloadButton').on('click', async function() {
+//         try {
+//             const formData = new FormData();
+//             formData.append('filename', csvFilename); // Append the filename to the form data
+            
+//             const response = await fetch(`/download/${csvFilename}`, { // Use csvFilename in the fetch URL
+//                 method: 'POST', // Change the method to POST
+//                 body: formData
+//             });
+    
+//             if (!response.ok) {
+//                 throw new Error('Failed to download CSV file');
+//             }
+    
+//             // Create a blob from the response
+//             const blob = await response.blob();
+    
+//             // Create a temporary link element
+//             const link = document.createElement('a');
+//             link.href = window.URL.createObjectURL(blob);
+//             link.download = csvFilename;
+    
+//             // Trigger a click event to start the download
+//             link.click();
+    
+//             // Clean up
+//             window.URL.revokeObjectURL(link.href);
+//             link.remove();
+    
+//             console.log('CSV file download successful.');
+//         } catch (error) {
+//             console.error('Error downloading CSV:', error);
+//             alert('Error downloading CSV: Please try again.');
+//         }
+//     });    
+// }
+
+// *************************************************************************************************************************
+// ************************************   Dropdown Based dataSet preperation Ended  *********************************************
+// *************************************************************************************************************************
+
+// Global variable to store the selected sheet
+let selectedSheet;
+
+// Function to fetch sheet names and column names asynchronously
+function fetchSheetAndColumnNames(formData) {
+    try {
+        fetch('/input_section', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch sheet names and column names');
+            }
+            return response.json();
+        })
+        .then(data => {
+            selectedSheet = data.selected_sheet; // Update the selected sheet based on the server's response
+            if (!data.is_csv) {
+                populateSheetDropdown(selectedSheet, data.sheet_names); // Populate sheet dropdown for XLSX files
+                populateColumnDropdown(data.sheet_columns[selectedSheet], selectedSheet, data.column_data); // Populate column dropdown for the selected sheet
+                $('#sheet-name').val(selectedSheet); // Update the selected sheet without resetting
+                $('#sheet-name').show(); // Show sheet dropdown for XLSX files
+                $('label[for="sheet-name"]').show(); // Show label for XLSX files
+            } else {
+                populateColumnDropdown(data.sheet_columns, selectedSheet, data.column_data); // Populate column dropdown for CSV files
+                $('#sheet-name').empty().hide(); // Hide sheet dropdown for CSV files
+                $('label[for="sheet-name"]').hide(); // Hide label for CSV files
+            }
+            // Fetch column data for the default selected column
+            var selectedColumn = $('#column-name').val(); // Get the selected column
+            if (selectedColumn) {
+                var formData = new FormData(); // Initialize FormData object
+                formData.append('file', $('#file')[0].files[0]); // Include the file data
+                formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
+                formData.append('selected_column', selectedColumn); // Pass the selected column
+                fetchColumnURLs(formData); // Pass the FormData object to fetch column Data
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching sheet names and column names:', error);
+        });
+    } catch (error) {
+        console.error('Error fetching sheet names and column names:', error);
+    }
+}
+
+// Function to populate sheet dropdown
+async function populateSheetDropdown(selectedSheet, sheetNames) {
+    var sheetDropdown = $('#sheet-name');
+    sheetDropdown.empty();
+    if (sheetNames && sheetNames.length > 0) {
+        $.each(sheetNames, function (_, sheetName) {
+            sheetDropdown.append($('<option></option>').val(sheetName).text(sheetName));
+        });
+        // Set the selected sheet to the first sheet by default if not provided
+        if (!selectedSheet) {
+            selectedSheet = sheetNames[0];
+        }
+    } else {
+        console.error('No sheet names available.');
+        sheetDropdown.append($('<option disabled selected>Please choose a sheet</option>'));
+    }
+}
+
+// Function to populate column dropdown
+async function populateColumnDropdown(columnNames, selectedSheet) {
+    var columnDropdown = $('#column-name');
+    columnDropdown.empty();
+    if (columnNames) {
+        $.each(columnNames, function (_, columnName) {
+            columnDropdown.append($('<option></option>').val(columnName).text(columnName));
+        });
+    } else {
+        console.error('No column names available for the selected sheet:', selectedSheet);
+        columnDropdown.append($('<option disabled selected>No columns available</option>'));
+    }
+    // Get the default selected column
+    var selectedColumn = columnDropdown.val();
+    var formData = new FormData(); // Initialize FormData object
+    // Fetch column data for the default selected column
+    if (selectedColumn) {
+        formData.append('file', $('#file')[0].files[0]); // Include the file data
+        formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
+        formData.append('selected_column', selectedColumn); // Pass the selected column
+        fetchColumnURLs(formData); // Pass the FormData object to fetch column Data
+    }
+}
+
+// Handle column dropdown change event
+$(document).on('change', '#column-name', function () {
+    var selectedColumn = $(this).val(); // Get the selected column
+    var formData = new FormData(); // Initialize FormData object
+    if (selectedColumn) {
+        selectedSheet= $('#sheet-name').val();
+        formData.append('file', $('#file')[0].files[0]); // Include the file data
+        formData.append('selected_sheet', selectedSheet); // Pass the selected sheet
+        formData.append('selected_column', selectedColumn); // Pass the selected column
+        fetchColumnURLs(formData); // Pass the FormData object to fetch column Data
+
+        $('#totalProcessingTime').empty().hide();
+        $("#processedTable").hide();
+        $("#tableDiv").hide();
+        $('#downloadButtonContainer').hide();
+        urlFlag = false;
+    } else {
+        console.log('No valid column selected.');
+    }
+});
+
+// Function to handle sheet dropdown change event
+$(document).on('change', '#sheet-name', function () {
+    selectedSheet = $(this).val(); // Update the selected sheet value
+    var formData = new FormData(); // Construct FormData object with selected sheet value
+    formData.append('file', $('#file')[0].files[0]); // Include the file data
+    formData.append('selected_sheet', selectedSheet); // Use the first sheet if selectedSheet is null
+    fetchSheetAndColumnNames(formData); // Pass the FormData object to fetch sheet and column names
+    $('totalProcessingTime').empty().hide();
+    $("#processedTable").hide();
+    $("#tableDiv").hide();
+    $('#downloadButtonContainer').hide();
+    urlFlag = false;
+
+});
+
+$(document).on('change', '#file', function () {
+    $('#valid_list').empty(); // Clear the valid_list div
+    var fileInput = $(this)[0].files[0]; // Get the selected file
+    var maxSize = 1024 * 1024; // 1024 KB in bytes
+  
+    if (fileInput && fileInput.size > maxSize) {
+      // Optionally display an error message to the user
+      $('#tbl-section').hide();
+      $('#sheet-name').empty();
+      $('#column-name').empty();      
+      $('#toggleButton').hide();
+
+      alert("File size exceeds 1 MB. Please choose a smaller file.")
+      return false; // Prevent further operations
+    }
+  
+    var formData = new FormData(); // Initialize FormData object only if size is valid
+    $("#processedTable").hide();
+    $("#tableDiv").hide();
+    $('caption').empty().hide();
+    $('#totalProcessingTime').empty().hide();
+    $('#downloadButtonContainer').hide();
+  
+    $('#url-container').hide();
+    urlFlag = false;
+    if (fileInput) {
+      formData.append('file', fileInput); // Include the file data
+      fetchSheetAndColumnNames(formData); // Pass the FormData object to fetch sheet and column names
+    } else {
+      console.error('No file selected.');
+      $('#tbl-section').hide();
+      $('#sheet-name').empty();
+      $('#column-name').empty();
+    }
+  });
+  
+});
+$('.developer').hover(function() {
+    $('.tooltip').css('visibility', 'visible').css('opacity', '1');
+}, function() {
+    $('.tooltip').css('visibility', 'hidden').css('opacity', '0');
+});
+
+// if (!getCookie('cookie_consent')) {
+//     $('#cookie-consent').show();
+// }
+
+// $('#accept-cookies').click(function() {
+//     if (!getCookie('cookie_consent')) { // Check if the cookie already exists
+//         setCookie('cookie_consent', 'true', 365);  // Set cookie with consent for 1 year
+//         $('#cookie-consent').hide();
+//         $.post('/set-cookie');  // Send a request to set the cookie on the server
+//     }
+// });
+
+// function setCookie(name, value, days) {
+//     var expires = "";
+//     if (days) {
+//         var date = new Date();
+//         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+//         expires = "; expires=" + date.toUTCString();
+//     }
+//     document.cookie = name + "=" + (value || "") + expires + "; path=/";
+// }
+
+// function getCookie(name) {
+//     var nameEQ = name + "=";
+//     var cookies = document.cookie.split(';');
+//     for (var i = 0; i < cookies.length; i++) {
+//         var cookie = cookies[i];
+//         while (cookie.charAt(0) == ' ') {
+//             cookie = cookie.substring(1, cookie.length);
+//         }
+//         if (cookie.indexOf(nameEQ) == 0) {
+//             return cookie.substring(nameEQ.length, cookie.length);
+//         }
+//     }
+//     return null;
+// }
+$(document).ready(function() {
+    $(window).scroll(function() {
+      $('.content').each(function() {
+        var position = $(this).offset().top;
+        var scrollPosition = $(window).scrollTop();
+        var windowHeight = $(window).height();
+        if (position < scrollPosition + windowHeight - 50) {
+          $(this).addClass('animate2top');
+        }
+      });
+      $('.contentBtm').each(function() {
+        var position = $(this).offset().top;
+        var scrollPosition = $(window).scrollTop();
+        var windowHeight = $(window).height();
+        if (position < scrollPosition + windowHeight - 100) {
+          $(this).addClass('animate2Btm');
+        }
+      });
+      $('.contentR').each(function() {
+          var position = $(this).offset().top;
+          var scrollPosition = $(window).scrollTop();
+          var windowHeight = $(window).height();
+          if (position < scrollPosition + windowHeight - 50) {
+            $(this).addClass('animate2right');
+          }
+        });
+      $('.contentL').each(function() {
+          var position = $(this).offset().top;
+          var scrollPosition = $(window).scrollTop();
+          var windowHeight = $(window).height();
+          if (position < scrollPosition + windowHeight - 50) {
+            $(this).addClass('animate2Left');
+          }
+        });
+    });
+  });
