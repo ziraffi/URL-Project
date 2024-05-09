@@ -5,13 +5,33 @@ var urlFlag = false;
 
 // Flag to track if the file section has been loaded
 var fileSectionLoaded = false;
-// Flag to track if sheet names have been fetched
+
+// $(document).ready(function() {
+//     var stickyHeader = $(".page-header");
+//     const toggleClass = "is-sticky";
+//     var aHeader = $(".strtHeader");
+
+  
+//     $(window).scroll(function() {
+//         const currentScroll = $(window).scrollTop();
+//       if (currentScroll > 50) {
+//         aHeader.fadeOut();
+//         stickyHeader.addClass(toggleClass).show();
+//       } else {
+//         stickyHeader.removeClass(toggleClass).hide();
+//         aHeader.fadeIn();
+
+//       }
+//     });
+//   });
 
 var sheetNamesFetched = false;
 $(document).ready(function () {
+    var stickyHeader = $(".page-header");
+    var toggleClass = "is-sticky";
+    var aHeader = $(".strtHeader");
     var windowHeight = $(window).height(); // Get the window height
     var footer = $("footer");
-    var header = $("header");
     var lastScrollTop = 0; // Variable to store the last scroll position
     // Button click event handler to toggle the visibility of the url-container
     $("#toggleButton").click(function() {
@@ -21,30 +41,43 @@ $(document).ready(function () {
         var scrollPosition = $(this).scrollTop();
         var scrollThreshold = windowHeight * 0.60;
 
+
+        // if (scrollPosition > 50) {
+        //   aHeader.fadeOut();
+        //   stickyHeader.addClass(toggleClass).show();
+        // } else {
+        //   stickyHeader.removeClass(toggleClass).hide();
+        //   aHeader.fadeIn();
+  
+        // }
         // Animation for header
         if (scrollPosition > scrollThreshold || lastScrollTop < scrollPosition) {
+            stickyHeader.addClass(toggleClass).show();
             // Hide the header with fade out animation
-            header.stop().animate({
-                top: '-100px', // Move header off-screen
-                opacity: 0
-            }, 200);
-            // if (urlFlag) {
-            //     $("#floatContainer").show().animate({
-            //         left: '50px' // Move to the specified left position
-            //     }, 1500);            
-            // }else{
-            //     $("#floatContainer").hide();
-            // }
+            // aHeader.show().animate({
+            //     top: '-100px', // Move header off-screen
+            //     // opacity: 0
+            // }, 200);
+            // aHeader.fadeOut();
+            if (urlFlag) {
+                $("#floatContainer").show().animate({
+                    left: '50px' // Move to the specified left position
+                }, 1500);            
+            }else{
+                $("#floatContainer").hide();
+            }
             
         } else {
-            // $("#floatContainer").stop().animate({
-            //     left: '-50px' // Move to the specified left position
-            // }, 1500);                
+            stickyHeader.removeClass(toggleClass).fadeOut();
+            aHeader.fadeIn();
+            $("#floatContainer").stop().animate({
+                left: '-50px' // Move to the specified left position
+            }, 1500);        
+            //Hiding Sticky Header
+            stickyHeader.hide();        
             // Show the header with fade in animation
-            header.animate({
-                top: '100px', // Move header back to its original position
-                opacity: 1                
-            }, 0);
+
+            
         }
 
         // Animation for footer
@@ -1355,3 +1388,5 @@ $(document).ready(function() {
         });
     });
   });
+
+  

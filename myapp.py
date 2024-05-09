@@ -223,9 +223,6 @@ def generate_unique_filename(base_filename):
     unique_filename = f"rk-{alphabet_hex}-{filename}"
     return os.path.join(directory, unique_filename)
 
-import os
-from flask import request, jsonify
-
 @app.route('/process_url_data', methods=['POST'])
 async def process_clienturl_data():
     try:
