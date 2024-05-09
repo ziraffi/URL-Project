@@ -231,6 +231,7 @@ nav ul li::after {
 .page-header.is-sticky {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   width: 100%;
   min-height: 3rem;
   position: fixed;
