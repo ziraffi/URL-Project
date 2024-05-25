@@ -110,7 +110,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: Montserrat, sans-serif;
+  font-family: Montserrat, sans-serif !important;
   font-optical-sizing: auto
 }
 
@@ -120,7 +120,6 @@ body::before {
   position: absolute;
   top: 0;
   left: 0;
-  height: auto;
   background-color: #626161;
   z-index: -1
 }
@@ -462,7 +461,7 @@ nav ul li::after {
   font-optical-sizing: auto;
   font-style: normal;
   color: #000;
-  font-family: "Playfair Display", serif
+  font-family: "Playfair Display", serif !important;
 }
 
 .fold,
@@ -484,7 +483,9 @@ main {
 
 .divider,
 p.dnlh {
-  margin: auto
+  margin: auto;
+  font-family: "Playfair Display", serif !important;
+
 }
 
 .hero-banner {
@@ -555,7 +556,9 @@ p.dnlh {
 
 p span.hope:hover,
 p span.source:hover {
-  color: #c300ff
+  color: #c300ff;
+  font-weight: bolder
+
 }
 
 p span.hope:hover::after,
@@ -565,7 +568,6 @@ p span.source:hover::after {
 
 p span.hope {
   color: #000;
-  font-weight: bolder
 }
 
 div.textOne {
@@ -638,6 +640,12 @@ form {
   width: 100%;
   padding: 20px;
   background-color: #ffffff
+}
+.full-ht {
+  width: 100%;
+  padding: 20px;
+  background-color: #ffffff;
+  min-height: 100vh;
 }
 
 #file-section {
@@ -1567,3 +1575,61 @@ div.tooltip-container>p {
     animation-delay:0s;
     -webkit-animation-delay:0s; /* Safari 和 Chrome */
   }
+  div.cardWrapper {
+    display: grid;
+    place-items: center;
+    gap: 2rem;
+    width: 100%;
+    margin: 2rem 2rem;
+    /* background-color: #60cee7; */
+    /* border: 1px rgb(10, 2, 2) solid; */
+
+}
+
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 4.5rem;
+    list-style: none;
+    width: 90%;
+    /* background-color: #444c4e; */
+
+    flex: 0 0 calc(33.33%-20px);
+}
+
+
+.cardBody {
+    background-color: var(--trio-color);
+    display: grid;
+    row-gap: 20px;
+    /* border: 1px var(--bg-color) solid; */
+    text-align: left;
+    grid-template-rows: subgrid;
+    grid-row: span 2;
+    padding: 1rem;
+
+}
+
+.cardBody:last-child:nth-child(3n-2) {
+    grid-column-start: -3;
+}
+
+.cardBody img {
+    object-fit: cover;
+    width: 200px;
+    aspect-ratio: 1;
+    /* border-radius:5% 5% 0 0; */
+}
+
+button {
+    height: 45px;
+    width: 100px;
+    align-self: flex-end;
+}
+
+p {
+    margin: 0.5rem 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}

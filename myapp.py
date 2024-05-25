@@ -11,6 +11,7 @@ import pandas as pd
 import os
 import uuid
 from domain_checker import process_urls_async, progress_info
+
 app = Flask(__name__)
 # @app.route('/login.html')
 # def login():
@@ -82,7 +83,9 @@ def blogone():
 @app.route('/guide.html')
 def guide():
     return render_template('guide.html')
-
+@app.route('/contact.html')
+def contact():
+    return render_template('contact.html')
 @app.route('/favicon.ico')
 def favicon():
     return 'dummy', 200
@@ -377,3 +380,7 @@ def submit_form():
 
     print(f"File type: {file_type}, Batch: {batch}, URL column: {url_column}, Selected Sheet: {selected_sheet}, Selected Column: {selected_column}, Required data: {required_data}, Output file type: {output_file_type}")
     return 'Form submitted successfully'
+
+
+# if __name__ == '__main__':
+#     app.run(debug=True)

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-8WY79D2QYQ"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8WY79D2QYQ"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -18,10 +18,12 @@
   })(window, document, "clarity", "script", "m92xjwig2f");
 </script>
     <meta charset="UTF-8" />
-    <meta property="og:image" content="https://url-project.onrender.com/opt/render/project/src/static/images/get_ready.webp">
+    <meta
+      property="og:image"
+      content="https://url-project.onrender.com/opt/render/project/src/static/images/get_ready.webp"
+    />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    {% block MetaDescription %} {%endblock%}
-    {% block Keywords %} {%endblock%}
+    {% block MetaDescription %} {%endblock%} {% block Keywords %} {%endblock%}
     <title>{% block title %}Default VAlue{% endblock %}</title>
     <link
       rel="stylesheet"
@@ -42,7 +44,6 @@
   </head>
   <body>
     <header>
-
       <div class="strtHeader">
         <div class="container-fluid">
           <div class="logo"><p>URL Project</p></div>
@@ -52,141 +53,139 @@
               <li><a href="/">HOME</a></li>
               <li><a href="/templates/guide.html">GUIDE</a></li>
               <li><a href="/templates/blog1.html">BLOG</a></li>
+              <li><a href="/templates/contact.html">CONTACT</a></li>
             </ul>
             <i class="bi bi-layout-sidebar-inset-reverse close-icon"></i>
           </nav>
         </div>
       </div>
 
-      <div class="page-header" style="display: none;">
-      <div class="container-fluid">
-        <div class="logo">
-          <p>
-                <a href="#">
-                URL Project
-              </a>
-              </p>
-            </div>
+      <div class="page-header" style="display: none">
+        <div class="container-fluid">
+          <div class="logo">
+            <p>
+              <a href="#"> URL Project </a>
+            </p>
+          </div>
           <i class="bi bi-layout-sidebar-inset"></i>
           <nav class="navigation">
             <ul>
               <li><a href="/">HOME</a></li>
               <li><a href="/templates/guide.html">GUIDE</a></li>
               <li><a href="/templates/blog1.html">BLOG</a></li>
+              <li><a href="/templates/contact.html">CONTACT</a></li>
             </ul>
             <div class="tooltip-container w-100 pe-4">
               <p
-                style="text-decoration: none; color: #7fe89e;"
+                style="text-decoration: none; color: #7fe89e"
                 class="mb-0 text-end"
               >
                 Crafted By:
-                <cite
-                  class="developer"
-                  title="Source Title"
+                <cite class="developer" title="Source Title"
                   >Rajkiran Mallikanti</cite
                 >
               </p>
               <div class="tooltip">
-                <img src="../static/images/developer.webp" alt="Developer Image" />
+                <img
+                  src="../static/images/developer.webp"
+                  alt="Developer Image"
+                />
               </div>
             </div>
             <i class="bi bi-layout-sidebar-inset-reverse close-icon"></i>
           </nav>
+        </div>
       </div>
-    </div>
-
     </header>
 
     {% block content %}{% endblock %}
-  <div
-    id="coockie-container"
-    class="form-container text-center"
-
-  >
-    <div id="cookie-consent" style="display: none">
-      <p>
-        This website uses cookies to ensure you get the best experience on our
-        website.you can read our
-        <a
-          style="text-decoration: none; color: #0b7adb"
-          href="/templates/privacyPolicy.html"
-          >Privacy Policy</a
-        >
-      </p>
-      <button id="accept-cookies">Accept Cookies</button>
-    </div>
-  </div>
-  <div class="footer_outer">
-  <footer>
-    <div style="min-height: 10%;"
-      class="col-12 px-3"
-      style="background-color: rgba(0, 0, 0, 0.2); color: #f0f8ff"
-    >
-      <div class="row py-2 d-flex justify-content-between align-items-center" id="footer_text">
-        <div class="col-sm-4 text-center">
-          <h6>
-            @All Rights Reserved 2024:<span>
-              <a
-                style="
-                  text-decoration: none;
-                  color: #ffd25d;
-                  font-size: large;
-                  font-weight: 300;
-                "
-                href="/"
-              >
-                URL Project
-              </a>
-            </span>
-          </h6>
-        </div>
-        <div class="col-sm-5 align-items-md-center px-5">
-          <ul
-            class="list-unstyled d-flex flex-wrap justify-content-center pl-5 mb-0 text-center "
-          >
-            <li class="px-2 lead">
-              <a
-                style="text-decoration: none; color: #f0f8ff"
-                href="/templates/disclaimer.html"
-                ><h6>Terms & conditions</h6></a
-              >
-            </li>
-            <li class="px-2 lead">
-              <a
-                style="text-decoration: none; color: #f0f8ff"
-                href="/templates/privacyPolicy.html"
-                ><h6>Privacy Policy</h6></a
-              >
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div id="sitemaps">
-      <div class="text-end px-3">
-
-
-        <p class="mb-0 font-weight" style="font-size:small">
-          Site Map:
-          <cite title="Source Title"
-            ><a
-              style="text-decoration: none; color: #f0f8ff"
-              href="/sitemap.xml"
-              >xml,</a
-            >
-
-            <a
-              style="text-decoration: none; color: #f0f8ff"
-              href="/sitemap.html"
-              >html</a
-            ></cite
+    <!-- <div id="coockie-container" class="form-container text-center">
+      <div id="cookie-consent" style="display: none">
+        <p>
+          This website uses cookies to ensure you get the best experience on our
+          website.you can read our
+          <a
+            style="text-decoration: none; color: #0b7adb"
+            href="/templates/privacyPolicy.html"
+            >Privacy Policy</a
           >
         </p>
+        <button id="accept-cookies">Accept Cookies</button>
       </div>
+    </div> -->
+    <div class="footer_outer">
+      <footer>
+        <div
+          style="min-height: 10%"
+          class="col-12 px-3"
+          style="background-color: rgba(0, 0, 0, 0.2); color: #f0f8ff"
+        >
+          <div
+            class="row py-2 d-flex justify-content-between align-items-center"
+            id="footer_text"
+          >
+            <div class="col-sm-4 text-center">
+              <h6>
+                @All Rights Reserved 2024:<span>
+                  <a
+                    style="
+                      text-decoration: none;
+                      color: #ffd25d;
+                      font-size: large;
+                      font-weight: 300;
+                    "
+                    href="/"
+                  >
+                    URL Project
+                  </a>
+                </span>
+              </h6>
+            </div>
+            <div class="col-sm-5 align-items-md-center px-5">
+              <ul
+                class="list-unstyled d-flex flex-wrap justify-content-center pl-5 mb-0 text-center"
+              >
+                <li class="px-2 lead">
+                  <a
+                    style="text-decoration: none; color: #f0f8ff"
+                    href="/templates/disclaimer.html"
+                    ><h6>Terms & conditions</h6></a
+                  >
+                </li>
+                <li class="px-2 lead">
+                  <a
+                    style="text-decoration: none; color: #f0f8ff"
+                    href="/templates/privacyPolicy.html"
+                    ><h6>Privacy Policy</h6></a
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div id="sitemaps">
+          <div class="text-end px-3">
+            <p class="mb-0 font-weight" style="font-size: small">
+              Site Map:
+              <cite title="Source Title"
+                ><a
+                  style="text-decoration: none; color: #f0f8ff"
+                  href="/sitemap.xml"
+                  >xml,</a
+                >
+
+                <a
+                  style="text-decoration: none; color: #f0f8ff"
+                  href="/sitemap.html"
+                  >html</a
+                ></cite
+              >
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
-  </footer>
-</div>
-</body>
+  </body>
 
   <script src="{{ url_for('static', filename='jquery.js') }}"></script>
   <script src="{{ url_for('static', filename='myfrnt.js') }}"></script>
