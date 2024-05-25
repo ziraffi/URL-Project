@@ -74,26 +74,29 @@
               <li><a href="/templates/guide.html">GUIDE</a></li>
               <li><a href="/templates/blog1.html">BLOG</a></li>
             </ul>
+            <div class="tooltip-container w-100 pe-4">
+              <p
+                style="text-decoration: none; color: #7fe89e;"
+                class="mb-0 text-end"
+              >
+                Crafted By:
+                <cite
+                  class="developer"
+                  title="Source Title"
+                  >Rajkiran Mallikanti</cite
+                >
+              </p>
+              <div class="tooltip">
+                <img src="../static/images/developer.webp" alt="Developer Image" />
+              </div>
+            </div>
             <i class="bi bi-layout-sidebar-inset-reverse close-icon"></i>
           </nav>
       </div>
     </div>
 
     </header>
-    <!-- <header class="stickyHead content" style="display: none;">
-      <div class="container-fluid">
-        <div class="logo"><p>URL Project</p></div>
-        <i class="bi bi-layout-sidebar-inset"></i>
-        <nav class="navigation">
-          <ul>
-            <li><a href="/">HOME</a></li>
-            <li><a href="/templates/guide.html">GUIDE</a></li>
-            <li><a href="/templates/blog1.html">BLOG</a></li>
-          </ul>
-          <i class="bi bi-layout-sidebar-inset-reverse close-icon"></i>
-        </nav>
-      </div>
-    </header> -->
+
     {% block content %}{% endblock %}
   <div
     id="coockie-container"
@@ -161,23 +164,7 @@
     </div>
     <div id="sitemaps">
       <div class="text-end px-3">
-        <div class="tooltip-container">
-          <p
-            style="text-decoration: none; color: #a0cef7"
-            class="mb-0"
-          >
-            Crafted By:
-            <cite
-              class="developer"
-              style="text-decoration: none; color: #d3ed76"
-              title="Source Title"
-              >Rajkiran Mallikanti</cite
-            >
-          </p>
-          <div class="tooltip">
-            <img src="../static/images/developer.webp" alt="Developer Image" />
-          </div>
-        </div>
+
 
         <p class="mb-0 font-weight" style="font-size:small">
           Site Map:

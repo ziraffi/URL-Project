@@ -78,8 +78,7 @@ form {
 }
 
 .logo,
-.side_img img,
-.tooltip img {
+.side_img img {
   object-fit: cover
 }
 
@@ -137,9 +136,8 @@ h6 {
 }
 
 .strtHeader {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
   transition: top .5s;
-  padding: .5rem 0;
+  padding: 1.5rem 0;
   z-index: 999;
   top: 0
 }
@@ -237,7 +235,7 @@ nav ul li::after {
   position: fixed;
   top: 0;
   box-shadow: 0 5px 16px rgba(0, 0, 0, 0.1);
-  padding: 8px 0;
+  padding: 6px 0;
   /* background-color: #38424136; */
   backdrop-filter: blur(10px);
   animation: slideDown 0.35s ease-out;
@@ -250,7 +248,7 @@ nav ul li::after {
 
 .page-header.is-sticky .logo {
   font-size: 1.4rem;
-  padding: 7px 10px;
+  padding-top: 10px;
 }
 
 @keyframes slideDown {
@@ -274,7 +272,9 @@ nav ul li::after {
   }
 }
 @media (max-width:668px) {
-  
+  label[for=file]{
+    font-size: 16px !important;
+  }
   .dropdown-fields {
     margin-bottom: 2rem !important;
     flex-direction: column !important;
@@ -399,7 +399,7 @@ nav ul li::after {
   .navigation.active {
     display: block;
     max-width: 350px;
-    height: 100%;
+    height: 100vh;
     margin-top: 0
   }
 
@@ -1265,26 +1265,32 @@ div#coockie-container {
 
 .tooltip-container {
   position: relative;
-  display: inline-block
+  display: inline-block;
+  margin-top: 10px;
 }
 
 .tooltip {
   position: absolute;
-  top: -5px;
-  left: -45%;
+  top: -20px;
+  left: -20%;
   transform: translateY(-20%);
   width: 60px;
   height: 60px;
+  object-fit: cover;
+  backdrop-filter: blur(5px);
   background-color: rgba(255, 255, 255, .9);
   visibility: hidden;
   opacity: 0;
   transition: visibility, opacity .5s linear
 }
-
+cite.developer{
+  text-decoration: none;
+  color: #63029f;
+}
 .tooltip img {
-  float: right;
   width: 100%;
-  height: 100%;
+  height: 125%;
+  margin-top: -7px;
   transition: transform .8s ease-in-out
 }
 
@@ -1307,13 +1313,25 @@ div#coockie-container {
 }
 
 .tooltip-container:hover .tooltip {
+  background-color: #fbf8f804;
   visibility: visible;
   opacity: 1
 }
 
-.developer:hover+.tooltip-container .tooltip img,
+/* Initial scale of the image */
+.tooltip img {
+  transform: scale(0);
+  transition: transform 0.8s ease;
+}
+
+/* Scale the image when hovering over the developer name */
+.developer:hover + .tooltip img {
+  transform: scale(1);
+}
+
+/* Optionally, scale the image when hovering over the tooltip container */
 .tooltip-container:hover .tooltip img {
-  animation: 2s forwards zoom-in-out
+  transform: scale(0.8);
 }
 
 .ltht {
