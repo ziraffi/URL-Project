@@ -1,3 +1,6 @@
+button#downloadButton{
+  width:130px !important;
+}
 div#loadingIndicator {
 
   color: #384241
@@ -921,7 +924,7 @@ button#send_serve {
 
 .floaterIcon {
   color: #fff;
-  padding: 10px;
+  width:50px;
   border-radius: 45% !important
 }
 
